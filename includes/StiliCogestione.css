@@ -1,0 +1,113 @@
+/*#content {
+   width: 130%;
+}*/
+
+table#ActivityTable {
+   border-collapse:collapse;
+}
+
+table#ActivityTable td, th {
+   border:1px solid black;
+   padding:5px;
+   min-width:150px;
+   max-width:250px;
+   vertical-align:top;
+}
+
+table#ActivityTable th {
+   background: #D3D3D3;
+}
+
+.activity {
+   display:block;
+   position: relative;
+   font-size:90%;
+   padding:5px 0;
+   padding-left: 22px;
+   text-indent: -22px;
+}
+
+.selectedActivity {
+	background-color: #FFCC66;
+}
+
+.activity_description {
+	display: none;
+	background: lightblue;
+	opacity: 0.95;
+	z-index: 2;
+	position: absolute;
+	padding: 10px;
+	left: 105%;
+	bottom: 50%;
+	width: 250px;
+	text-align: left;
+	text-indent: 0;
+}
+
+.activity:not(.disabled):not(.selectedActivity):hover {
+	background-color: #FFCC33;
+}
+
+.activity:hover .activity_description {
+	display: block;	
+}
+
+.posti {
+   color: red;
+}
+
+/*
+#fieldTable td {
+   vertical-align:bottom;
+}*/
+
+#submit {
+   margin: 10px 0;
+   width:100%;
+}
+
+.iField {
+   width:200px;
+}
+
+div#timeBox {
+	border: 1px solid black;
+	width: 50%;
+	padding: 5px;
+	margin-top: 10px;
+}
+
+table#modeTable {
+	width:100%;
+}
+
+#modeField {
+	width:50%;
+	padding: 5px;
+	margin-bottom: 10px;
+}
+
+#graph {
+	float:left;
+	margin-right: 5px;
+}
+
+.hidden {
+	display:none;
+}
+
+.id-box {
+	display: block;
+	float:left;
+	color: gray;
+	min-width:2em;
+}
+
+#class {
+	width:100%;
+}
+
+#desc {
+	width: 40%;
+}
