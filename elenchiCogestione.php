@@ -45,7 +45,7 @@ echo "</table>\n</form>\n";
 if(isset($_GET['activity'])) // Se si seleziona un'attività
 {
 	// Visualizza elenco partecipanti
-	$activity = $db->real_escape_string($_GET['activity']);
+	$activity = intval($_GET['activity']);
 	$aRow = getActivityInfo($activity, $db);
 	echo "\n<h2>" . $blocks[$aRow['time']] . ' – ' . $aRow['title'] . '</h2>';
 	echo "\n<div id=\"output\">\nAttività: <b>" . $aRow['title']
@@ -146,7 +146,7 @@ foreach($blocks as $i => $b) {
 	$res = $db->query('SELECT attivita.*, COUNT(prenotazioni.id) AS prenotati
 						FROM attivita
 						LEFT JOIN prenotazioni ON attivita.id=prenotazioni.activity
-						WHERE attivita.time=' . $i . '
+						WHERE attivita.time=' . intval($i) . '
 						GROUP BY attivita.id
 						ORDER BY attivita.id;');
 	while($row = $res->fetch_assoc()) {

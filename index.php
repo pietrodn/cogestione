@@ -47,7 +47,7 @@ if(inputValid($db)) {
     
     /* Ripete per ogni singola prenotazione */
     foreach($blocks as $i => $b) {
-        $pref = $db->real_escape_string($_GET['block_' . $i]);
+        $pref = intval($_GET['block_' . $i]);
         $activityRow = getActivityInfo($pref, $db);
         
         /* Verifico l'affollamento. Se max=0 il vincolo non vale. */
@@ -198,7 +198,7 @@ function printActivityTable($db) {
         $res = $db->query('SELECT attivita.*, COUNT(prenotazioni.id) AS prenotati
                             FROM attivita
                             LEFT JOIN prenotazioni ON attivita.id=prenotazioni.activity
-                            WHERE attivita.time=' . $i . '
+                            WHERE attivita.time=' . intval($i) . '
                             GROUP BY attivita.id
                             ORDER BY attivita.id;');
         

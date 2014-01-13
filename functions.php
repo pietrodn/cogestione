@@ -56,9 +56,9 @@ function getActivityInfo($id, $db) {
     $res = $db->query('SELECT attivita.*, COUNT(prenotazioni.id) AS prenotati
                             FROM attivita
                             LEFT JOIN prenotazioni ON attivita.id=prenotazioni.activity
-                            WHERE attivita.id=' . $id . '
+                            WHERE attivita.id=' . intval($id) . '
                             GROUP BY attivita.id;');
-    if(!$res) die("Error whiule fetching activity info!");
+    if(!$res) die("Error while fetching activity info!");
     $row = $res->fetch_assoc();
     return $row;
 }
