@@ -20,14 +20,22 @@ echo '<h2 class="noprint">Cerca uno studente</h2>';
 echo '<form class="noprint" action="'. $_SERVER['PHP_SELF'] . '" method="get">
 	<table id="fieldTable">
 	<tr><td><label for="name">Nome: </label></td>
-	<td><input class="iField" type="text" name="name" id="name" required placeholder="Mario" /></td></tr>
+	<td><input class="iField" type="text" name="name" id="name" placeholder="Mario" ' .
+	(!empty($_GET['name']) ? 'value="' . htmlspecialchars($_GET['name']) . '" ' : '') .
+	'/></td></tr>
 	<tr><td><label for="surname">Cognome: </label></td>
-	<td><input class="iField" type="text" name="surname" id="surname" placeholder="Rossi" required /></td></tr>
-	<tr><td><label for="class">Classe: </label></td><td><select class="iField" name="class" id="class" required><option value="" disabled selected>Seleziona la classe</option>';
+	<td><input class="iField" type="text" name="surname" id="surname" placeholder="Rossi" ' .
+	(!empty($_GET['surname']) ? 'value="' . htmlspecialchars($_GET['surname']) . '" ' : '') .
+	'/></td></tr>
+	<tr><td><label for="class">Classe: </label></td><td><select class="iField" name="class" id="class"><option value="" disabled selected>Seleziona la classe</option>';
 	
 // Selettore classe	   
 foreach($classi as $cl) {
-	echo "\n<option value=\"$cl\">$cl</option>";
+	if(isset($_GET['class']) && $cl == $_GET['class'])
+		$selected = 'selected';
+	else
+		$selected = '';
+	echo "\n<option value=\"$cl\" $selected>$cl</option>";
 }		
 		
 echo "\n</select></td></tr>";
@@ -63,39 +71,60 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 	echo "\n</div>";
 	
 } else if(isset($_GET['cercastud'])
-	AND isset($_GET['name'])
-	AND isset($_GET['surname'])
-	AND isset($_GET['class'])) {
+	AND (isset($_GET['name']) OR isset($_GET['surname']) OR isset($_GET['class']))) {
 		
 	// Se si cerca uno studente
 	
-	$name = $db->real_escape_string($_GET['name']);
-	$surname = $db->real_escape_string($_GET['surname']);
-	$class = $db->real_escape_string($_GET['class']);
-   	
-	$res = $db->query("SELECT attivita.title AS title 
-		FROM prenotazioni
-		JOIN attivita ON attivita.id = prenotazioni.activity
-		WHERE prenotazioni.name=\"$name\"
-		AND prenotazioni.surname=\"$surname\"
-		AND prenotazioni.class=\"$class\"
-		ORDER BY prenotazioni.time;");
-		
-		if($res->num_rows) {
-			$riepilogo = '';
-			$riepilogo .= "<p>Le prenotazioni di " . htmlspecialchars($name) . htmlspecialchars($surname) . ":</p>\n";
-			$riepilogo .= '<table id="ActivityTable">';
-			$riepilogo .= '<tr>';
-			foreach($blocks as $b) {
-				$riepilogo .= "\n<th>$b</th>";
-			}
-			$riepilogo .= "\n</tr><tr>";
+	$conditions = Array();
+	if(!empty($_GET['name'])) {
+		$name = $db->real_escape_string($_GET['name']);
+		$conditions[] = "prenotazioni.name=\"$name\"";
+	}
+	if(!empty($_GET['surname'])) {
+		$surname = $db->real_escape_string($_GET['surname']);
+		$conditions[] = "prenotazioni.surname=\"$surname\"";
+	}
+	if(!empty($_GET['class'])) {
+		$class = $db->real_escape_string($_GET['class']);
+		$conditions[] = "prenotazioni.class=\"$class\"";
+	}
+	$conditionString = implode($conditions, ' AND ');
 	
-			/* Ripete per ogni singola prenotazione */
-			while($row = $res->fetch_assoc()) {
-				$riepilogo .= "\n<td><div class=\"activity\">" . $row['title'] . '</div></td>';
+	$studenti = $db->query("SELECT DISTINCT name, surname, class FROM prenotazioni
+		WHERE $conditionString
+		ORDER BY prenotazioni.timestamp;");
+	
+	if($studenti->num_rows) {
+		$riepilogo = '';
+		$riepilogo .= '<table id="ActivityTable">';
+		$riepilogo .= '<tr><th>Nome</th><th>Cognome</th><th>Classe</th>';
+		foreach($blocks as $b) {
+			$riepilogo .= "\n<th>$b</th>";
+		}
+		$riepilogo .= "\n</tr>";
+		while($row = $studenti->fetch_assoc()) {
+			$riepilogo .= "\n<tr>";
+			$riepilogo .= "\n<td>" . htmlspecialchars($row['name']) . '</td>';
+			$riepilogo .= "\n<td>" . htmlspecialchars($row['surname']) . '</td>';
+			$riepilogo .= "\n<td>" . htmlspecialchars($row['class']) . '</td>';
+			
+			$studentName = $db->real_escape_string($row['name']);
+			$studentSurname = $db->real_escape_string($row['surname']);
+			$studentClass = $db->real_escape_string($row['class']);
+			
+			$prenotazione = $db->query("SELECT attivita.title AS title
+				FROM attivita, prenotazioni
+				WHERE prenotazioni.activity = attivita.id
+				AND prenotazioni.name=\"$studentName\"
+				AND prenotazioni.surname=\"$studentSurname\"
+				AND prenotazioni.class=\"$studentClass\"
+				ORDER BY attivita.time;");
+			
+			while($p = $prenotazione->fetch_assoc()) {
+				$riepilogo .= "\n<td><div class=\"activity\">" . htmlspecialchars($p['title']) . '</div></td>';
 			}
-			$riepilogo .= '</tr></table>';
+		}
+		$riepilogo .= '</tr></table>';
 		echo $riepilogo;
 	} else {
 		echo '<p class="error">Nessuno studente trovato!</p>';

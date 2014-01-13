@@ -27,6 +27,11 @@ table#ActivityTable th {
    text-indent: -22px;
 }
 
+.set-activity {
+   font-size:90%;
+   margin:10px 4px;
+}
+
 .selectedActivity {
 	background-color: #FFCC66;
 }
@@ -110,4 +115,12 @@ table#modeTable {
 
 #desc {
 	width: 40%;
+}
+
+input[type="number"] {
+	width: 3em;
+}
+
+input.activity-set-title {
+	width: 100%;
 }

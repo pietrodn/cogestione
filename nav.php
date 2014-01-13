@@ -40,7 +40,7 @@ function showFooter($selectedId='')
 		array('id' => 'ca-nstab-prenota', 'title' => 'Prenota', 'url' => 'cogestione.php'),
 		array('id' => 'ca-nstab-elenchi', 'title' => 'Elenchi', 'url' => 'elenchiCogestione.php'),
 		array('id' => 'ca-nstab-grafico', 'title' => 'Grafico', 'url' => 'graficoPrenotazioni.php'),
-		//array('id' => 'ca-nstab-imposta', 'title' => 'Imposta', 'url' => 'impostaCogestione.php')
+		array('id' => 'ca-nstab-imposta', 'title' => 'Imposta', 'url' => 'impostaCogestione.php')
 		);
 
 ?>

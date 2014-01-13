@@ -207,17 +207,18 @@ if($validated) {
         /* Stampa tutte le attività che si svolgono contemporaneamente */
         while($row = $res->fetch_assoc()) {
             $full = ($row['max']!=0 && $row['prenotati']>=$row['max']);
+            
             echo "\n<div class=\"activity"
             	. ($full ? ' disabled' : '')
             	. "\">\n<input type=\"radio\" name=\"block_$i\" value=\""
-                . $row['id'] . '" id="activity_' . $row['id'] . '"'
+                . intval($row['id']) . '" id="activity_' . intval($row['id']) . '"'
                 . ($full ? ' disabled ' : '')
                 . ' class="' . ($row['vm'] ? 'vm' : '') . ($full ? ' full' : '') . '" ' 
-                . ' required />' . "\n" . '<label for="activity_' . $row['id'] . '">' . "\n"
+                . ' required />' . "\n" . '<label for="activity_' . intval($row['id']) . '">' . "\n"
                 . ($row['max']!=0?'<span class="posti">['
                 . ($row['max']-$row['prenotati']) . "]</span>\n":'')
-                . $row['title'] . "</label>"
-                . ($row['desc'] ? "<div id=\"activity_desc_" . $row['id'] . "\" class=\"activity_description\">" . $row['desc'] . "</div>" : '')
+                . htmlspecialchars($row['title']) . "</label>"
+                . ($row['description'] ? "<div id=\"activity_desc_" . intval($row['id']) . "\" class=\"activity_description\">" . $row['description'] . "</div>" : '')
                 . "</div>\n";
         }
         echo "</td>\n";
