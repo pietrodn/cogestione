@@ -1,19 +1,19 @@
 <?php
+require_once("functions.php");
 require("nav.php");
-$css = Array('includes/StiliCogestione.css', 'includes/elenchi.css');
+$css = Array('css/StiliCogestione.css', 'css/elenchi.css');
 showHeader("Elenco prenotazioni cogestione", $css);
 
 $db = initDB();
 
 // MAIN
-$studentiTot = 1040;
 
 $blocks = blocchi($db);
 $classi = classi($db);
 $validated = FALSE;
 
 $nPrenot = getSubscriptionsNumber($db);
-echo '<p class="noprint">Numero di prenotazioni: ' . $nPrenot . ' (' . round($nPrenot/$studentiTot*100) . '% degli studenti)</p>';
+echo '<p class="noprint">Numero di prenotazioni: ' . $nPrenot . ' (' . round($nPrenot/STUDENTS_IN_SCHOOL*100) . '% degli studenti)</p>';
 
 // Cerca studente
 echo '<h2 class="noprint">Cerca uno studente</h2>';
@@ -49,7 +49,8 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 	$aRow = getActivityInfo($activity, $db);
 	echo "\n<h2>" . $blocks[$aRow['time']] . ' – ' . $aRow['title'] . '</h2>';
 	echo "\n<div id=\"output\">\nAttività: <b>" . $aRow['title']
-		. "</b>.\n<br />Quando: <b>" . $blocks[$aRow['time']]
+		. "</b>.\n<br />Descrizione: <br /><div class=\"descriptionBox\">" . $aRow['description']
+		. "</div>\n<br />Quando: <b>" . $blocks[$aRow['time']]
 		. "</b>\n<br />Partecipanti: <b>" . $aRow['prenotati'] . ($aRow['max'] ? '/' . $aRow['max'] : '') . '</b>';
 	
 	if($aRow['prenotati']>0)
@@ -150,7 +151,8 @@ foreach($blocks as $i => $b) {
 						ORDER BY attivita.id;');
 	while($row = $res->fetch_assoc()) {
 		$url = $_SERVER['PHP_SELF'] . '?activity=' . $row['id'];
-		echo "\n<div class=\"activity\"><span class=\"posti\">[" . $row['prenotati'] . ($row['max']!=0?'/' . $row['max']:'') . "]</span> <a href=\"" . $url . "\">" . $row['title'] . '</a></div>';
+		echo "\n<div class=\"activity\"><span class=\"posti\">[" . $row['prenotati'] . ($row['max']!=0?'/' . $row['max']:'') . "]</span> 
+			<a href=\"" . $url . "\">" . $row['title'] . '</a></div>';
 	}
 	
 	echo '</td>';

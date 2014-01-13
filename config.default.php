@@ -6,10 +6,17 @@
 require_once("../../external_includes/mysql_pw.inc");
 
 # Form enabling
-$cogeStart = "20 january 2014, 14:00";
-$cogeEnd = "23 january 2014, 18:00";
+define('START_TIME', "20 january 2014, 14:00");
+define('END_TIME', "23 january 2014, 18:00");
 
 # Override the time settings?
-$manuallyEnableForm = FALSE;
-$manualSwitch = FALSE;
+define('COGE_MANUAL', FALSE);
+define('COGE_MANUAL_ENABLED', FALSE);
+
+# Number of students
+define('STUDENTS_IN_SCHOOL', 1000);
+
+# Edit cogestione data
+#$coge_users[] = Array('user' => 'user', 'pass' => 'password');
+
 ?>

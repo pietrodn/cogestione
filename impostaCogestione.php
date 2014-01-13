@@ -1,6 +1,7 @@
 <?php
+require_once("functions.php");
 require("nav.php");
-$css = Array('includes/StiliCogestione.css');
+$css = Array('css/StiliCogestione.css');
 $js = Array('http://code.jquery.com/jquery-1.10.2.min.js');
 
 showHeader("Impostazioni cogestione", $css, $js);
@@ -10,16 +11,10 @@ $db = initDB();
 $validated = FALSE;
 
 if(isset($_POST['confermaTutto'])) {
-	foreach($coge_users as $k) {
-		if($_POST['username'] == $k['user'] && $_POST['password'] == $k['pass']) {
-			$validated=TRUE;
-			break;
-		}
-	}
-	
-	if($validated) {
-		// Escaping dati attività
+	if(authenticated($coge_users)) {
 		$activities = $bl = $deleteAct = $deleteBlocks = Array();
+		
+		// Escaping dati attività
 		foreach($_POST['activity'] as $act) {
 			if(!empty($act['id'])) {
 				$id = intval($act['id']);
@@ -37,21 +32,15 @@ if(isset($_POST['confermaTutto'])) {
 		foreach($_POST['block'] as $b) {
 			if(!empty($b['id'])) {
 				$id = intval($b['id']);
-				$bl[$id]['title'] = $db->real_escape_string(stripslashes(htmlspecialchars_decode($b['title'], ENT_QUOTES)));
+				$bl[$id]['title'] = $db->real_escape_string(htmlspecialchars_decode($b['title'], ENT_QUOTES));
 				$bl[$id]['newRows'] = intval($b['newRows']);
 				if(!empty($b['delete']))
 					$deleteBlocks[] = $id;
 			}
 		}
 		
-		// Cancella le attività da cancellare
-		if(count($deleteAct)>0) {
-			$deleteString = '(' . implode(', ', $deleteAct) . ')';
-			$query = "DELETE FROM attivita
-					WHERE id IN $deleteString;";
-			$res = $db->query($query);
-			if(!$res) die("Problem1!");
-		}
+		// Cancella le attività da cancellare.
+		deleteActivities($deleteAct, $db);
 		
 		// Modifica dati attività.
 		foreach($activities as $k => $in) {
@@ -70,13 +59,7 @@ if(isset($_POST['confermaTutto'])) {
 		}
 		
 		// Cancella i blocchi da cancellare
-		if(count($deleteBlocks)>0) {
-			$deleteString = '(' . implode(', ', $deleteBlocks) . ')';
-			$query = "DELETE FROM blocchi
-					WHERE id IN $deleteString;";
-			$res = $db->query($query);
-			if(!$res) die("Problem3!");
-		}
+		deleteBlocks($deleteBlocks, $db);
 		
 		// Modifica dati blocchi
 		foreach($bl as $k => $b) {
@@ -104,23 +87,11 @@ if(isset($_POST['confermaTutto'])) {
 		
 		// Nuovi blocchi
 		$newBlocks = intval($_POST['newBlocks']);
-		if($newBlocks > 0) {
-			$query = "INSERT INTO blocchi (title) VALUES ";
-			$defaultRecord = "('Nuovo blocco')";
-			for($i=0; $i<$newBlocks; $i++) {
-				$query .= $defaultRecord . ','; // Multiple rows
-			}
-			$query = rtrim($query, ','); // Remove last comma
-			$res = $db->query($query);
-			if(!$res) die("Problem6!");
-		}
+		addNewBlocks($newBlocks, $db);
 		
-		// Elimina le attività che non si trovano in nessun blocco
-		$res = $db->query('DELETE FROM attivita
-			WHERE time NOT IN (
-				SELECT DISTINCT id
-				FROM blocchi );');
-		if(!$res) die("Problem7!");
+		// Cleanup (order *is* important)
+		cleanOrphanActivities($db);
+		cleanOrphanPrenotations($db);
 			
 		echo '<p class="error">I dati sono stati registrati con successo.</p>';
 		
@@ -135,6 +106,33 @@ if(isset($_POST['confermaTutto'])) {
 	}
 }    
 ?>
+<div id="desc">
+Cambia le impostazioni della cogestione utilizzando il form sottostante.
+Le modifiche saranno applicate soltanto dopo aver confermato cliccando sul pulsante <b>Salva modifiche orario</b> in fondo alla pagina.
+
+<p>
+Per <b>aggiungere un nuovo blocco o una nuova attività</b> occorre dunque:
+<ol>
+	<li>incrementare gli appositi contatori;</li>
+	<li>salvare le modifiche;</li>
+	<li>modificare i dati dei nuovi elementi creati.</li>
+</ol>
+</p>
+<p>
+Per <b>cancellare un blocco o un'attività</b>, spuntare la casella <b>"DEL"</b> relativa e poi confermare. Saranno automaticamente cancellate:
+<ol>
+	<li>le attività non appartenenti ad alcun blocco;</li>
+	<li>le prenotazioni non riferite ad un blocco esistente;</li>
+	<li>le prenotazioni non riferite ad un'attività esistente.</li>
+</ol>
+</p>
+<p>
+Per segnare un'attività come <b>riservata alle quarte o alle quinte</b>, spuntare la casella <b>"VM18"</b> relativa e poi confermare.
+</p>
+<p>
+Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo aver modificato le attività.
+</p>
+</div>
 
 <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
 <fieldset style="width:50%;">
@@ -146,7 +144,7 @@ if(isset($_POST['confermaTutto'])) {
 <label style="width:50%; display:block; float:left;">
 <?php
 	echo 'Ci sono <b>' . getSubscriptionsNumber($db) . ' prenotazioni</b> effettuate.';
-?> Se vuoi cancellarle, conferma.
+?> Se vuoi cancellarle, spunta la casella.
 I dati non potranno essere recuperati.</label>
 <input type="checkbox" name="confermaTruncate" value="Cancella prenotazioni" />
 </fieldset>
@@ -154,7 +152,6 @@ I dati non potranno essere recuperati.</label>
 <?php
 // New blocks
 echo '<label>Aggiungi <input type="number" min="0" name="newBlocks" value="0" /> nuovi blocchi</label>';
-
 
 /* Stampa la griglia */
 echo '<table id="ActivityTable" class="wideTable">';
@@ -216,4 +213,69 @@ echo "</form>\n";
 
 showFooter('ca-nstab-imposta');
 $db->close();
+
+function addNewBlocks($n, $db) {
+	if($n > 0) {
+		$query = "INSERT INTO blocchi (title) VALUES ";
+		$defaultRecord = "('Nuovo blocco')";
+		for($i=0; $i<$n; $i++) {
+			$query .= $defaultRecord . ','; // Multiple rows
+		}
+		$query = rtrim($query, ','); // Remove last comma
+		$res = $db->query($query);
+		if(!$res) die("Problem while adding $n new blocks!");
+	}
+}
+
+function cleanOrphanActivities($db) {
+	// Elimina le attività che non si trovano in nessun blocco
+	$res = $db->query('DELETE FROM attivita
+		WHERE time NOT IN (
+			SELECT DISTINCT id
+			FROM blocchi );');
+	if(!$res) die("Problem while cleaning orphan activities!");
+}
+
+function deleteBlocks($ids, $db) {
+	// Cancella i blocchi da cancellare
+	if(count($ids)>0) {
+		$deleteString = '(' . implode(', ', $ids) . ')';
+		$query = "DELETE FROM blocchi
+				WHERE id IN $deleteString;";
+		$res = $db->query($query);
+		if(!$res) die("Problem while deleting blocks $deleteString!");
+	}
+}
+
+function deleteActivities($ids, $db) {
+	// Cancella le attività da cancellare
+	if(count($ids)>0) {
+		$deleteString = '(' . implode(', ', $ids) . ')';
+		$query = "DELETE FROM attivita
+				WHERE id IN $deleteString;";
+		$res = $db->query($query);
+		if(!$res) die("Problem while deleting activities $deleteString!");
+	}
+}
+
+function authenticated($users) {
+	foreach($users as $k) {
+		if($_POST['username'] == $k['user'] && $_POST['password'] == $k['pass']) {
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+function cleanOrphanPrenotations($db) {
+	// Elimina le prenotazioni riferite ad attività o blocchi inesistenti
+	$res = $db->query('DELETE FROM prenotazioni
+		WHERE time NOT IN (
+			SELECT DISTINCT id
+			FROM blocchi )
+		OR activity NOT IN (
+			SELECT DISTINCT id
+			FROM attivita );');
+	if(!$res) die("Problem while cleaning orphan prenotations!");
+}
 ?>

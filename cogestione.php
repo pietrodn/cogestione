@@ -1,87 +1,26 @@
 <?php	
 	require_once("config.php");
+	require_once("functions.php");
 	require("nav.php");
 	
-	$css = Array('includes/StiliCogestione.css');
+	$css = Array('css/StiliCogestione.css');
 	$js = Array(
 		'http://code.jquery.com/jquery-1.10.2.min.js',
-		'includes/prenotazioni.js');
+		'js/prenotazioni.js');
 	showHeader('Prenotazioni cogestione 2014', $css, $js);
-
-	echo '<div id="timeBox">';
-
-
-/* Ore di inizio e di fine */
-$dtz = new DateTimeZone('Europe/Rome');
-$beginTime = new DateTime($cogeStart, $dtz);
-$endTime = new DateTime($cogeEnd, $dtz);
-
-$now = new DateTime(null, $dtz);
-
-if($now < $beginTime OR $now > $endTime) {
-	$enabled = 0;
-} else {
-	$enabled = 1;
-}
-
-/* Manual override */
-if($manuallyEnableForm) {
-	$enabled = $manualSwitch;
-}
-
-if(!$enabled) {
-    echo '<p class="error"><b>Avviso</b>: le prenotazioni sono ora chiuse.</p>';
-}
-
-echo '<p>Le prenotazioni saranno aperte <br />da <b>'
-    . $beginTime->format('r')
-    . '</b><br />a <b>'
-    . $endTime->format('r')
-    . '</b></p>';
-
-if($now >= $beginTime AND $now <= $endTime AND $enabled) {
-	$diffTime = date_diff($endTime, $now); 
-	echo '<p>Prenotazioni chiuse tra <b>'
-	   . $diffTime->format('%d giorni, %h ore, %i minuti, %s secondi')
-	   . '</b>.</p>';
-} else if($now <= $beginTime AND !$enabled) {
-	$diffTime = date_diff($beginTime, $now); 
-	echo '<p>Prenotazioni aperte tra <b>'
-	   . $diffTime->format('%d giorni, %h ore, %i minuti, %s secondi')
-	   . '</b>.</p>';
-}
+	
+	$db = initDB();
+	printTimeBox($db);
 ?>
-</div>
 
 <?php
 // MAIN
-$db = initDB();
 
 /* Ottiene i nomi delle colonne (blocchi) e l'elenco delle classi */
 $blocks = blocchi($db);
 $classi = classi($db);
-$validated = FALSE;
-
-if(isset($_GET['class'])) {
-    $validated = TRUE;
-    
-    /* Verifico la completezza dei dati */
-    if(empty($_GET['name']) || empty($_GET['surname']) || empty($_GET['class']))
-        $validated = FALSE;
-    
-    /* L'utente deve aver prenotato tutti i blocchi */
-    foreach($blocks as $i => $b)
-    {
-        if(!isset($_GET['block_' . $i]) || !is_numeric($_GET['block_' . $i]))
-            $validated = FALSE;
-    }
-    
-    /* La classe deve essere in elenco */
-    if(!in_array($_GET['class'], $classi))
-        $validated = FALSE;
-}
-        
-if($validated) {
+   
+if(inputValid($db)) {
     $name = $db->real_escape_string($_GET['name']);
     $surname = $db->real_escape_string($_GET['surname']);
     $class = $db->real_escape_string($_GET['class']);
@@ -126,7 +65,7 @@ if($validated) {
         $riepilogo .= "\n<td><div class=\"activity\">" . $activityRow['title'] . ($pieno ? ' <b>[Pieno!]</b>':'') . '</div></td>';
     }
     $riepilogo .= '</tr></table>';
-    if(!$enabled) {
+    if(!isEnabled()) {
         echo '<div class="error">Le prenotazioni sono chiuse!</div>';
     } else if($pieno) {
         echo '<div class="error">Alcune delle attività selezionate sono troppo affollate. Rifai!</div>';
@@ -135,15 +74,10 @@ if($validated) {
     } else if (isSubscribed($name, $surname, $class, $db)) {
         echo '<div class="error">Ti sei già iscritto!</div>';
     } else {
+    	/* Controlli passati. L'utente può iscriversi. */
         echo $riepilogo;
-        
-        // Inserimento dati
-        foreach($inserts as $k => $in) {
-            $res = $db->query("INSERT INTO prenotazioni (name, surname, class, time, activity) VALUES ('$name', '$surname', '$class', $k, $in);");
-            if(!$res) die("Errore nell'inserimento della prenotazione!");
-        }
-        
-    echo "<p>I dati sono stati registrati con successo.</p>";
+    	inserisciPrenotazione($name, $surname, $class, $inserts, $db);    
+        echo "<p>I dati sono stati registrati con successo.</p>";
     }
     
 } else {
@@ -169,27 +103,89 @@ if($validated) {
 </div>
 <?php
     if(isset($_GET['submit'])) {
-        echo '<p class="error">Non hai compilato tutti i campi. Riprova.</p>';
-    } echo  '<form action="'. $_SERVER['PHP_SELF'] . '" method="get" autocomplete="off">
-            <table id="fieldTable">
+        echo '<p class="error">Non hai compilato correttamente tutti i campi. Riprova.</p>';
+    }
+    
+    printForm($db);
+}
+
+$db->close();
+showFooter('ca-nstab-prenota');
+
+/* end main */
+
+function inputValid($db) {
+	$validated = FALSE;
+	
+	$blocks = blocchi($db);
+	$classi = classi($db);
+
+	if(isset($_GET['class'])) {
+		$validated = TRUE;
+	
+		/* Verifico la completezza dei dati */
+		if(empty($_GET['name']) || empty($_GET['surname']) || empty($_GET['class']))
+			$validated = FALSE;
+	
+		/* L'utente deve aver prenotato tutti i blocchi */
+		foreach($blocks as $i => $b)
+		{
+			if(!isset($_GET['block_' . $i]) || !is_numeric($_GET['block_' . $i]))
+				$validated = FALSE;
+		}
+	
+		/* La classe deve essere in elenco */
+		if(!in_array($_GET['class'], $classi))
+			$validated = FALSE;
+	}
+	
+	return $validated;
+}
+
+function printForm($db) {
+	/* Stampa il form */
+	
+	echo  '<form action="'. $_SERVER['PHP_SELF'] . '" method="get" autocomplete="off">';
+	echo '<table id="fieldTable">
             <tr><td><label for="name">Nome: </label></td>
             <td><input class="iField" type="text" name="name" id="name" required placeholder="Mario" /></td></tr>
             <tr><td><label for="surname">Cognome: </label></td>
             <td><input class="iField" type="text" name="surname" id="surname" placeholder="Rossi" required /></td></tr>
             <tr><td><label for="class">Classe: </label></td>
-            <td><select class="iField" name="class" id="class" onchange="getClassAndToggle(this)" required>
+            <td>';       
+    
+    printClassSelector($db);
+    
+    echo "\n</td></tr>";
+    echo '<tr><td colspan="2"><input id="submit" type="submit" name="submit" value="Conferma" ' . (isEnabled() ? '' : 'disabled') . ' /></td></tr>'; 
+    echo "</table>\n";
+    
+    printActivityTable($db);
+    
+    echo '</form>';
+}
+
+function printClassSelector($db) {
+	$classi = classi($db);
+	
+	echo '<select class="iField" name="class" id="class" onchange="getClassAndToggle(this)" required>
             <option value="" disabled selected>Seleziona la classe</option>';
     
     // Selettore classe       
     foreach($classi as $cl) {
-        echo "\n<option value=\"$cl\">$cl</option>";
+    	if(isset($_GET['class']) && $cl == $_GET['class'])
+    		$selected = 'selected';
+    	else
+    		$selected = '';
+        echo "\n<option value=\"$cl\" $selected>$cl</option>";
     }        
             
-    echo "\n</select></td></tr>";
-    echo '<tr><td colspan="2"><input id="submit" type="submit" name="submit" value="Conferma" ' . ($enabled ? '' : 'disabled') . ' /></td></tr>'; 
-    echo "</table>\n";
-    
+    echo "\n</select>";
+}
+
+function printActivityTable($db) {
     /* Stampa la griglia */
+    $blocks = blocchi($db);
     echo '<table id="ActivityTable">';
     /* Intestazione con blocchi */
     echo '<tr>';
@@ -229,7 +225,50 @@ if($validated) {
     echo '</tr></table>';
 }
 
-$db->close();
-echo '</form>';
-showFooter('ca-nstab-prenota');
+function printTimeBox($db) {
+	/* Prints info on opening and closing times */
+	
+	echo '<div id="timeBox">';
+	$enabled = isEnabled();
+	
+	/* Ore di inizio e di fine */
+	$dtz = new DateTimeZone('Europe/Rome');
+	$beginTime = new DateTime(START_TIME, $dtz);
+	$endTime = new DateTime(END_TIME, $dtz);
+
+	$now = new DateTime(null, $dtz);
+	
+	if(!$enabled) {
+		echo '<p class="error"><b>Avviso</b>: le prenotazioni sono ora chiuse.</p>';
+	}
+	echo '<p>Le prenotazioni saranno aperte <br />da <b>'
+		. $beginTime->format('r')
+		. '</b><br />a <b>'
+		. $endTime->format('r')
+		. '</b></p>';
+
+	if($now >= $beginTime AND $now <= $endTime AND $enabled) {
+		$diffTime = date_diff($endTime, $now); 
+		echo '<p>Prenotazioni chiuse tra <b>'
+		   . $diffTime->format('%d giorni, %h ore, %i minuti, %s secondi')
+		   . '</b>.</p>';
+	} else if($now <= $beginTime AND !$enabled) {
+		$diffTime = date_diff($beginTime, $now); 
+		echo '<p>Prenotazioni aperte tra <b>'
+		   . $diffTime->format('%d giorni, %h ore, %i minuti, %s secondi')
+		   . '</b>.</p>';
+	}
+	
+	echo '</div>';
+}
+
+function inserisciPrenotazione($name, $surname, $class, $prenotazione, $db) {
+	/* $prenotazione array associativo "id blocco" => "id attività" */
+	
+	// Inserimento dati
+	foreach($prenotazione as $blocco_id => $attivita_id) {
+		$res = $db->query("INSERT INTO prenotazioni (name, surname, class, time, activity) VALUES ('$name', '$surname', '$class', $blocco_id, $attivita_id);");
+		if(!$res) die("Errore nell'inserimento della prenotazione!");
+	}
+}
 ?>

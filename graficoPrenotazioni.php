@@ -1,7 +1,8 @@
 <?php
+	require_once("functions.php");
 	require("nav.php");
 	
-	$css = Array('includes/StiliCogestione.css');
+	$css = Array('css/StiliCogestione.css');
 	showHeader('Grafico prenotazioni cogestione', $css);
 	
     // Config
