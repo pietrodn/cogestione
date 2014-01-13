@@ -87,11 +87,9 @@ function showFooter($selectedId='')
 </div>
 
 <div id="footer">
-    <!--<ul id="footer-places">
-        <li id="footer-places-privacy"><a href="/wiki/Einsteinwiki:Informazioni_sulla_privacy" title="Einsteinwiki:Informazioni sulla privacy">Informazioni sulla privacy</a></li>
-        <li id="footer-places-about"><a href="/wiki/Einsteinwiki:Informazioni" title="Einsteinwiki:Informazioni">Informazioni su Einsteinwiki</a></li>
-        <li id="footer-places-disclaimer"><a href="/wiki/Einsteinwiki:Avvertenze_generali" title="Einsteinwiki:Avvertenze generali">Avvertenze</a></li>
-    </ul>-->
+    <ul id="footer-places">
+        <li id="footer-places-about"><a href="https://pietrodn.wordpress.com" title="Denilog">Creato da Pietro De Nicolao</a></li>
+    </ul>
     <ul id="footer-icons" class="noprint">
         <li><a href="http://validator.w3.org/check?uri=referer"><img
         src="http://www.w3.org/Icons/valid-xhtml10"

@@ -112,20 +112,20 @@ Le modifiche saranno applicate soltanto dopo aver confermato cliccando sul pulsa
 
 <p>
 Per <b>aggiungere un nuovo blocco o una nuova attività</b> occorre dunque:
+</p>
 <ol>
 	<li>incrementare gli appositi contatori;</li>
 	<li>salvare le modifiche;</li>
 	<li>modificare i dati dei nuovi elementi creati.</li>
 </ol>
-</p>
 <p>
 Per <b>cancellare un blocco o un'attività</b>, spuntare la casella <b>"DEL"</b> relativa e poi confermare. Saranno automaticamente cancellate:
+</p>
 <ol>
 	<li>le attività non appartenenti ad alcun blocco;</li>
 	<li>le prenotazioni non riferite ad un blocco esistente;</li>
 	<li>le prenotazioni non riferite ad un'attività esistente.</li>
 </ol>
-</p>
 <p>
 Per segnare un'attività come <b>riservata alle quarte o alle quinte</b>, spuntare la casella <b>"VM18"</b> relativa e poi confermare.
 </p>
@@ -186,8 +186,7 @@ foreach($blocks as $i => $b) {
 		echo "\n<div class=\"set-activity\" id=\"activity-$id\">\n"
 			. "<input type=\"hidden\" name=\"activity[$id][id]\" value=\"$id\" />\n"
 			. "<input type=\"hidden\" name=\"activity[$id][block]\" value=\"$i\" />\n"
-			. "<input type=\"text\" class=\"activity-set-title\" id=\"activity-title-$id\" name=\"activity[$id][title]\" value=\"$title\" "
-			. "id=\"activity-title-$id\" /><br />\n"
+			. "<input type=\"text\" class=\"activity-set-title\" id=\"activity-title-$id\" name=\"activity[$id][title]\" value=\"$title\" /><br />\n"
 			. "<input type=\"number\" min=\"0\" id=\"activity-max-$id\" name=\"activity[$id][max]\" value=\""
 			. intval($row['max']) . "\" />\n"
 			. "<input id=\"activity-vm-$id\" name=\"activity[$id][vm]\" type=\"checkbox\" "

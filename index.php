@@ -16,9 +16,8 @@
 <?php
 // MAIN
 
-/* Ottiene i nomi delle colonne (blocchi) e l'elenco delle classi */
+/* Ottiene i nomi delle colonne (blocchi) */
 $blocks = blocchi($db);
-$classi = classi($db);
    
 if(inputValid($db)) {
     $name = $db->real_escape_string($_GET['name']);
