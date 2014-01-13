@@ -127,7 +127,7 @@ function initDB() {
 	return $db;
 }
 
-function blocchi(&$db) {
+function blocchi($db) {
     // Ottiene id e nome dei blocchi come array associativo.
     $res = $db->query("SELECT * FROM blocchi ORDER BY id;");
     if(!$res) die("Errore nella selezione dei blocchi!");
@@ -138,7 +138,7 @@ function blocchi(&$db) {
     return $blocks;
 }
 
-function getActivityInfo($id, &$db) {
+function getActivityInfo($id, $db) {
     /* Ottiene title, time e n. prenotati di una data attività.
         Restituisce una riga siffatta:
         (id, time, max, title, vm, prenotati)
@@ -154,7 +154,7 @@ function getActivityInfo($id, &$db) {
 }
 
 
-function classi(&$db) {
+function classi($db) {
     // Ottiene l'array delle classi.
     $res = $db->query("SELECT * FROM classi ORDER BY classe;");
     if(!$res) die("Error3!");
@@ -186,7 +186,7 @@ function getSubscriptionsNumber($db)
 							WHERE prenotazioni.time=1;');
 	if(!$res) die("Errore nell'ottenere il numero di prenotazioni!");
 	$row = $res->fetch_assoc();
-	return $row['c'];
+	return intval($row['c']);
 }
 
 function lastID($db)

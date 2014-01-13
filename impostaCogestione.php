@@ -198,7 +198,7 @@ foreach($blocks as $i => $b) {
 			. "/><label for=\"activity-vm-$id\">VM18</label>"
 			. "<input id=\"activity-delete-$id\" name=\"activity[$id][delete]\" type=\"checkbox\" />"
 			. "<label for=\"activity-delete-$id\">DEL</label>"
-			. "<textarea name=\"activity[$id][description]\" placeholder=\"$placeholder\">" . htmlspecialchars($row['description']) . "</textarea>"
+			. "<textarea rows=\"4\" name=\"activity[$id][description]\" placeholder=\"$placeholder\">" . htmlspecialchars($row['description']) . "</textarea>"
 			. "\n</div>\n";
 	}
 	echo '</td>';

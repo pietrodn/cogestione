@@ -98,11 +98,14 @@ if($validated) {
     $riepilogo = '';
     $riepilogo .= "<p>Le tue prenotazioni:</p>\n";
     $riepilogo .= '<table id="ActivityTable">';
-    $riepilogo .= '<tr>';
+    $riepilogo .= '<tr><th>Nome</th><th>Cognome</th><th>Classe</th>';
     foreach($blocks as $b) {
         $riepilogo .= "\n<th>$b</th>";
     }
-    $riepilogo .= "\n</tr><tr>";
+    $riepilogo .= "\n</tr><tr>\n";
+    
+    $riepilogo .= "<td>" . htmlspecialchars($name) . "</td>\n<td>" . htmlspecialchars($surname)
+    	. "</td>\n<td>" . htmlspecialchars($class) . "</td>\n";
     
     /* Ripete per ogni singola prenotazione */
     foreach($blocks as $i => $b) {

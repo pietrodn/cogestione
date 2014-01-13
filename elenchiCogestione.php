@@ -121,7 +121,7 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 				ORDER BY attivita.time;");
 			
 			while($p = $prenotazione->fetch_assoc()) {
-				$riepilogo .= "\n<td><div class=\"activity\">" . htmlspecialchars($p['title']) . '</div></td>';
+				$riepilogo .= "\n<td>" . htmlspecialchars($p['title']) . '</td>';
 			}
 		}
 		$riepilogo .= '</tr></table>';

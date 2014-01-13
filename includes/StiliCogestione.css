@@ -124,3 +124,7 @@ input[type="number"] {
 input.activity-set-title {
 	width: 100%;
 }
+
+input[name="confermaTutto"] {
+	margin-top: 10px;
+}
