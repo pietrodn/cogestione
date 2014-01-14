@@ -35,6 +35,7 @@ foreach($classi as $cl) {
 		$selected = 'selected';
 	else
 		$selected = '';
+	$cl = htmlspecialchars($cl);
 	echo "\n<option value=\"$cl\" $selected>$cl</option>";
 }		
 		
@@ -47,11 +48,11 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 	// Visualizza elenco partecipanti
 	$activity = intval($_GET['activity']);
 	$aRow = getActivityInfo($activity, $db);
-	echo "\n<h2>" . $blocks[$aRow['time']] . ' – ' . $aRow['title'] . '</h2>';
-	echo "\n<div id=\"output\">\nAttività: <b>" . $aRow['title']
+	echo "\n<h2>" . htmlspecialchars($blocks[$aRow['time']]) . ' – ' . htmlspecialchars($aRow['title']) . '</h2>';
+	echo "\n<div id=\"output\">\nAttività: <b>" . htmlspecialchars($aRow['title'])
 		. "</b>.\n<br />Descrizione: <br /><div class=\"descriptionBox\">" . $aRow['description']
-		. "</div>\n<br />Quando: <b>" . $blocks[$aRow['time']]
-		. "</b>\n<br />Partecipanti: <b>" . $aRow['prenotati'] . ($aRow['max'] ? '/' . $aRow['max'] : '') . '</b>';
+		. "</div>\n<br />Quando: <b>" . htmlspecialchars($blocks[$aRow['time']])
+		. "</b>\n<br />Partecipanti: <b>" . intval($aRow['prenotati']) . ($aRow['max'] ? '/' . intval($aRow['max']) : '') . '</b>';
 	
 	if($aRow['prenotati']>0)
 	{
@@ -100,6 +101,7 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 		$riepilogo .= '<table id="ActivityTable">';
 		$riepilogo .= '<tr><th>Nome</th><th>Cognome</th><th>Classe</th>';
 		foreach($blocks as $b) {
+			$b = htmlspecialchars($b);
 			$riepilogo .= "\n<th>$b</th>";
 		}
 		$riepilogo .= "\n</tr>";
@@ -128,7 +130,7 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 		$riepilogo .= '</tr></table>';
 		echo $riepilogo;
 	} else {
-		echo '<p class="error">Nessuno studente trovato!</p>';
+		printError('Nessuno studente trovato!');
 	}
 }
 			
@@ -138,6 +140,7 @@ echo '<h2 class="noprint">Cerca un\'attività</h2>';
 echo '<table id="ActivityTable" class="noprint">';
 echo '<tr>';
 foreach($blocks as $b) {
+	$b = htmlspecialchars($b);
 	echo "\n<th>$b</th>";
 }
 echo "\n</tr><tr>";
@@ -150,9 +153,9 @@ foreach($blocks as $i => $b) {
 						GROUP BY attivita.id
 						ORDER BY attivita.id;');
 	while($row = $res->fetch_assoc()) {
-		$url = $_SERVER['PHP_SELF'] . '?activity=' . $row['id'];
-		echo "\n<div class=\"activity\"><span class=\"posti\">[" . $row['prenotati'] . ($row['max']!=0?'/' . $row['max']:'') . "]</span> 
-			<a href=\"" . $url . "\">" . $row['title'] . '</a></div>';
+		$url = $_SERVER['PHP_SELF'] . '?activity=' . intval($row['id']);
+		echo "\n<div class=\"activity\"><span class=\"posti\">[" . intval($row['prenotati']) . ($row['max']!=0?'/' . intval($row['max']):'') . "]</span> 
+			<a href=\"" . $url . "\">" . htmlspecialchars($row['title']) . '</a></div>';
 	}
 	
 	echo '</td>';

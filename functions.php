@@ -83,9 +83,9 @@ function isSubscribed($name, $surname, $class, $db) {
     // Determina se l'utente è già iscritto.
     $res = $db->query('SELECT id
                             FROM prenotazioni
-                            WHERE name="' . $name . '"
-                            AND surname="' . $surname . '"
-                            AND class="' . $class . '";');
+                            WHERE name="' . $db->real_escape_string($name) . '"
+                            AND surname="' . $db->real_escape_string($surname) . '"
+                            AND class="' . $db->real_escape_string($class) . '";');
     if(!$res) die('Errore!');
     $n = $res->num_rows;
     return ( $n ? TRUE : FALSE );
@@ -94,12 +94,11 @@ function isSubscribed($name, $surname, $class, $db) {
 function getSubscriptionsNumber($db)
 {
 	// Ottiene il numero di prenotazioni
-	$res = $db->query('SELECT COUNT(prenotazioni.id) AS c
+	$res = $db->query('SELECT id
 							FROM prenotazioni
-							WHERE prenotazioni.time=1;');
+							GROUP BY CONCAT(name, surname, class);');
 	if(!$res) die("Errore nell'ottenere il numero di prenotazioni!");
-	$row = $res->fetch_assoc();
-	return intval($row['c']);
+	return $res->num_rows;
 }
 
 function lastID($db)
@@ -109,5 +108,9 @@ function lastID($db)
 	if(!$res) die("Errore nell'ottenere l'ultimo ID");
 	$row = $res->fetch_assoc();
 	return intval($row['m']);
+}
+
+function printError($message) {
+	echo '<p class="error">' . htmlentities($message) . '</p>';
 }
 ?>

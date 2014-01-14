@@ -66,7 +66,7 @@ if(isset($_POST['confermaTutto'])) {
 			if(in_array($k, $deleteBlocks))
 				continue;
 			$query = "REPLACE INTO blocchi (id, title) VALUES ("
-			. "'" . $k . "', "
+			. "'" . intval($k) . "', "
 			. "'" . $b['title'] . "'"
 			. ');';
 			$res = $db->query($query);
@@ -75,7 +75,7 @@ if(isset($_POST['confermaTutto'])) {
 			// Nuove righe attività
 			if($b['newRows']>0) {
 				$query = "INSERT INTO attivita (time, max, title, vm) VALUES ";
-				$defaultRecord = "(" . $k . "," . "0,'Titolo',0)";
+				$defaultRecord = "(" . intval($k) . "," . "0,'Titolo',0)";
 				for($i=0; $i<$b['newRows']; $i++) {
 					$query .= $defaultRecord . ','; // Multiple rows
 				}
@@ -93,15 +93,15 @@ if(isset($_POST['confermaTutto'])) {
 		cleanOrphanActivities($db);
 		cleanOrphanPrenotations($db);
 			
-		echo '<p class="error">I dati sono stati registrati con successo.</p>';
+		printError('I dati sono stati registrati con successo.');
 		
 	
 		if(isset($_POST['confermaTruncate'])) {
 			$db->query("TRUNCATE TABLE prenotazioni;");
-			echo '<p class="error">Prenotazioni cancellate.</p>';
+			echo printError('Prenotazioni cancellate.');
 		}
 	} else {
-		echo '<p class="error">Autenticazione fallita! Capra!</p>';
+		printError('Autenticazione fallita! Capra!');
 		echo '<img src="http://www.controcopertina.com/wp-content/uploads/2012/09/sgarbi-vittorio-foto.png" alt="Sgarbi insulta" width="300" />';
 	}
 }    
@@ -160,6 +160,7 @@ echo '<table id="ActivityTable" class="wideTable">';
 $blocks = blocchi($db);
 echo '<tr>';
 foreach($blocks as $id => $b) {
+	$id = intval($id);
 	echo "\n<th>"
 		. "<input type=\"hidden\" name=\"block[$id][id]\" value=\"$id\" />\n"
 		. "<input type=\"text\" size=\"35\" name=\"block[$id][title]\" id=\"block-title-$id\" value=\"". htmlspecialchars($b, ENT_QUOTES, "UTF-8", false) . "\" />"
@@ -174,7 +175,7 @@ foreach($blocks as $i => $b) {
 	$res = $db->query('SELECT attivita.*, COUNT(prenotazioni.id) AS prenotati
 						FROM attivita
 						LEFT JOIN prenotazioni ON attivita.id=prenotazioni.activity
-						WHERE attivita.time=' . $i . '
+						WHERE attivita.time=' . intval($i) . '
 						GROUP BY attivita.id
 						ORDER BY attivita.id;');
 	
@@ -202,7 +203,7 @@ foreach($blocks as $i => $b) {
 echo '</tr><tr>';
 foreach($blocks as $i => $title) {
 	echo '<td>';
-	echo '<label>Aggiungi <input type="number" min="0" name="block[' . $i . '][newRows]" value="0" /> nuove attività</label>';
+	echo '<label>Aggiungi <input type="number" min="0" name="block[' . intval($i) . '][newRows]" value="0" /> nuove attività</label>';
 	echo '</td>';
 }
 

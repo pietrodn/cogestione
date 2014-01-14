@@ -20,17 +20,18 @@
 $blocks = blocchi($db);
    
 if(inputValid($db)) {
-    $name = $db->real_escape_string($_GET['name']);
-    $surname = $db->real_escape_string($_GET['surname']);
-    $class = $db->real_escape_string($_GET['class']);
+    $name = $_GET['name'];
+    $surname = $_GET['surname'];
+    $class = $_GET['class'];
     $arrSplit = str_split($class, 1);
     
     /* La classe senza la sezione */
-    $classN = $arrSplit[0];
+    $classN = intval($arrSplit[0]);
     
     // Riepilogo e controllo affollamento
     $inserts = Array();
     $pieno = $vm = FALSE;
+    $correctBlocks = TRUE;
     
     // Riepilogo
     $riepilogo = '';
@@ -38,6 +39,7 @@ if(inputValid($db)) {
     $riepilogo .= '<table id="ActivityTable">';
     $riepilogo .= '<tr><th>Nome</th><th>Cognome</th><th>Classe</th>';
     foreach($blocks as $b) {
+    	$b = htmlentities($b);
         $riepilogo .= "\n<th>$b</th>";
     }
     $riepilogo .= "\n</tr><tr>\n";
@@ -50,6 +52,11 @@ if(inputValid($db)) {
         $pref = intval($_GET['block_' . $i]);
         $activityRow = getActivityInfo($pref, $db);
         
+        /* Verifico se l'attività è coerente con il blocco */
+        if($activityRow['time'] != $i) {
+        	$correctBlocks = FALSE;
+        }
+        
         /* Verifico l'affollamento. Se max=0 il vincolo non vale. */
         if($activityRow['max'] != 0 && $activityRow['prenotati'] >= $activityRow['max']) {
             $pieno = TRUE;
@@ -61,17 +68,19 @@ if(inputValid($db)) {
         }
         
         $inserts[$i] = $pref;
-        $riepilogo .= "\n<td><div class=\"activity\">" . $activityRow['title'] . ($pieno ? ' <b>[Pieno!]</b>':'') . '</div></td>';
+        $riepilogo .= "\n<td><div class=\"activity\">" . htmlentities($activityRow['title']) . ($pieno ? ' <b>[Pieno!]</b>':'') . '</div></td>';
     }
     $riepilogo .= '</tr></table>';
     if(!isEnabled()) {
-        echo '<div class="error">Le prenotazioni sono chiuse!</div>';
+        printError('Le prenotazioni sono chiuse!');
     } else if($pieno) {
-        echo '<div class="error">Alcune delle attività selezionate sono troppo affollate. Rifai!</div>';
+        printError('Alcune delle attività selezionate sono troppo affollate. Rifai!');
     } else if ($vm) {
-        echo '<div class="error">Alcune delle attività selezionate sono riservate a quarte e quinte. Rifai!</div>';
+        printError('Alcune delle attività selezionate sono riservate a quarte e quinte. Rifai!');
     } else if (isSubscribed($name, $surname, $class, $db)) {
-        echo '<div class="error">Ti sei già iscritto!</div>';
+        printError('Ti sei già iscritto!');
+    } else if(!$correctBlocks) {
+    	printError('Alcune delle attività scelte non sono coerenti con i blocchi.');
     } else {
     	/* Controlli passati. L'utente può iscriversi. */
         echo $riepilogo;
@@ -102,7 +111,7 @@ if(inputValid($db)) {
 </div>
 <?php
     if(isset($_GET['submit'])) {
-        echo '<p class="error">Non hai compilato correttamente tutti i campi. Riprova.</p>';
+        printError('Non hai compilato correttamente tutti i campi. Riprova.');
     }
     
     printForm($db);
@@ -264,8 +273,15 @@ function printTimeBox($db) {
 function inserisciPrenotazione($name, $surname, $class, $prenotazione, $db) {
 	/* $prenotazione array associativo "id blocco" => "id attività" */
 	
+	// Escaping
+	$name = $db->real_escape_string($name);
+	$surname = $db->real_escape_string($surname);
+	$class = $db->real_escape_string($class);
 	// Inserimento dati
 	foreach($prenotazione as $blocco_id => $attivita_id) {
+		$blocco_id = intval($blocco_id);
+		$attivita_id = intval($attivita_id);
+		
 		$res = $db->query("INSERT INTO prenotazioni (name, surname, class, time, activity) VALUES ('$name', '$surname', '$class', $blocco_id, $attivita_id);");
 		if(!$res) die("Errore nell'inserimento della prenotazione!");
 	}

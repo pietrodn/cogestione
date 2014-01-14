@@ -8,9 +8,11 @@
     // Config
     $dtz = new DateTimeZone('Europe/Rome');
     date_default_timezone_set('Europe/Rome');
-    
-    $beginTime = 20130225130000;	// Inizio delle prenotazioni	
-    $endTime = 20130228235900;          // Fine delle prenotazioni
+    $beginDateTime = new DateTime(START_TIME, $dtz);
+	$endDateTime = new DateTime(END_TIME, $dtz);
+	
+    $beginTime = $beginDateTime->format('YmdHis');	// Inizio delle prenotazioni	
+    $endTime = $endDateTime->format('YmdHis');          // Fine delle prenotazioni
     $xSize = 710;			// Dimensioni del grafico
     $ySize = 420;
     $xTicks = floor($xSize/100);	// N. di tacche sull'asse X
