@@ -12,8 +12,9 @@ $blocks = blocchi($db);
 $classi = classi($db);
 $validated = FALSE;
 
+$postiTot = getTotalSeats($db);
 $nPrenot = getSubscriptionsNumber($db);
-echo '<p class="noprint">Numero di prenotazioni: ' . $nPrenot . ' (' . round($nPrenot/STUDENTS_IN_SCHOOL*100) . '% degli studenti)</p>';
+echo '<p class="noprint">Numero di prenotazioni: ' . $nPrenot . '/' . $postiTot . ' (' . round($nPrenot/$postiTot*100) . '% degli studenti)</p>';
 
 // Cerca studente
 echo '<h2 class="noprint">Cerca uno studente</h2>';

@@ -101,6 +101,18 @@ function getSubscriptionsNumber($db)
 	return $res->num_rows;
 }
 
+function getTotalSeats($db)
+{
+	// Ottiene il numero totale di posti
+	$res = $db->query('SELECT MIN(time_seats) AS m FROM
+		(SELECT SUM(max) AS time_seats, time
+		FROM attivita
+		GROUP BY time) AS tmp;');
+	if(!$res) die("Errore nell'ottenere il numero di posti totali!");
+	$row = $res->fetch_assoc();
+	return intval($row['m']);
+}
+
 function lastID($db)
 {
 	// Ottiene l'ultimo ID

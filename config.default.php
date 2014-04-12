@@ -13,9 +13,6 @@ define('END_TIME', "23 january 2014, 18:00");
 define('COGE_MANUAL', FALSE);
 define('COGE_MANUAL_ENABLED', FALSE);
 
-# Number of students
-define('STUDENTS_IN_SCHOOL', 1000);
-
 # Edit cogestione data
 #$coge_users[] = Array('user' => 'user', 'pass' => 'password');
 

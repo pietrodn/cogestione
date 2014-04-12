@@ -249,7 +249,7 @@ function printTimeBox($db) {
 	if(!$enabled) {
 		echo '<p class="error"><b>Avviso</b>: le prenotazioni sono ora chiuse.</p>';
 	}
-	echo '<p>Le prenotazioni saranno aperte <br />da <b>'
+	echo '<p>Prenotazioni aperte <br />da <b>'
 		. $beginTime->format('r')
 		. '</b><br />a <b>'
 		. $endTime->format('r')
