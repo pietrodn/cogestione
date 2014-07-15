@@ -14,7 +14,10 @@ $validated = FALSE;
 
 $postiTot = getTotalSeats($db);
 $nPrenot = getSubscriptionsNumber($db);
-echo '<p class="noprint">Numero di prenotazioni: ' . $nPrenot . '/' . $postiTot . ' (' . round($nPrenot/$postiTot*100) . '% degli studenti)</p>';
+echo '<p class="noprint">Numero di prenotazioni: '
+	. $nPrenot . '/' . $postiTot
+	. ' (' . round($nPrenot/$postiTot*100)
+	. '% degli studenti)</p>';
 
 // Cerca studente
 echo '<h2 class="noprint">Cerca uno studente</h2>';
@@ -28,7 +31,9 @@ echo '<form class="noprint" action="'. $_SERVER['PHP_SELF'] . '" method="get">
 	<td><input class="iField" type="text" name="surname" id="surname" placeholder="Rossi" ' .
 	(!empty($_GET['surname']) ? 'value="' . htmlspecialchars($_GET['surname']) . '" ' : '') .
 	'/></td></tr>
-	<tr><td><label for="class">Classe: </label></td><td><select class="iField" name="class" id="class"><option value="" disabled selected>Seleziona la classe</option>';
+	<tr><td><label for="class">Classe: </label></td>
+	<td><select class="iField" name="class" id="class">
+	<option value="" disabled selected>Seleziona la classe</option>';
 	
 // Selettore classe	   
 foreach($classi as $cl) {
@@ -41,30 +46,33 @@ foreach($classi as $cl) {
 }		
 		
 echo "\n</select></td></tr>";
-echo '<tr><td colspan="2"><input id="submit" type="submit" name="cercastud" value="Cerca" /></td></tr>';
+echo '<tr><td colspan="2">
+	<input id="submit" type="submit" name="cercastud" value="Cerca" />
+	</td></tr>';
 echo "</table>\n</form>\n";
 			
 if(isset($_GET['activity'])) // Se si seleziona un'attività
 {
 	// Visualizza elenco partecipanti
 	$activity = intval($_GET['activity']);
-	$aRow = getActivityInfo($activity, $db);
-	echo "\n<h2>" . htmlspecialchars($blocks[$aRow['time']]) . ' – ' . htmlspecialchars($aRow['title']) . '</h2>';
-	echo "\n<div id=\"output\">\nAttività: <b>" . htmlspecialchars($aRow['title'])
-		. "</b>.\n<br />Descrizione: <br /><div class=\"descriptionBox\">" . $aRow['description']
-		. "</div>\n<br />Quando: <b>" . htmlspecialchars($blocks[$aRow['time']])
-		. "</b>\n<br />Partecipanti: <b>" . intval($aRow['prenotati']) . ($aRow['max'] ? '/' . intval($aRow['max']) : '') . '</b>';
+	$aRow = getActivityInfo($db, $activity);
+	echo "\n<h2>" . htmlspecialchars($blocks[$aRow['activity_time']]) . ' – ' . htmlspecialchars($aRow['activity_title']) . '</h2>';
+	echo "\n<div id=\"output\">\nAttività: <b>" . htmlspecialchars($aRow['activity_title'])
+		. "</b>.\n<br />Descrizione: <br /><div class=\"descriptionBox\">" . $aRow['activity_description']
+		. "</div>\n<br />Quando: <b>" . htmlspecialchars($blocks[$aRow['activity_time']])
+		. "</b>\n<br />Partecipanti: <b>" . intval($aRow['prenotati']) . ($aRow['activity_size'] ? '/' . intval($aRow['activity_size']) : '') . '</b>';
 	
 	if($aRow['prenotati']>0)
-	{
-		$res = $db->query("SELECT *
-								FROM prenotazioni
-								WHERE activity=$activity
-								ORDER BY timestamp;");
+	{	
+		$user_list = getUsersForActivity($db, $activity);
 								
-		echo "<br />Elenco dei partecipanti:\n<ol id=\"partecipanti\">";
-		while($row = $res->fetch_assoc()) {
-			echo "\n<li>" . htmlspecialchars($row['surname']) . ' ' . htmlspecialchars($row['name']) . ' (' . $row['class'] . ") </li>";
+		echo "<br />Elenco dei partecipanti:\n
+			<ol id=\"partecipanti\">";
+		foreach($user_list as $row) {
+			echo "\n<li>"
+				. htmlspecialchars($row['user_surname']) . ' '
+				. htmlspecialchars($row['user_name'])
+				. ' (' . $row['user_class'] . ") </li>";
 		}
 		echo "\n</ol>";
 		
@@ -78,54 +86,32 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 		
 	// Se si cerca uno studente
 	
-	$conditions = Array();
-	if(!empty($_GET['name'])) {
-		$name = $db->real_escape_string($_GET['name']);
-		$conditions[] = "prenotazioni.name=\"$name\"";
-	}
-	if(!empty($_GET['surname'])) {
-		$surname = $db->real_escape_string($_GET['surname']);
-		$conditions[] = "prenotazioni.surname=\"$surname\"";
-	}
-	if(!empty($_GET['class'])) {
-		$class = $db->real_escape_string($_GET['class']);
-		$conditions[] = "prenotazioni.class=\"$class\"";
-	}
-	$conditionString = implode($conditions, ' AND ');
+	$studenti = findUser($db, $_GET['name'], $_GET['surname'], $_GET['class']);
 	
-	$studenti = $db->query("SELECT DISTINCT name, surname, class FROM prenotazioni
-		WHERE $conditionString
-		ORDER BY prenotazioni.timestamp;");
-	
-	if($studenti->num_rows) {
+	if(count($studenti)) {
 		$riepilogo = '';
 		$riepilogo .= '<table id="ActivityTable">';
 		$riepilogo .= '<tr><th>Nome</th><th>Cognome</th><th>Classe</th>';
-		foreach($blocks as $b) {
-			$b = htmlspecialchars($b);
-			$riepilogo .= "\n<th>$b</th>";
+		foreach($blocks as $blockTitle) {
+			$blockTitle = htmlspecialchars($blockTitle);
+			$riepilogo .= "\n<th>$blockTitle</th>";
 		}
 		$riepilogo .= "\n</tr>";
-		while($row = $studenti->fetch_assoc()) {
+		foreach($studenti as $row) {
 			$riepilogo .= "\n<tr>";
-			$riepilogo .= "\n<td>" . htmlspecialchars($row['name']) . '</td>';
-			$riepilogo .= "\n<td>" . htmlspecialchars($row['surname']) . '</td>';
-			$riepilogo .= "\n<td>" . htmlspecialchars($row['class']) . '</td>';
+			$riepilogo .= "\n<td>" . htmlspecialchars($row['user_name']) . '</td>';
+			$riepilogo .= "\n<td>" . htmlspecialchars($row['user_surname']) . '</td>';
+			$riepilogo .= "\n<td>" . htmlspecialchars($row['user_class']) . '</td>';
 			
-			$studentName = $db->real_escape_string($row['name']);
-			$studentSurname = $db->real_escape_string($row['surname']);
-			$studentClass = $db->real_escape_string($row['class']);
+			$studentName = $db->real_escape_string($row['user_name']);
+			$studentSurname = $db->real_escape_string($row['user_surname']);
+			$studentClass = $db->real_escape_string($row['user_class']);
+			$studentId = intval($row['user_id']);
 			
-			$prenotazione = $db->query("SELECT attivita.title AS title
-				FROM attivita, prenotazioni
-				WHERE prenotazioni.activity = attivita.id
-				AND prenotazioni.name=\"$studentName\"
-				AND prenotazioni.surname=\"$studentSurname\"
-				AND prenotazioni.class=\"$studentClass\"
-				ORDER BY attivita.time;");
+			$prenotazione = getReservationsForUser($db, $studentId);
 			
-			while($p = $prenotazione->fetch_assoc()) {
-				$riepilogo .= "\n<td>" . htmlspecialchars($p['title']) . '</td>';
+			foreach($blocks as $i => $b) {
+				$riepilogo .= "\n<td>" . htmlspecialchars($prenotazione[$i]) . '</td>';
 			}
 		}
 		$riepilogo .= '</tr></table>';
@@ -147,16 +133,11 @@ foreach($blocks as $b) {
 echo "\n</tr><tr>";
 foreach($blocks as $i => $b) {
 	echo '<td>';
-	$res = $db->query('SELECT attivita.*, COUNT(prenotazioni.id) AS prenotati
-						FROM attivita
-						LEFT JOIN prenotazioni ON attivita.id=prenotazioni.activity
-						WHERE attivita.time=' . intval($i) . '
-						GROUP BY attivita.id
-						ORDER BY attivita.id;');
-	while($row = $res->fetch_assoc()) {
-		$url = $_SERVER['PHP_SELF'] . '?activity=' . intval($row['id']);
-		echo "\n<div class=\"activity\"><span class=\"posti\">[" . intval($row['prenotati']) . ($row['max']!=0?'/' . intval($row['max']):'') . "]</span> 
-			<a href=\"" . $url . "\">" . htmlspecialchars($row['title']) . '</a></div>';
+	$activities = getActivitiesForBlock($db, $i);
+	foreach($activities as $row) {
+		$url = $_SERVER['PHP_SELF'] . '?activity=' . intval($row['activity_id']);
+		echo "\n<div class=\"activity\"><span class=\"posti\">[" . intval($row['prenotati']) . ($row['activity_size']!=0?'/' . intval($row['activity_size']):'') . "]</span> 
+			<a href=\"" . $url . "\">" . htmlspecialchars($row['activity_title']) . '</a></div>';
 	}
 	
 	echo '</td>';

@@ -32,10 +32,10 @@
     $db = initDB();
     
     // Intervalli di 1h
-    $res = $db->query("SELECT count(id) as c,
-    	UNIX_TIMESTAMP(CONCAT(DATE(timestamp), ' ', HOUR(timestamp), ':00:00')) + 3600 - $beginTS AS t
-    	FROM prenotazioni WHERE time=1 AND timestamp >= $beginTime
-    	GROUP BY CONCAT(DATE(timestamp), HOUR(timestamp)) ORDER BY timestamp;");
+    $res = $db->query("SELECT count(pren_id) as c,
+    	UNIX_TIMESTAMP(CONCAT(DATE(pren_timestamp), ' ', HOUR(pren_timestamp), ':00:00')) + 3600 - $beginTS AS t
+    	FROM prenotazioni WHERE pren_timestamp >= $beginTime
+    	GROUP BY CONCAT(DATE(pren_timestamp), HOUR(pren_timestamp)) ORDER BY pren_timestamp;");
     
     $pCount = $nData = 0;
     

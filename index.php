@@ -5,7 +5,7 @@
 	
 	$css = Array('css/StiliCogestione.css');
 	$js = Array(
-		'http://code.jquery.com/jquery-1.10.2.min.js',
+		'//code.jquery.com/jquery-1.10.2.min.js',
 		'js/prenotazioni.js');
 	showHeader('Prenotazioni cogestione 2014', $css, $js);
 	
@@ -14,7 +14,6 @@
 ?>
 
 <?php
-// MAIN
 
 /* Ottiene i nomi delle colonne (blocchi) */
 $blocks = blocchi($db);
@@ -44,31 +43,32 @@ if(inputValid($db)) {
     }
     $riepilogo .= "\n</tr><tr>\n";
     
-    $riepilogo .= "<td>" . htmlspecialchars($name) . "</td>\n<td>" . htmlspecialchars($surname)
+    $riepilogo .= "<td>" . htmlspecialchars($name)
+    	. "</td>\n<td>" . htmlspecialchars($surname)
     	. "</td>\n<td>" . htmlspecialchars($class) . "</td>\n";
     
-    /* Ripete per ogni singola prenotazione */
+    /* Ripete per ogni blocco */
     foreach($blocks as $i => $b) {
-        $pref = intval($_GET['block_' . $i]);
-        $activityRow = getActivityInfo($pref, $db);
+        $selectedActivity = intval($_GET['block_' . $i]);
+        $activityRow = getActivityInfo($db, $selectedActivity);
         
         /* Verifico se l'attività è coerente con il blocco */
-        if($activityRow['time'] != $i) {
+        if($activityRow['activity_time'] != $i) {
         	$correctBlocks = FALSE;
         }
         
         /* Verifico l'affollamento. Se max=0 il vincolo non vale. */
-        if($activityRow['max'] != 0 && $activityRow['prenotati'] >= $activityRow['max']) {
+        if($activityRow['activity_size'] != 0 && $activityRow['prenotati'] >= $activityRow['activity_size']) {
             $pieno = TRUE;
         }
         
         /* Solo le quarte e le quinte possono accedere alle attività "VM18" */
-        if($activityRow['vm'] == 1 && $classN != 4 && $classN != 5) {
+        if($activityRow['activity_vm'] == 1 && $classN != 4 && $classN != 5) {
             $vm = TRUE;
         }
         
-        $inserts[$i] = $pref;
-        $riepilogo .= "\n<td><div class=\"activity\">" . htmlentities($activityRow['title']) . ($pieno ? ' <b>[Pieno!]</b>':'') . '</div></td>';
+        $inserts[$i] = $selectedActivity;
+        $riepilogo .= "\n<td><div class=\"activity\">" . htmlentities($activityRow['activity_title']) . ($pieno ? ' <b>[Pieno!]</b>':'') . '</div></td>';
     }
     $riepilogo .= '</tr></table>';
     if(!isEnabled()) {
@@ -77,14 +77,14 @@ if(inputValid($db)) {
         printError('Alcune delle attività selezionate sono troppo affollate. Rifai!');
     } else if ($vm) {
         printError('Alcune delle attività selezionate sono riservate a quarte e quinte. Rifai!');
-    } else if (isSubscribed($name, $surname, $class, $db)) {
+    } else if (isSubscribed($db, $name, $surname, $class)) {
         printError('Ti sei già iscritto!');
     } else if(!$correctBlocks) {
     	printError('Alcune delle attività scelte non sono coerenti con i blocchi.');
     } else {
     	/* Controlli passati. L'utente può iscriversi. */
         echo $riepilogo;
-    	inserisciPrenotazione($name, $surname, $class, $inserts, $db);    
+    	inserisciPrenotazione($db, $name, $surname, $class, $inserts);    
         echo "<p>I dati sono stati registrati con successo.</p>";
     }
     
@@ -153,20 +153,28 @@ function inputValid($db) {
 function printForm($db) {
 	/* Stampa il form */
 	
-	echo  '<form action="'. $_SERVER['PHP_SELF'] . '" method="get" autocomplete="off">';
-	echo '<table id="fieldTable">
-            <tr><td><label for="name">Nome: </label></td>
-            <td><input class="iField" type="text" name="name" id="name" required placeholder="Mario" /></td></tr>
-            <tr><td><label for="surname">Cognome: </label></td>
-            <td><input class="iField" type="text" name="surname" id="surname" placeholder="Rossi" required /></td></tr>
-            <tr><td><label for="class">Classe: </label></td>
+	echo  '<form action="'. $_SERVER['PHP_SELF'] . '" method="get" autocomplete="off">
+			<table id="fieldTable">
+            <tr>
+            <td><label for="name">Nome: </label></td>
+            <td><input class="iField" type="text" name="name" id="name" required placeholder="Mario" /></td>
+            </tr>
+            <tr>
+            <td><label for="surname">Cognome: </label></td>
+            <td><input class="iField" type="text" name="surname" id="surname" placeholder="Rossi" required /></td>
+            </tr>
+            <tr>
+            <td><label for="class">Classe: </label></td>
             <td>';       
     
     printClassSelector($db);
     
     echo "\n</td></tr>";
-    echo '<tr><td colspan="2"><input id="submit" type="submit" name="submit" value="Conferma" ' . (isEnabled() ? '' : 'disabled') . ' /></td></tr>'; 
-    echo "</table>\n";
+    echo '<tr>
+    	<td colspan="2">
+    	<input id="submit" type="submit" name="submit" value="Conferma" ' . (isEnabled() ? '' : 'disabled') . ' />
+    	</td></tr>
+    	</table>' . "\n";
     
     printActivityTable($db);
     
@@ -204,28 +212,24 @@ function printActivityTable($db) {
     /* Procede colonna per colonna */
     foreach($blocks as $i => $b) {
         echo '<td>';
-        $res = $db->query('SELECT attivita.*, COUNT(prenotazioni.id) AS prenotati
-                            FROM attivita
-                            LEFT JOIN prenotazioni ON attivita.id=prenotazioni.activity
-                            WHERE attivita.time=' . intval($i) . '
-                            GROUP BY attivita.id
-                            ORDER BY attivita.id;');
+        $activities = getActivitiesForBlock($db, $i);
         
         /* Stampa tutte le attività che si svolgono contemporaneamente */
-        while($row = $res->fetch_assoc()) {
-            $full = ($row['max']!=0 && $row['prenotati']>=$row['max']);
+        foreach($activities as $row) {
+        	
+            $full = ($row['activity_size']!=0 && $row['prenotati']>=$row['activity_size']);
             
             echo "\n<div class=\"activity"
             	. ($full ? ' disabled' : '')
-            	. "\">\n<input type=\"radio\" name=\"block_$i\" value=\""
-                . intval($row['id']) . '" id="activity_' . intval($row['id']) . '"'
+            	. '">' . "\n" . '<input type="radio" name="block_' . $i . '" value="'
+                . intval($row['activity_id']) . '" id="activity_' . intval($row['activity_id']) . '"'
                 . ($full ? ' disabled ' : '')
-                . ' class="' . ($row['vm'] ? 'vm' : '') . ($full ? ' full' : '') . '" ' 
-                . ' required />' . "\n" . '<label for="activity_' . intval($row['id']) . '">' . "\n"
-                . ($row['max']!=0?'<span class="posti">['
-                . ($row['max']-$row['prenotati']) . "]</span>\n":'')
-                . htmlspecialchars($row['title']) . "</label>"
-                . ($row['description'] ? "<div id=\"activity_desc_" . intval($row['id']) . "\" class=\"activity_description\">" . $row['description'] . "</div>" : '')
+                . ' class="' . ($row['activity_vm'] ? 'vm' : '') . ($full ? ' full' : '') . '" ' 
+                . ' required />' . "\n" . '<label for="activity_' . intval($row['activity_id']) . '">' . "\n"
+                . ($row['activity_size']!=0?'<span class="posti">['
+                . ($row['activity_size']-$row['prenotati']) . "]</span>\n":'')
+                . htmlspecialchars($row['activity_title']) . "</label>"
+                . ($row['activity_description'] ? '<div id="activity_desc_' . intval($row['activity_id']) . '" class="activity_description">' . $row['activity_description'] . "</div>" : '')
                 . "</div>\n";
         }
         echo "</td>\n";
@@ -270,20 +274,4 @@ function printTimeBox($db) {
 	echo '</div>';
 }
 
-function inserisciPrenotazione($name, $surname, $class, $prenotazione, $db) {
-	/* $prenotazione array associativo "id blocco" => "id attività" */
-	
-	// Escaping
-	$name = $db->real_escape_string($name);
-	$surname = $db->real_escape_string($surname);
-	$class = $db->real_escape_string($class);
-	// Inserimento dati
-	foreach($prenotazione as $blocco_id => $attivita_id) {
-		$blocco_id = intval($blocco_id);
-		$attivita_id = intval($attivita_id);
-		
-		$res = $db->query("INSERT INTO prenotazioni (name, surname, class, time, activity) VALUES ('$name', '$surname', '$class', $blocco_id, $attivita_id);");
-		if(!$res) die("Errore nell'inserimento della prenotazione!");
-	}
-}
 ?>

@@ -43,19 +43,10 @@ if(isset($_POST['confermaTutto'])) {
 		deleteActivities($deleteAct, $db);
 		
 		// Modifica dati attività.
-		foreach($activities as $k => $in) {
-			if(in_array($k, $deleteAct))
+		foreach($activities as $id => $in) {
+			if(in_array($id, $deleteAct))
 				continue;
-			$query = "REPLACE INTO attivita (id, time, max, title, vm, description) VALUES ("
-			. $k . ','
-			. $in['block'] . ','
-			. $in['max'] . ','
-			. "'" . $in['title'] . "', "
-			. $in['vm'] . ','
-			. "'" . $in['description'] . "'"
-			. ');';
-			$res = $db->query($query);
-			if(!$res) die("Problem2!");
+			replaceActivity($db, $id, $in['block'], $in['max'], $in['title'], $in['vm'], $in['description']);
 		}
 		
 		// Cancella i blocchi da cancellare
@@ -65,23 +56,11 @@ if(isset($_POST['confermaTutto'])) {
 		foreach($bl as $k => $b) {
 			if(in_array($k, $deleteBlocks))
 				continue;
-			$query = "REPLACE INTO blocchi (id, title) VALUES ("
-			. "'" . intval($k) . "', "
-			. "'" . $b['title'] . "'"
-			. ');';
-			$res = $db->query($query);
-			if(!$res) die("Problem4!");
+			replaceBlock($db, intval($k), $b['title']);
 			
 			// Nuove righe attività
 			if($b['newRows']>0) {
-				$query = "INSERT INTO attivita (time, max, title, vm) VALUES ";
-				$defaultRecord = "(" . intval($k) . "," . "0,'Titolo',0)";
-				for($i=0; $i<$b['newRows']; $i++) {
-					$query .= $defaultRecord . ','; // Multiple rows
-				}
-				$query = rtrim($query, ','); // Remove last comma
-				$res = $db->query($query);
-				if(!$res) die("Problem5!");
+				addNewActivities($b['newRows'], $k, $db);
 			}
 		}
 		
@@ -95,9 +74,8 @@ if(isset($_POST['confermaTutto'])) {
 			
 		printError('I dati sono stati registrati con successo.');
 		
-	
 		if(isset($_POST['confermaTruncate'])) {
-			$db->query("TRUNCATE TABLE prenotazioni;");
+			clearReservations();
 			echo printError('Prenotazioni cancellate.');
 		}
 	} else {
@@ -172,30 +150,25 @@ echo "\n</tr><tr>";
 /* Procede colonna per colonna */
 foreach($blocks as $i => $b) {
 	echo '<td id="block-' . $i . '">';
-	$res = $db->query('SELECT attivita.*, COUNT(prenotazioni.id) AS prenotati
-						FROM attivita
-						LEFT JOIN prenotazioni ON attivita.id=prenotazioni.activity
-						WHERE attivita.time=' . intval($i) . '
-						GROUP BY attivita.id
-						ORDER BY attivita.id;');
+	$activities = getActivitiesForBlock($db, $i);
 	
 	/* Stampa tutte le attività che si svolgono contemporaneamente */
-	while($row = $res->fetch_assoc()) {
-		$title = htmlspecialchars($row['title'], ENT_QUOTES, "UTF-8", false);
-		$id = $row['id'];
-		$placeholder = htmlspecialchars('Descrizione per "' . $row['title'] . '"');
+	foreach($activities as $row) {
+		$title = htmlspecialchars($row['activity_title'], ENT_QUOTES, "UTF-8", false);
+		$id = $row['activity_id'];
+		$placeholder = htmlspecialchars('Descrizione per "' . $row['activity_title'] . '"');
 		echo "\n<div class=\"set-activity\" id=\"activity-$id\">\n"
 			. "<input type=\"hidden\" name=\"activity[$id][id]\" value=\"$id\" />\n"
 			. "<input type=\"hidden\" name=\"activity[$id][block]\" value=\"$i\" />\n"
 			. "<input type=\"text\" class=\"activity-set-title\" id=\"activity-title-$id\" name=\"activity[$id][title]\" value=\"$title\" /><br />\n"
 			. "<input type=\"number\" min=\"0\" id=\"activity-max-$id\" name=\"activity[$id][max]\" value=\""
-			. intval($row['max']) . "\" />\n"
+			. intval($row['activity_size']) . "\" />\n"
 			. "<input id=\"activity-vm-$id\" name=\"activity[$id][vm]\" type=\"checkbox\" "
-			. ($row['vm'] ? 'checked="checked"' : '')
+			. ($row['activity_vm'] ? 'checked="checked"' : '')
 			. "/><label for=\"activity-vm-$id\">VM18</label>"
 			. "<input id=\"activity-delete-$id\" name=\"activity[$id][delete]\" type=\"checkbox\" />"
 			. "<label for=\"activity-delete-$id\">DEL</label>"
-			. "<textarea rows=\"4\" name=\"activity[$id][description]\" placeholder=\"$placeholder\">" . htmlspecialchars($row['description']) . "</textarea>"
+			. "<textarea rows=\"4\" name=\"activity[$id][description]\" placeholder=\"$placeholder\">" . htmlspecialchars($row['activity_description']) . "</textarea>"
 			. "\n</div>\n";
 	}
 	echo '</td>';
@@ -214,10 +187,24 @@ echo "</form>\n";
 showFooter('ca-nstab-imposta');
 $db->close();
 
+function addNewActivities($n, $blk, $db) {
+	// Adds $n new activities for block $blk.
+	$query = "INSERT INTO activity (activity_time, activity_size, activity_title, activity_vm) VALUES ";
+	$defaultRecord = "(" . intval($blk) . "," . "0,'Titolo',0)";
+	for($i=0; $i<$n; $i++) {
+		$query .= $defaultRecord . ','; // Multiple rows
+	}
+	$query = rtrim($query, ','); // Remove last comma
+	$res = $db->query($query);
+	if(!$res) die("Problem while adding new activities!");
+}
+
 function addNewBlocks($n, $db) {
+	// Adds $n new blocks
+	$defaultRecord = "('Nuovo blocco')";
+	
 	if($n > 0) {
-		$query = "INSERT INTO blocchi (title) VALUES ";
-		$defaultRecord = "('Nuovo blocco')";
+		$query = "INSERT INTO block (block_title) VALUES ";
 		for($i=0; $i<$n; $i++) {
 			$query .= $defaultRecord . ','; // Multiple rows
 		}
@@ -229,10 +216,10 @@ function addNewBlocks($n, $db) {
 
 function cleanOrphanActivities($db) {
 	// Elimina le attività che non si trovano in nessun blocco
-	$res = $db->query('DELETE FROM attivita
-		WHERE time NOT IN (
-			SELECT DISTINCT id
-			FROM blocchi );');
+	$res = $db->query('DELETE FROM activity
+		WHERE activity_time NOT IN (
+			SELECT DISTINCT block_id
+			FROM block );');
 	if(!$res) die("Problem while cleaning orphan activities!");
 }
 
@@ -240,8 +227,8 @@ function deleteBlocks($ids, $db) {
 	// Cancella i blocchi da cancellare
 	if(count($ids)>0) {
 		$deleteString = '(' . implode(', ', $ids) . ')';
-		$query = "DELETE FROM blocchi
-				WHERE id IN $deleteString;";
+		$query = "DELETE FROM block
+				WHERE block_id IN $deleteString;";
 		$res = $db->query($query);
 		if(!$res) die("Problem while deleting blocks $deleteString!");
 	}
@@ -251,8 +238,8 @@ function deleteActivities($ids, $db) {
 	// Cancella le attività da cancellare
 	if(count($ids)>0) {
 		$deleteString = '(' . implode(', ', $ids) . ')';
-		$query = "DELETE FROM attivita
-				WHERE id IN $deleteString;";
+		$query = "DELETE FROM activity
+				WHERE activity_id IN $deleteString;";
 		$res = $db->query($query);
 		if(!$res) die("Problem while deleting activities $deleteString!");
 	}
@@ -267,7 +254,37 @@ function authenticated($users) {
 	return FALSE;
 }
 
+function replaceActivity($db, $act_id, $act_time, $act_size, $act_title, $act_vm, $act_description) {
+	// Replaces the activity associated with the id $act_id with the new values.
+	$query = "REPLACE INTO activity (activity_id, activity_time, activity_size, activity_title, activity_vm, activity_description) VALUES ("
+		. $act_id . ','
+		. $act_time . ','
+		. $act_size . ','
+		. "'" . $act_title . "', "
+		. $act_vm . ','
+		. "'" . $act_description . "'"
+		. ');';
+		$res = $db->query($query);
+		if(!$res) die("Problem while REPLACEing an activity!");
+}
+
+function replaceBlock($db, $blk_id, $blk_title) {
+	// Replaces the title of block $blk_id.
+	$query = "REPLACE INTO block (block_id, block_title) VALUES ("
+		. "'" . intval($blk_id) . "', "
+		. "'" . $blk_title . "'"
+		. ');';
+	$res = $db->query($query);
+	if(!$res) die("Problem while replacing a block!");
+}
+
+function clearReservations($db) {
+	$db->query("TRUNCATE TABLE prenotazioni;");
+	$db->query("TRUNCATE TABLE prenotazioni_attivita;");
+}
+
 function cleanOrphanPrenotations($db) {
+	/* TODO!
 	// Elimina le prenotazioni riferite ad attività o blocchi inesistenti
 	$res = $db->query('DELETE FROM prenotazioni
 		WHERE time NOT IN (
@@ -277,5 +294,6 @@ function cleanOrphanPrenotations($db) {
 			SELECT DISTINCT id
 			FROM attivita );');
 	if(!$res) die("Problem while cleaning orphan prenotations!");
+	*/
 }
 ?>
