@@ -9,7 +9,7 @@ function showHeader($title, $cssFiles=Array(), $jsFiles=Array())
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title><?php echo htmlentities($title) ?></title>
-    <link rel="icon" href="includes/favicon.ico" />
+    <link rel="icon" href="images/favicon.ico" />
     <link rel="stylesheet" href="skins/vector/screen.css" media="screen" />
     <link rel="stylesheet" href="skins/common/shared.css" media="screen" />
     <link rel="stylesheet" href="skins/common/commonPrint.css" media="print" />
@@ -64,7 +64,7 @@ function showFooter($selectedId='')
 </div>
 <div id="mw-panel" class="noprint">
     <!-- logo -->
-	<div id="p-logo"><a style="background-image: url(includes/Wiki.png);" href="/wiki/Pagina_principale"  title="Visita la pagina principale"></a></div>
+	<div id="p-logo"><a style="background-image: url(images/Wiki.png);" href="/wiki/Pagina_principale"  title="Visita la pagina principale"></a></div>
 <!-- /logo -->
 
 <!-- Cogestione -->

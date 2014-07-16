@@ -1,15 +1,15 @@
 <?php
-	require_once("functions.php");
-	require("nav.php");
+	require_once("common.php");
 	
 	$css = Array('css/StiliCogestione.css');
 	showHeader('Grafico prenotazioni cogestione', $css);
 	
     // Config
+    $configurator = Configurator::configurator();
     $dtz = new DateTimeZone('Europe/Rome');
     date_default_timezone_set('Europe/Rome');
-    $beginDateTime = new DateTime(START_TIME, $dtz);
-	$endDateTime = new DateTime(END_TIME, $dtz);
+    $beginDateTime = new DateTime($configurator->getStartTime(), $dtz);
+	$endDateTime = new DateTime($configurator->getEndTime(), $dtz);
 	
     $beginTime = $beginDateTime->format('YmdHis');	// Inizio delle prenotazioni	
     $endTime = $endDateTime->format('YmdHis');          // Fine delle prenotazioni
@@ -29,7 +29,7 @@
     $endDT = min($curDT, $eDT);
     $endTS = $endDT->getTimestamp(); // Non va comunque oltre l'ora di fine
     
-    $db = initDB();
+    $db = Database::database();
     
     // Intervalli di 1h
     $res = $db->query("SELECT count(pren_id) as c,
@@ -42,7 +42,7 @@
     // Data
     $chdX = '';
     $chdY = '';
-    while($row = $res->fetch_assoc()) {
+    foreach($res as $row) {
     	$pCount += $row['c'];
     	$chdX .= $row['t'] . ',';
     	$chdY .= $pCount . ',';
@@ -95,5 +95,4 @@
 	}
 
 showFooter('ca-nstab-grafico');
-$db->close();
 ?>

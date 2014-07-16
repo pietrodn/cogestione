@@ -1,7 +1,5 @@
-<?php	
-	require_once("config.php");
-	require_once("functions.php");
-	require("nav.php");
+<?php
+	require_once("common.php");
 	
 	$css = Array('css/StiliCogestione.css');
 	$js = Array(
@@ -9,16 +7,17 @@
 		'js/prenotazioni.js');
 	showHeader('Prenotazioni cogestione 2014', $css, $js);
 	
-	$db = initDB();
-	printTimeBox($db);
+	$configurator = Configurator::configurator();
+	$cogestione = new Cogestione();
+	printTimeBox();
 ?>
 
 <?php
 
 /* Ottiene i nomi delle colonne (blocchi) */
-$blocks = blocchi($db);
+$blocks = $cogestione->blocchi();
    
-if(inputValid($db)) {
+if(inputValid($cogestione)) {
     $name = $_GET['name'];
     $surname = $_GET['surname'];
     $class = $_GET['class'];
@@ -50,7 +49,7 @@ if(inputValid($db)) {
     /* Ripete per ogni blocco */
     foreach($blocks as $i => $b) {
         $selectedActivity = intval($_GET['block_' . $i]);
-        $activityRow = getActivityInfo($db, $selectedActivity);
+        $activityRow = $cogestione->getActivityInfo($selectedActivity);
         
         /* Verifico se l'attività è coerente con il blocco */
         if($activityRow['activity_time'] != $i) {
@@ -71,20 +70,20 @@ if(inputValid($db)) {
         $riepilogo .= "\n<td><div class=\"activity\">" . htmlentities($activityRow['activity_title']) . ($pieno ? ' <b>[Pieno!]</b>':'') . '</div></td>';
     }
     $riepilogo .= '</tr></table>';
-    if(!isEnabled()) {
+    if(!$configurator->isEnabled()) {
         printError('Le prenotazioni sono chiuse!');
     } else if($pieno) {
         printError('Alcune delle attività selezionate sono troppo affollate. Rifai!');
     } else if ($vm) {
         printError('Alcune delle attività selezionate sono riservate a quarte e quinte. Rifai!');
-    } else if (isSubscribed($db, $name, $surname, $class)) {
+    } else if ($cogestione->isSubscribed($name, $surname, $class)) {
         printError('Ti sei già iscritto!');
     } else if(!$correctBlocks) {
     	printError('Alcune delle attività scelte non sono coerenti con i blocchi.');
     } else {
     	/* Controlli passati. L'utente può iscriversi. */
         echo $riepilogo;
-    	inserisciPrenotazione($db, $name, $surname, $class, $inserts);    
+    	$cogestione->inserisciPrenotazione($name, $surname, $class, $inserts);    
         echo "<p>I dati sono stati registrati con successo.</p>";
     }
     
@@ -114,19 +113,18 @@ if(inputValid($db)) {
         printError('Non hai compilato correttamente tutti i campi. Riprova.');
     }
     
-    printForm($db);
+    printForm($cogestione);
 }
 
-$db->close();
 showFooter('ca-nstab-prenota');
 
 /* end main */
 
-function inputValid($db) {
+function inputValid($cogestione) {
 	$validated = FALSE;
 	
-	$blocks = blocchi($db);
-	$classi = classi($db);
+	$blocks = $cogestione->blocchi();
+	$classi = $cogestione->classi();
 
 	if(isset($_GET['class'])) {
 		$validated = TRUE;
@@ -150,7 +148,9 @@ function inputValid($db) {
 	return $validated;
 }
 
-function printForm($db) {
+function printForm($cogestione) {
+
+	$configurator = Configurator::configurator();
 	/* Stampa il form */
 	
 	echo  '<form action="'. $_SERVER['PHP_SELF'] . '" method="get" autocomplete="off">
@@ -167,22 +167,22 @@ function printForm($db) {
             <td><label for="class">Classe: </label></td>
             <td>';       
     
-    printClassSelector($db);
+    printClassSelector($cogestione);
     
     echo "\n</td></tr>";
     echo '<tr>
     	<td colspan="2">
-    	<input id="submit" type="submit" name="submit" value="Conferma" ' . (isEnabled() ? '' : 'disabled') . ' />
+    	<input id="submit" type="submit" name="submit" value="Conferma" ' . ($configurator->isEnabled() ? '' : 'disabled') . ' />
     	</td></tr>
     	</table>' . "\n";
     
-    printActivityTable($db);
+    printActivityTable($cogestione);
     
     echo '</form>';
 }
 
-function printClassSelector($db) {
-	$classi = classi($db);
+function printClassSelector($cogestione) {
+	$classi = $cogestione->classi();
 	
 	echo '<select class="iField" name="class" id="class" onchange="getClassAndToggle(this)" required>
             <option value="" disabled selected>Seleziona la classe</option>';
@@ -199,9 +199,9 @@ function printClassSelector($db) {
     echo "\n</select>";
 }
 
-function printActivityTable($db) {
+function printActivityTable($cogestione) {
     /* Stampa la griglia */
-    $blocks = blocchi($db);
+    $blocks = $cogestione->blocchi();
     echo '<table id="ActivityTable">';
     /* Intestazione con blocchi */
     echo '<tr>';
@@ -212,7 +212,7 @@ function printActivityTable($db) {
     /* Procede colonna per colonna */
     foreach($blocks as $i => $b) {
         echo '<td>';
-        $activities = getActivitiesForBlock($db, $i);
+        $activities = $cogestione->getActivitiesForBlock($i);
         
         /* Stampa tutte le attività che si svolgono contemporaneamente */
         foreach($activities as $row) {
@@ -237,16 +237,17 @@ function printActivityTable($db) {
     echo '</tr></table>';
 }
 
-function printTimeBox($db) {
+function printTimeBox() {
 	/* Prints info on opening and closing times */
 	
 	echo '<div id="timeBox">';
-	$enabled = isEnabled();
+	$configurator = Configurator::configurator();
+	$enabled = $configurator->isEnabled();
 	
 	/* Ore di inizio e di fine */
 	$dtz = new DateTimeZone('Europe/Rome');
-	$beginTime = new DateTime(START_TIME, $dtz);
-	$endTime = new DateTime(END_TIME, $dtz);
+	$beginTime = new DateTime($configurator->getStartTime(), $dtz);
+	$endTime = new DateTime($configurator->getEndTime(), $dtz);
 
 	$now = new DateTime(null, $dtz);
 	

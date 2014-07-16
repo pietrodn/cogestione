@@ -1,19 +1,18 @@
 <?php
-require_once("functions.php");
-require("nav.php");
+require_once("common.php");
 $css = Array('css/StiliCogestione.css', 'css/elenchi.css');
 showHeader("Elenco prenotazioni cogestione", $css);
 
-$db = initDB();
+$cogestione = new Cogestione();
 
 // MAIN
 
-$blocks = blocchi($db);
-$classi = classi($db);
+$blocks = $cogestione->blocchi();
+$classi = $cogestione->classi();
 $validated = FALSE;
 
-$postiTot = getTotalSeats($db);
-$nPrenot = getSubscriptionsNumber($db);
+$postiTot = $cogestione->getTotalSeats();
+$nPrenot = $cogestione->getSubscriptionsNumber();
 echo '<p class="noprint">Numero di prenotazioni: '
 	. $nPrenot . '/' . $postiTot
 	. ' (' . round($nPrenot/$postiTot*100)
@@ -33,7 +32,7 @@ echo '<form class="noprint" action="'. $_SERVER['PHP_SELF'] . '" method="get">
 	'/></td></tr>
 	<tr><td><label for="class">Classe: </label></td>
 	<td><select class="iField" name="class" id="class">
-	<option value="" disabled selected>Seleziona la classe</option>';
+	<option value="" selected>Tutte le classi</option>';
 	
 // Selettore classe	   
 foreach($classi as $cl) {
@@ -55,7 +54,7 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 {
 	// Visualizza elenco partecipanti
 	$activity = intval($_GET['activity']);
-	$aRow = getActivityInfo($db, $activity);
+	$aRow = $cogestione->getActivityInfo($activity);
 	echo "\n<h2>" . htmlspecialchars($blocks[$aRow['activity_time']]) . ' – ' . htmlspecialchars($aRow['activity_title']) . '</h2>';
 	echo "\n<div id=\"output\">\nAttività: <b>" . htmlspecialchars($aRow['activity_title'])
 		. "</b>.\n<br />Descrizione: <br /><div class=\"descriptionBox\">" . $aRow['activity_description']
@@ -64,7 +63,7 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 	
 	if($aRow['prenotati']>0)
 	{	
-		$user_list = getUsersForActivity($db, $activity);
+		$user_list = $cogestione->getUsersForActivity($activity);
 								
 		echo "<br />Elenco dei partecipanti:\n
 			<ol id=\"partecipanti\">";
@@ -82,11 +81,11 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 	echo "\n</div>";
 	
 } else if(isset($_GET['cercastud'])
-	AND (isset($_GET['name']) OR isset($_GET['surname']) OR isset($_GET['class']))) {
+	AND (!empty($_GET['name']) OR !empty($_GET['surname']) OR !empty($_GET['class']))) {
 		
 	// Se si cerca uno studente
 	
-	$studenti = findUser($db, $_GET['name'], $_GET['surname'], $_GET['class']);
+	$studenti = $cogestione->findUser($_GET['name'], $_GET['surname'], $_GET['class']);
 	
 	if(count($studenti)) {
 		$riepilogo = '';
@@ -103,12 +102,9 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 			$riepilogo .= "\n<td>" . htmlspecialchars($row['user_surname']) . '</td>';
 			$riepilogo .= "\n<td>" . htmlspecialchars($row['user_class']) . '</td>';
 			
-			$studentName = $db->real_escape_string($row['user_name']);
-			$studentSurname = $db->real_escape_string($row['user_surname']);
-			$studentClass = $db->real_escape_string($row['user_class']);
 			$studentId = intval($row['user_id']);
 			
-			$prenotazione = getReservationsForUser($db, $studentId);
+			$prenotazione = $cogestione->getReservationsForUser($studentId);
 			
 			foreach($blocks as $i => $b) {
 				$riepilogo .= "\n<td>" . htmlspecialchars($prenotazione[$i]) . '</td>';
@@ -133,7 +129,7 @@ foreach($blocks as $b) {
 echo "\n</tr><tr>";
 foreach($blocks as $i => $b) {
 	echo '<td>';
-	$activities = getActivitiesForBlock($db, $i);
+	$activities = $cogestione->getActivitiesForBlock($i);
 	foreach($activities as $row) {
 		$url = $_SERVER['PHP_SELF'] . '?activity=' . intval($row['activity_id']);
 		echo "\n<div class=\"activity\"><span class=\"posti\">[" . intval($row['prenotati']) . ($row['activity_size']!=0?'/' . intval($row['activity_size']):'') . "]</span> 
@@ -144,5 +140,4 @@ foreach($blocks as $i => $b) {
 }
 echo '</tr></table>';
 showFooter('ca-nstab-elenchi');
-$db->close();
 ?>
