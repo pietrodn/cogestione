@@ -57,8 +57,13 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 	$aRow = $cogestione->getActivityInfo($activity);
 	echo "\n<h2>" . htmlspecialchars($blocks[$aRow['activity_time']]) . ' – ' . htmlspecialchars($aRow['activity_title']) . '</h2>';
 	echo "\n<div id=\"output\">\nAttività: <b>" . htmlspecialchars($aRow['activity_title'])
-		. "</b>.\n<br />Descrizione: <br /><div class=\"descriptionBox\">" . $aRow['activity_description']
-		. "</div>\n<br />Quando: <b>" . htmlspecialchars($blocks[$aRow['activity_time']])
+		. "</b>.\n";
+	if ($aRow['activity_description']) {
+		echo "<br />Descrizione: <br />
+		<div class=\"descriptionBox\">" . $aRow['activity_description'] . "
+		</div>";
+	}
+	echo "\n<br />Quando: <b>" . htmlspecialchars($blocks[$aRow['activity_time']])
 		. "</b>\n<br />Partecipanti: <b>" . intval($aRow['prenotati']) . ($aRow['activity_size'] ? '/' . intval($aRow['activity_size']) : '') . '</b>';
 	
 	if($aRow['prenotati']>0)
