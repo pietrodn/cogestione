@@ -31,6 +31,8 @@ class Database {
 	}
 	
 	public function query($query) {
+		// Extreme debugging
+		// echo $query;
 		$res = $this->db->query($query) or die($this->db->error);
 		
 		if($res === TRUE) {

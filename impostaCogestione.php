@@ -14,27 +14,31 @@ if(isset($_POST['confermaTutto'])) {
 		$activities = $bl = $deleteAct = $deleteBlocks = Array();
 		
 		// Escaping dati attività
-		foreach($_POST['activity'] as $act) {
-			if(!empty($act['id'])) {
-				$id = intval($act['id']);
-				$activities[$id]['block'] = intval($act['block']);
-				$activities[$id]['max'] = intval($act['max']);
-				$activities[$id]['title'] = htmlspecialchars_decode($act['title'], ENT_QUOTES);
-				$activities[$id]['vm'] = intval(!empty($act['vm']));
-				$activities[$id]['description'] = htmlspecialchars_decode($act['description'], ENT_QUOTES);
-				if(!empty($act['delete']))
-					$deleteAct[] = $id;
+		if(isset($_POST['activity'])) {
+			foreach($_POST['activity'] as $act) {
+				if(!empty($act['id'])) {
+					$id = intval($act['id']);
+					$activities[$id]['block'] = intval($act['block']);
+					$activities[$id]['max'] = intval($act['max']);
+					$activities[$id]['title'] = htmlspecialchars_decode($act['title'], ENT_QUOTES);
+					$activities[$id]['vm'] = intval(!empty($act['vm']));
+					$activities[$id]['description'] = htmlspecialchars_decode($act['description'], ENT_QUOTES);
+					if(!empty($act['delete']))
+						$deleteAct[] = $id;
+				}
 			}
 		}
 		
 		// Escaping dati blocchi
-		foreach($_POST['block'] as $b) {
-			if(!empty($b['id'])) {
-				$id = intval($b['id']);
-				$bl[$id]['title'] = htmlspecialchars_decode($b['title'], ENT_QUOTES);
-				$bl[$id]['newRows'] = intval($b['newRows']);
-				if(!empty($b['delete']))
-					$deleteBlocks[] = $id;
+		if(isset($_POST['block'])) {
+			foreach($_POST['block'] as $b) {
+				if(!empty($b['id'])) {
+					$id = intval($b['id']);
+					$bl[$id]['title'] = htmlspecialchars_decode($b['title'], ENT_QUOTES);
+					$bl[$id]['newRows'] = intval($b['newRows']);
+					if(!empty($b['delete']))
+						$deleteBlocks[] = $id;
+				}
 			}
 		}
 		
@@ -45,7 +49,7 @@ if(isset($_POST['confermaTutto'])) {
 		foreach($activities as $id => $in) {
 			if(in_array($id, $deleteAct))
 				continue;
-			$cogestione->replaceActivity($id, $in['block'], $in['max'], $in['title'], $in['vm'], $in['description']);
+			$cogestione->updateActivity($id, $in['block'], $in['max'], $in['title'], $in['vm'], $in['description']);
 		}
 		
 		// Cancella i blocchi da cancellare
@@ -55,7 +59,7 @@ if(isset($_POST['confermaTutto'])) {
 		foreach($bl as $k => $b) {
 			if(in_array($k, $deleteBlocks))
 				continue;
-			$cogestione->replaceBlock(intval($k), $b['title']);
+			$cogestione->updateBlock(intval($k), $b['title']);
 			
 			// Nuove righe attività
 			if($b['newRows']>0) {
@@ -66,10 +70,6 @@ if(isset($_POST['confermaTutto'])) {
 		// Nuovi blocchi
 		$newBlocks = intval($_POST['newBlocks']);
 		$cogestione->addNewBlocks($newBlocks);
-		
-		// Cleanup (order *is* important)
-		$cogestione->cleanOrphanActivities();
-		$cogestione->cleanOrphanPrenotations();
 			
 		printError('I dati sono stati registrati con successo.');
 		

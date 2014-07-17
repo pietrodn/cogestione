@@ -18,9 +18,9 @@
 $blocks = $cogestione->blocchi();
    
 if(inputValid($cogestione)) {
-    $name = $_GET['name'];
-    $surname = $_GET['surname'];
-    $class = $_GET['class'];
+    $name = $_POST['name'];
+    $surname = $_POST['surname'];
+    $class = $_POST['class'];
     $arrSplit = str_split($class, 1);
     
     /* La classe senza la sezione */
@@ -48,7 +48,7 @@ if(inputValid($cogestione)) {
     
     /* Ripete per ogni blocco */
     foreach($blocks as $i => $b) {
-        $selectedActivity = intval($_GET['block_' . $i]);
+        $selectedActivity = intval($_POST['block_' . $i]);
         $activityRow = $cogestione->getActivityInfo($selectedActivity);
         
         /* Verifico se l'attività è coerente con il blocco */
@@ -109,7 +109,7 @@ if(inputValid($cogestione)) {
 <p>In caso di difficoltà o di problemi con il sistema, contattare <a href="mailto:cogestione@cogestione2014.netsons.org">l'assistenza</a>.</p>
 </div>
 <?php
-    if(isset($_GET['submit'])) {
+    if(isset($_POST['submit'])) {
         printError('Non hai compilato correttamente tutti i campi. Riprova.');
     }
     
@@ -126,22 +126,22 @@ function inputValid($cogestione) {
 	$blocks = $cogestione->blocchi();
 	$classi = $cogestione->classi();
 
-	if(isset($_GET['class'])) {
+	if(isset($_POST['class'])) {
 		$validated = TRUE;
 	
 		/* Verifico la completezza dei dati */
-		if(empty($_GET['name']) || empty($_GET['surname']) || empty($_GET['class']))
+		if(empty($_POST['name']) || empty($_POST['surname']) || empty($_POST['class']))
 			$validated = FALSE;
 	
 		/* L'utente deve aver prenotato tutti i blocchi */
 		foreach($blocks as $i => $b)
 		{
-			if(!isset($_GET['block_' . $i]) || !is_numeric($_GET['block_' . $i]))
+			if(!isset($_POST['block_' . $i]) || !is_numeric($_POST['block_' . $i]))
 				$validated = FALSE;
 		}
 	
 		/* La classe deve essere in elenco */
-		if(!in_array($_GET['class'], $classi))
+		if(!in_array($_POST['class'], $classi))
 			$validated = FALSE;
 	}
 	
@@ -153,7 +153,7 @@ function printForm($cogestione) {
 	$configurator = Configurator::configurator();
 	/* Stampa il form */
 	
-	echo  '<form action="'. $_SERVER['PHP_SELF'] . '" method="get" autocomplete="off">
+	echo  '<form action="'. $_SERVER['PHP_SELF'] . '" method="post" autocomplete="off">
 			<table id="fieldTable">
             <tr>
             <td><label for="name">Nome: </label></td>
@@ -189,7 +189,7 @@ function printClassSelector($cogestione) {
     
     // Selettore classe       
     foreach($classi as $cl) {
-    	if(isset($_GET['class']) && $cl == $_GET['class'])
+    	if(isset($_POST['class']) && $cl == $_POST['class'])
     		$selected = 'selected';
     	else
     		$selected = '';

@@ -224,17 +224,7 @@ class Cogestione {
 		}
 	}
 
-	public function cleanOrphanActivities() {
-		// Elimina le attività che non si trovano in nessun blocco
-		$res = $this->db->query('DELETE FROM activity
-			WHERE activity_time NOT IN (
-				SELECT DISTINCT block_id
-				FROM block );');
-		return $res;
-	}
-
 	public function deleteBlocks($ids) {
-		// Cancella i blocchi da cancellare
 		if(count($ids)>0) {
 			$deleteString = '(' . implode(', ', $ids) . ')';
 			$query = "DELETE FROM block
@@ -245,7 +235,6 @@ class Cogestione {
 	}
 
 	public function deleteActivities($ids) {
-		// Cancella le attività da cancellare
 		if(count($ids)>0) {
 			$deleteString = '(' . implode(', ', $ids) . ')';
 			$query = "DELETE FROM activity
@@ -255,43 +244,33 @@ class Cogestione {
 		}
 	}
 
-	public function replaceActivity($act_id, $act_time, $act_size, $act_title, $act_vm, $act_description) {
+	public function updateActivity($act_id, $act_time, $act_size, $act_title, $act_vm, $act_description) {
 		// Replaces the activity associated with the id $act_id with the new values.
-		$query = "REPLACE INTO activity (activity_id, activity_time, activity_size, activity_title, activity_vm, activity_description) VALUES ("
-			. intval($act_id) . ','
-			. intval($act_time) . ','
-			. intval($act_size) . ','
-			. "'" . $this->db->escape($act_title) . "', "
-			. intval($act_vm) . ','
-			. "'" . $this->db->escape($act_description) . "'"
-			. ');';
-			$res = $this->db->query($query);
-			return $res;
+		$query = "UPDATE activity SET "
+			. 'activity_time = ' . intval($act_time) . ', '
+			. 'activity_size = ' . intval($act_size) . ', '
+			. "activity_title = '" . $this->db->escape($act_title) . "', "
+			. 'activity_vm = ' . intval($act_vm) . ', '
+			. "activity_description = '" . $this->db->escape($act_description) . "' "
+			. ' WHERE activity_id = ' . intval($act_id) . ';';
+		$res = $this->db->query($query);
+		return $res;
 	}
 
-	public function replaceBlock($blk_id, $blk_title) {
+	public function updateBlock($blk_id, $blk_title) {
 		// Replaces the title of block $blk_id.
-		$query = "REPLACE INTO block (block_id, block_title) VALUES ("
-			. "'" . intval($blk_id) . "', "
-			. "'" . $this->db->escape($blk_title) . "'"
-			. ');';
+		$query = "UPDATE block SET "
+			. "block_title = '" . $this->db->escape($blk_title) . "' "
+			. "WHERE block_id = " . intval($blk_id)
+			. ';';
 		$res = $this->db->query($query);
 		return $res;
 	}
 
 	public function clearReservations() {
-		$this->db->query("TRUNCATE TABLE user;");
-		$this->db->query("TRUNCATE TABLE prenotazioni;");
-		$this->db->query("TRUNCATE TABLE prenotazioni_attivita;");
-	}
-
-	public function cleanOrphanPrenotations() {
-		// Elimina le prenotazioni riferite ad attività inesistenti
-		$res = $this->db->query('DELETE FROM prenotazioni_attivita
-				WHERE prenact_activity NOT IN (
-				SELECT DISTINCT activity_id
-				FROM activity );');
-		return $res;
+		// Deletes all rows. Doesn't use TRUNCATE TABLE because of foreign keys.
+		// This also deletes rows from "prenotazioni" and "prenotazioni_attivita", automatically.
+		$this->db->query("DELETE FROM user;");
 	}
 
 }
