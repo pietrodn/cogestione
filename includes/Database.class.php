@@ -35,7 +35,7 @@ class Database {
 		// echo $query;
 		$res = $this->db->query($query) or die($this->db->error);
 		
-		if($res === TRUE) {
+		if($res === TRUE || res === FALSE) {
 			return $res;
 		} else {
 			$rows = Array();

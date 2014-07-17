@@ -73,9 +73,27 @@ if(isset($_POST['confermaTutto'])) {
 			
 		printError('I dati sono stati registrati con successo.');
 		
+		/* Cancellazione di tutte le prenotazioni */
 		if(isset($_POST['confermaTruncate'])) {
 			$cogestione->clearReservations();
 			echo printError('Prenotazioni cancellate.');
+		}
+		
+		/* Cancellazione di un utente singolo */
+		if(isset($_POST['uid_delete'])) {
+			$uid = intval($_POST['uid_delete']);
+			$uInfo = $cogestione->getUser($uid);
+			if($uInfo !== FALSE) {
+				$result = $cogestione->deleteUser($uid);
+				if($result === TRUE) {
+					printError("L'utente " . $uInfo['user_name'] . " " . $uInfo['user_surname']
+					. " ($uid) è stato eliminato con successo.");
+				} else {
+					printError("L'utente $uid non ha potuto essere eliminato.");
+				}
+			} else {
+				printError("L'utente con UID $uid non esiste!");
+			}
 		}
 	} else {
 		printError('Autenticazione fallita! Capra!');
@@ -118,12 +136,28 @@ Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo 
 <label for="password">Password: </label><input type="password" name="password" id="password" size="20" placeholder="password" />
 </fieldset>
 <fieldset id="truncateField" style="width:50%; min-height:50px; padding:10px;">
-<label style="width:50%; display:block; float:left;">
+<table>
+<label for="confermaTruncate">
+<tr>
+<td>
 <?php
 	echo 'Ci sono <b>' . $cogestione->getSubscriptionsNumber() . ' prenotazioni</b> effettuate.';
 ?> Se vuoi cancellarle, spunta la casella.
-I dati non potranno essere recuperati.</label>
-<input type="checkbox" name="confermaTruncate" value="Cancella prenotazioni" />
+I dati non potranno essere recuperati.</label></td>
+<td>
+<input type="checkbox" name="confermaTruncate" id="confermaTruncate" value="Cancella prenotazioni" />
+</td>
+</tr>
+<tr>
+<td>
+<label for="uid_delete">
+Elimina una singola prenotazione inserendone l'UID:</label>
+</td>
+<td>
+<input type="text" name="uid_delete" id="uid_delete" size="20" placeholder="123" />
+</td>
+</tr>
+</table>
 </fieldset>
 
 <?php

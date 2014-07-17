@@ -90,7 +90,7 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 	if(count($studenti)) {
 		$riepilogo = '';
 		$riepilogo .= '<table id="ActivityTable">';
-		$riepilogo .= '<tr><th>Nome</th><th>Cognome</th><th>Classe</th>';
+		$riepilogo .= '<tr><th>UID</th><th>Nome</th><th>Cognome</th><th>Classe</th>';
 		foreach($blocks as $blockTitle) {
 			$blockTitle = htmlspecialchars($blockTitle);
 			$riepilogo .= "\n<th>$blockTitle</th>";
@@ -98,6 +98,7 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 		$riepilogo .= "\n</tr>";
 		foreach($studenti as $row) {
 			$riepilogo .= "\n<tr>";
+			$riepilogo .= "\n<td>" . htmlspecialchars($row['user_id']) . '</td>';
 			$riepilogo .= "\n<td>" . htmlspecialchars($row['user_name']) . '</td>';
 			$riepilogo .= "\n<td>" . htmlspecialchars($row['user_surname']) . '</td>';
 			$riepilogo .= "\n<td>" . htmlspecialchars($row['user_class']) . '</td>';

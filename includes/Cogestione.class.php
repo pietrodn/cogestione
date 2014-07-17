@@ -134,6 +134,10 @@ class Cogestione {
 			$res = $this->db->query("INSERT INTO prenotazioni_attivita (prenact_prenotation, prenact_activity)
 				VALUES ('$pren_id', '$attivita_id');");
 		}
+		
+		$res = $this->db->query("UPDATE user SET
+			user_pren_latest = " . $pren_id . "
+			WHERE user_id = " . $user_id . ";");
 	}
 
 	public function getReservationsForUser($userId) {
@@ -187,7 +191,18 @@ class Cogestione {
 			ORDER BY CONCAT(user_surname, user_name);");
 	
 		return $res;
-	}	
+	}
+	
+	public function getUser($user_id) {
+		$res = $this->db->query("SELECT DISTINCT user_id, user_name, user_surname, user_class
+			FROM user
+			WHERE user_id = " . intval($user_id) . "
+			LIMIT 1;");
+		if(count($res) == 0) {
+			return FALSE;
+		}
+		return $res[0];
+	}
 	
 	public function activityOkForClass($activity_id, $class_n) {
 		$act_info = $this->getActivityInfo($activity_id);
@@ -270,7 +285,14 @@ class Cogestione {
 	public function clearReservations() {
 		// Deletes all rows. Doesn't use TRUNCATE TABLE because of foreign keys.
 		// This also deletes rows from "prenotazioni" and "prenotazioni_attivita", automatically.
-		$this->db->query("DELETE FROM user;");
+		$res = $this->db->query("DELETE FROM user;");
+		return $res;
+	}
+	
+	public function deleteUser($uid) {
+		$res = $this->db->query("DELETE FROM user
+								WHERE user_id = " . intval($uid) . ";");
+		return $res;
 	}
 
 }
