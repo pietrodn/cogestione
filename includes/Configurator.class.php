@@ -7,17 +7,40 @@ class Configurator {
 	private $startTime;
 	private $endTime;
 	
+	private $db;
+	
 	static protected $instance = null;
 	
 	private function __construct() {
 		/* Loads parameters from configuration file */
 		require('config.php');
 		
-		$this->manualMode = $cgManual;
-		$this->manualOn = $cgManualEnabled;
-		$this->startTime = $cgStartTime;
-		$this->endTime = $cgEndTime;
+		$this->db = Database::database();
+		
 		$this->coge_users = $cgUsers;
+		$this->loadFromDb();
+	}
+	
+	private function loadFromDb() {
+		$res = $this->db->query("SELECT * FROM config;");
+		$kvConf = Array();
+		foreach($res as $row) {
+			$kvConf[$row['config_key']] = $row['config_value'];
+		}
+		
+		if(isset($kvConf['manualMode'])) {
+			$this->manualMode = (bool)$kvConf['manualMode'];
+		}
+		if(isset($kvConf['manualOn'])) {
+			$this->manualOn = (bool)$kvConf['manualOn'];
+		}
+		if(isset($kvConf['startTime'])) {
+			$this->startTime = $kvConf['startTime'];
+		}
+		if(isset($kvConf['endTime'])) {
+			$this->endTime = $kvConf['endTime'];
+		}
+	
 	}
 	
 	public static function configurator() {
@@ -60,6 +83,50 @@ class Configurator {
 	
 	public function getEndTime() {
 		return $this->endTime;
+	}
+	
+	public function getManualMode() {
+		return $this->manualMode;
+	}
+	
+	public function getManualOn() {
+		return $this->manualOn;
+	}
+	
+	public function setManualMode($on) {
+		if($on != $this->manualMode) {
+			$this->manualMode = (bool)$on;
+			$this->db->query("REPLACE config SET
+							config_value = " . intval($this->manualMode) . ", 
+							config_key = 'manualMode'");
+		}
+	}
+	
+	public function setManualOn($on) {
+		if($on != $this->manualOn) {
+			$this->manualOn = (bool)$on;
+			$this->db->query("REPLACE config SET
+							config_value = " . intval($this->manualOn) . ", 
+							config_key = 'manualOn'");
+		}
+	}
+	
+	public function setStartTime($time) {
+		if($time != $this->startTime) {
+			$this->startTime = $time;
+			$this->db->query("REPLACE config SET
+							config_value = '" . $this->db->escape($this->startTime) . "', 
+							config_key = 'startTime'");
+		}
+	}
+	
+	public function setEndTime($time) {
+		if($time != $this->endTime) {
+			$this->endTime = $time;
+			$this->db->query("REPLACE config SET
+							config_value = '" . $this->db->escape($this->endTime) . "', 
+							config_key = 'endTime'");
+		}
 	}
 
 }

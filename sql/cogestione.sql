@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Lug 17, 2014 alle 15:29
+-- Generation Time: Lug 17, 2014 alle 17:03
 -- Versione del server: 5.6.15
 -- PHP Version: 5.4.24
 
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `activity` (
   `activity_description` text,
   UNIQUE KEY `id` (`activity_id`),
   KEY `activity_time` (`activity_time`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=115 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS `block` (
   `block_id` int(11) NOT NULL AUTO_INCREMENT,
   `block_title` tinytext NOT NULL,
   PRIMARY KEY (`block_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=6 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -63,6 +63,18 @@ CREATE TABLE IF NOT EXISTS `class` (
 -- --------------------------------------------------------
 
 --
+-- Struttura della tabella `config`
+--
+
+CREATE TABLE IF NOT EXISTS `config` (
+  `config_key` varchar(255) NOT NULL,
+  `config_value` text NOT NULL,
+  PRIMARY KEY (`config_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Struttura della tabella `prenotazioni`
 --
 
@@ -72,7 +84,7 @@ CREATE TABLE IF NOT EXISTS `prenotazioni` (
   `pren_user` int(11) NOT NULL,
   PRIMARY KEY (`pren_id`),
   KEY `pren_user` (`pren_user`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=14 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -87,7 +99,7 @@ CREATE TABLE IF NOT EXISTS `prenotazioni_attivita` (
   PRIMARY KEY (`prenact_id`),
   KEY `prenact_prenotation` (`prenact_prenotation`),
   KEY `prenact_activity` (`prenact_activity`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=37 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -104,7 +116,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   PRIMARY KEY (`user_id`),
   KEY `user_class` (`user_class`),
   KEY `user_pren_latest` (`user_pren_latest`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=14 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 --
 -- Limiti per le tabelle scaricate

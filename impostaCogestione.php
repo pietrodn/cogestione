@@ -1,7 +1,7 @@
 <?php
 require_once("common.php");
 $css = Array('css/StiliCogestione.css');
-$js = Array('http://code.jquery.com/jquery-1.10.2.min.js');
+$js = Array('//code.jquery.com/jquery-1.10.2.min.js');
 
 showHeader("Impostazioni cogestione", $css, $js);
 
@@ -80,7 +80,7 @@ if(isset($_POST['confermaTutto'])) {
 		}
 		
 		/* Cancellazione di un utente singolo */
-		if(isset($_POST['uid_delete'])) {
+		if(isset($_POST['uid_delete']) && $_POST['uid_delete']) {
 			$uid = intval($_POST['uid_delete']);
 			$uInfo = $cogestione->getUser($uid);
 			if($uInfo !== FALSE) {
@@ -94,6 +94,23 @@ if(isset($_POST['confermaTutto'])) {
 			} else {
 				printError("L'utente con UID $uid non esiste!");
 			}
+		}
+		
+		/* Manual mode */
+		if(isset($_POST['autoEnable'])) {
+			$configurator->setManualMode(!(bool)$_POST['autoEnable']);
+		}
+		
+		if(isset($_POST['manualOn'])) {
+			$configurator->setManualOn((bool)$_POST['manualOn']);
+		}
+		
+		/* Start and end times */
+		if(isset($_POST['startTime'])) {
+			$configurator->setStartTime($_POST['startTime']);
+		}
+		if(isset($_POST['endTime'])) {
+			$configurator->setEndTime($_POST['endTime']);
 		}
 	} else {
 		printError('Autenticazione fallita! Capra!');
@@ -134,6 +151,20 @@ Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo 
 <p>Per effettuare modifiche al software devi autenticarti.</p>
 <label for="username">Username: </label><input type="text" name="username" id="username" size="20" placeholder="utente" /><br />
 <label for="password">Password: </label><input type="password" name="password" id="password" size="20" placeholder="password" />
+</fieldset>
+<fieldset style="width: 50%;">
+<p>
+<b>Abilitazione delle prenotazioni.</b>
+</p>
+<input type="radio" name="autoEnable" value="1" <?php if(!$configurator->getManualMode()) echo "checked"; ?> />Automatica
+<input type="radio" name="autoEnable" value="0" <?php if($configurator->getManualMode()) echo "checked"; ?> />Manuale<br />
+Date inizio e fine (solo modalità automatica):<br />
+<input type="datetime-local" name="startTime" value="<?php echo $configurator->getStartTime();?>" />
+<input type="datetime-local" name="endTime" value="<?php echo $configurator->getEndTime();?>" />
+<br />
+Switch on/off (solo modalità manuale):
+<input type="radio" name="manualOn" value="1" <?php if($configurator->getManualOn()) echo "checked"; ?> />On
+<input type="radio" name="manualOn" value="0" <?php if(!$configurator->getManualOn()) echo "checked"; ?> />Off<br />
 </fieldset>
 <fieldset id="truncateField" style="width:50%; min-height:50px; padding:10px;">
 <table>
@@ -214,7 +245,7 @@ foreach($blocks as $i => $title) {
 }
 
 echo "</tr></table>\n";
-echo '<input type="submit" name="confermaTutto" value="Salva modifiche orario" />' . "\n";
+echo '<input type="submit" name="confermaTutto" value="Salva modifiche" />' . "\n";
 echo "</form>\n";
 
 showFooter('ca-nstab-imposta');
