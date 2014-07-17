@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Lug 17, 2014 alle 14:39
+-- Generation Time: Lug 17, 2014 alle 15:29
 -- Versione del server: 5.6.15
 -- PHP Version: 5.4.24
 
@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS `prenotazioni` (
   `pren_user` int(11) NOT NULL,
   PRIMARY KEY (`pren_id`),
   KEY `pren_user` (`pren_user`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=8 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=14 ;
 
 -- --------------------------------------------------------
 
@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS `prenotazioni_attivita` (
   PRIMARY KEY (`prenact_id`),
   KEY `prenact_prenotation` (`prenact_prenotation`),
   KEY `prenact_activity` (`prenact_activity`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=19 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=37 ;
 
 -- --------------------------------------------------------
 
@@ -100,9 +100,11 @@ CREATE TABLE IF NOT EXISTS `user` (
   `user_name` tinytext NOT NULL,
   `user_surname` tinytext NOT NULL,
   `user_class` varchar(20) NOT NULL,
+  `user_pren_latest` int(11) DEFAULT NULL,
   PRIMARY KEY (`user_id`),
-  KEY `user_class` (`user_class`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=8 ;
+  KEY `user_class` (`user_class`),
+  KEY `user_pren_latest` (`user_pren_latest`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=14 ;
 
 --
 -- Limiti per le tabelle scaricate
@@ -131,6 +133,7 @@ ALTER TABLE `prenotazioni_attivita`
 -- Limiti per la tabella `user`
 --
 ALTER TABLE `user`
+  ADD CONSTRAINT `user_pren_latest` FOREIGN KEY (`user_pren_latest`) REFERENCES `prenotazioni` (`pren_id`) ON DELETE SET NULL ON UPDATE SET NULL,
   ADD CONSTRAINT `user_class` FOREIGN KEY (`user_class`) REFERENCES `class` (`class_name`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
