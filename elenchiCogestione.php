@@ -44,7 +44,7 @@ echo '<div class="panel panel-default noprint">
   <h3 class="panel-title">Cerca uno studente per visualizzare la sua prenotazione</h3>
   </div>
   <div class="panel-body">';
-echo '<form class="form-inline" role="form" class="noprint" action="'. $_SERVER['PHP_SELF'] . '" method="get" style="margin-bottom: 10px;">
+echo '<form class="form-inline noprint" role="form" action="'. $_SERVER['PHP_SELF'] . '" method="get" style="margin-bottom: 10px;">
 	<fieldset>
 	<div class="form-group">
 	<label for="name" class="sr-only">Nome: </label>
@@ -117,8 +117,8 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 		. "</b>.\n";
 	if ($aRow['activity_description']) {
 		echo "<br />Descrizione: <br />
-		<div class=\"descriptionBox\">" . $aRow['activity_description'] . "
-		</div>";
+		<blockquote>" . $aRow['activity_description'] . "
+		</blockquote>";
 	}
 	echo "\n<br />Quando: <b>" . htmlspecialchars($blocks[$aRow['activity_time']])
 		. "</b>\n<br />Partecipanti: <b>" . intval($aRow['prenotati']) . ($aRow['activity_size'] ? '/' . intval($aRow['activity_size']) : '') . '</b>';

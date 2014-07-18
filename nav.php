@@ -83,8 +83,7 @@ function showHeader($selectedId='', $title, $cssFiles=Array(), $jsFiles=Array())
 					<img id="wikitech-logo" class="media-object" src="images/Wiki.png" alt="Einsteinwiki">
 				</a>-->
 				<div class="media-body">
-					<h1><?php echo htmlentities($title) ?>
-					</h1>
+					<h1><?php echo htmlentities($title) ?></h1>
 				</div>
 			</div>
 			<!-- start content -->
@@ -96,7 +95,8 @@ function showFooter()
 
 ?>
 		</div>
-	</body>
+	</div>
+</body>
 </html>
 <?php
 }

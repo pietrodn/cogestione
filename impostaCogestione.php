@@ -257,11 +257,11 @@ Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo 
 	<div class="panel-body">
 		<label>Aggiungi <input type="number" min="0" name="newBlocks" value="0" /> nuovi blocchi</label>
 		<table id="ActivityTable" class="table table-bordered">
+			<tr>
 <?php
 /* Intestazione con blocchi */
 /* Ottiene i nomi delle colonne (blocchi) */
 $blocks = $cogestione->blocchi();
-echo '<tr>';
 foreach($blocks as $id => $b) {
 	$id = intval($id);
 	echo "\n<th class=\"active\">"
@@ -293,7 +293,7 @@ foreach($blocks as $i => $b) {
 			. "<label for=\"activity-delete-$id\">"
 			. "<input id=\"activity-delete-$id\" name=\"activity[$id][delete]\" type=\"checkbox\" />"
 			. "DEL</label></span>"
-			. "<input class=\"form-control\" type=\"text\" class=\"activity-set-title\" id=\"activity-title-$id\" name=\"activity[$id][title]\" value=\"$title\" /><br />\n"
+			. "<input class=\"form-control activity-set-title\" type=\"text\" id=\"activity-title-$id\" name=\"activity[$id][title]\" value=\"$title\" /><br />\n"
 			. "</div>"
 			. '<div class="input-group activity-size">'
 			. '<span class="checkbox input-group-addon">'
@@ -321,7 +321,6 @@ foreach($blocks as $i => $title) {
 </tr>
 </table>
 <button class="btn btn-primary" type="submit" name="submitActivities">Modifica attività</button>
-</li>
 </div>
 </div>
 </form>

@@ -226,9 +226,9 @@ function printActivityTable($cogestione) {
             	. '<label for="activity_' . intval($row['activity_id']). '" '
             	. ' class="popover_activity" data-toggle="popover"'
             	. " title=\"" . htmlspecialchars($row['activity_title']) . "\">"
-            	. '<div class="description-wrapper">'
+            	. '<span class="description-wrapper">'
             	. $row['activity_description']
-            	. '</div>'
+            	. '</span>'
             	. '<input type="radio" name="block_' . $i . '" value="'
                 . intval($row['activity_id']) . '" id="activity_' . intval($row['activity_id']) . '"'
                 . ($full ? ' disabled ' : '')
