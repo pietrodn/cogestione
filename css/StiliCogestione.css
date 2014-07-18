@@ -3,85 +3,21 @@
    margin-bottom: 20px;
 }
 
-.activity-size {
-}
-/*
-.activity {
-   display:block;
-   position: relative;
-   font-size:90%;
-   padding:5px 0;
-   padding-left: 22px;
-   text-indent: -22px;
+.description-wrapper {
+	display: none;
 }
 
-
-
-.selectedActivity {
-	background-color: #FFCC66;
+.popover {
+	max-width: 400px;
 }
 
-.activity:not(.disabled):not(.selectedActivity):hover {
-	background-color: #FFCC33;
+.popover-title {
+	font-weight: bold;
 }
 
-.activity:hover .activity_description {
-	display: block;	
-}
-*/
 .posti {
    color: red;
 }
-/*
-div#timeBox {
-	border: 1px solid black;
-	width: 50%;
-	padding: 5px;
-	margin-top: 10px;
-}
-
-table#modeTable {
-	width:100%;
-}
-
-#modeField {
-	width:50%;
-	padding: 5px;
-	margin-bottom: 10px;
-}
-
-#graph {
-	float:left;
-	margin-right: 5px;
-}
-
-.hidden {
-	display:none;
-}
-
-.id-box {
-	display: block;
-	float:left;
-	color: gray;
-	min-width:2em;
-}
-
-#class {
-	width:100%;
-}
-
-#desc {
-	width: 60%;
-}
-
-input[type="number"] {
-	width: 3em;
-}
-
-input.activity-set-title {
-	width: 100%;
-}
-*/
 
 @media print {
 	.noprint {

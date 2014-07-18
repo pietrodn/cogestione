@@ -1,7 +1,7 @@
 <?php
 require_once("common.php");
 
-if(!isset($_SESSION['auth']) || !$_SESSION['auth']) {
+if(empty($_SESSION['auth'])) {
 	header('Location: ./login.php');
 	die();
 }

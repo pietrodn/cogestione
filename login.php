@@ -12,6 +12,7 @@ $configurator = Configurator::configurator();
 
 if(isset($_POST['login'])) {
 	if($configurator->isAuthenticated($_POST['username'], $_POST['password'])) {
+		session_regenerate_id(true);
 		$_SESSION['auth'] = TRUE;
 		$_SESSION['username'] = $_POST['username'];
 		header('Location: ./impostaCogestione.php');
@@ -20,7 +21,7 @@ if(isset($_POST['login'])) {
 	} else {
 		destroyLogin();
 		showHeader('ca-nstab-login', "Login", $css, $js);
-		authenticationFailed();
+		printError('Autenticazione fallita!');
 	}
 } else if (isset($_GET['logout'])) {
 	destroyLogin();
@@ -30,13 +31,10 @@ if(isset($_POST['login'])) {
 	showHeader('ca-nstab-login', "Login", $css, $js);
 }
 
-function authenticationFailed() {
-	printError('Autenticazione fallita!');
-}
-
 function destroyLogin() {
 	unset($_SESSION['auth']);
 	unset($_SESSION['username']);
+	session_regenerate_id(true);
 }  
 ?>
 

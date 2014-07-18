@@ -17,6 +17,10 @@ function toggleVm(classN) {
 	$('input[type="radio"]:disabled').prop('checked', false);
 }
 
+function getPopoverContent() {
+	var content = $(this).children('.description-wrapper').html();
+	return content;
+}
 
 $(function(){
 	/* Di default le attività "VM18" sono disattivate */
@@ -35,6 +39,7 @@ $(function(){
   		trigger: 'hover',
   		container: 'body',
   		html: true,
+  		content: getPopoverContent,
 	});
 });
 

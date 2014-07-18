@@ -96,10 +96,10 @@ if(inputValid($cogestione)) {
 <li><b>Leggi</b> le descrizioni delle attività e le aule in cui si svolgeranno passando il cursore del mouse sui titoli delle stesse.
 <li><b>Scegli con attenzione</b> le attività a cui vuoi prenotarti.
 <ul>
-<li>Per ogni colonna dovrai scegliere <b>una e una sola attività</b> (il numero <span class="posti">[n]</span> indica i posti rimasti).</li>
+<li>Per ogni colonna dovrai scegliere <b>una e una sola attività</b> (il numero <span class="text-danger">[n]</span> indica i posti rimasti).</li>
 <li>Le attività segnate con (<b>Q</b>) sono riservate alle classi <b>quarte e quinte</b>. Per selezionarle dovrai prima scegliere la classe.</li>
 <li>Se prevedi di essere <b>assente</b> per uno o più giorni, scegli l'apposita opzione: ricordati che dovrai comunque giustificare l'assenza secondo le modalità previste dal Regolamento di Istituto.</li>
-<li>Se non puoi scegliere un'attività, vuol dire che ci sono <span class="posti">[0]</span> posti rimasti oppure è riservata alle classi quarte e quinte.</li>
+<li>Se non puoi scegliere un'attività, vuol dire che ci sono <span class="text-danger">[0]</span> posti rimasti oppure è riservata alle classi quarte e quinte.</li>
 </ul>
 </li>
 <li><b>Ricontrolla: una volta che avrai confermato la prenotazione, non potrai cambiare idea!</b><br />Ogni richiesta in questo senso sarà respinta.</li>
@@ -222,20 +222,20 @@ function printActivityTable($cogestione) {
             $full = ($row['activity_size']!=0 && $row['prenotati']>=$row['activity_size']);
             
             echo "\n<div class=\"radio" 
-            	. ($full ? ' disabled' : '')
-            	. '">' . "\n"
-            	. '<label class="popover_activity" for="activity_' . intval($row['activity_id']) . '"'
-            	. " data-toggle=\"popover\""
-            	. " data-content=\"" . $row['activity_description'] . "\""
-            	. " title=\"" . htmlspecialchars($row['activity_title']) . "\""
-            	. '>'
+            	. ($full ? ' disabled' : '') . '">' . "\n"
+            	. '<label for="activity_' . intval($row['activity_id']). '" '
+            	. ' class="popover_activity" data-toggle="popover"'
+            	. " title=\"" . htmlspecialchars($row['activity_title']) . "\">"
+            	. '<div class="description-wrapper">'
+            	. $row['activity_description']
+            	. '</div>'
             	. '<input type="radio" name="block_' . $i . '" value="'
                 . intval($row['activity_id']) . '" id="activity_' . intval($row['activity_id']) . '"'
                 . ($full ? ' disabled ' : '')
                 . ' class="' . ($row['activity_vm'] ? 'vm' : '') . ($full ? ' full' : '') . '" ' 
                 . ' required />' . "\n"
-                . ($row['activity_size']!=0?'<span class="posti">['
-                . ($row['activity_size']-$row['prenotati']) . "]</span>\n":'')
+                . ($row['activity_size']!=0 ? '<span class="text-danger">['
+                . ($row['activity_size']-$row['prenotati']) . "]</span>\n" : '')
                 . htmlspecialchars($row['activity_title']) . "</label>"
                 . "</div>\n";
         }
