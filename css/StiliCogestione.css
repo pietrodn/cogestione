@@ -1,12 +1,14 @@
 .set-activity {
-   font-size:90%;
    margin-bottom: 20px;
 }
 
-.description-wrapper {
-	display: none;
+@media print {
+	.noprint {
+		display: none;
+	}
 }
 
+/* Popover styles */
 .popover {
 	max-width: 400px;
 }
@@ -15,12 +17,6 @@
 	font-weight: bold;
 }
 
-.posti {
-   color: red;
-}
-
-@media print {
-	.noprint {
-		display: none;
-	}
+.description-wrapper {
+	display: none;
 }

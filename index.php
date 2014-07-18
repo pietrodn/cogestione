@@ -8,7 +8,6 @@
 	
 	$configurator = Configurator::configurator();
 	$cogestione = new Cogestione();
-	printTimeBox();
 ?>
 
 <?php
@@ -83,10 +82,11 @@ if(inputValid($cogestione)) {
     	/* Controlli passati. L'utente può iscriversi. */
         echo $riepilogo;
     	$cogestione->inserisciPrenotazione($name, $surname, $class, $inserts);    
-        echo "<p>I dati sono stati registrati con successo.</p>";
+        printSuccess("I dati sono stati registrati con successo.");
     }
     
 } else {
+	printTimeBox();
 ?>
 <div id="desc">
 <p>Questo è il sistema di prenotazione per la <b>cogestione</b> che si svolgerà al Liceo Scientifico "Albert Einstein" di Milano il giorno 25 gennaio 2014. Ecco come prenotarti per le attività:
@@ -208,7 +208,7 @@ function printActivityTable($cogestione) {
     /* Intestazione con blocchi */
     echo '<tr>';
     foreach($blocks as $b) {
-        echo "\n<th>$b</th>";
+        echo "\n<th class=\"active\">$b</th>";
     }
     echo "\n</tr><tr>";
     /* Procede colonna per colonna */

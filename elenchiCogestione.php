@@ -3,6 +3,7 @@ require_once("common.php");
 $css = Array('css/StiliCogestione.css', 'css/elenchi.css');
 showHeader('ca-nstab-elenchi', "Elenco prenotazioni cogestione", $css);
 
+$authenticated = !empty($_SESSION['auth']);
 $cogestione = new Cogestione();
 
 // MAIN
@@ -17,6 +18,25 @@ echo '<p class="noprint">Numero di prenotazioni: '
 	. $nPrenot . '/' . $postiTot
 	. ' (' . round($nPrenot/$postiTot*100)
 	. '% degli studenti)</p>';
+
+if(isset($_GET['deleteUser'])) {
+	if($authenticated) {
+		/* Cancellazione di un utente singolo */
+		$uid = intval($_GET['deleteUser']);
+		$uInfo = $cogestione->getUser($uid);
+		if($uInfo !== FALSE) {
+			$result = $cogestione->deleteUser($uid);
+			if($result === TRUE) {
+				printSuccess("L'utente " . $uInfo['user_name'] . " " . $uInfo['user_surname']
+				. " (" . $uInfo['user_class'] . ") è stato eliminato con successo.");
+			} else {
+				printError("L'utente $uid non ha potuto essere eliminato.");
+			}
+		} else {
+			printError("L'utente con UID $uid non esiste!");
+		}
+	}
+}
 
 // Cerca studente
 echo '<div class="panel panel-default noprint">
@@ -79,7 +99,7 @@ foreach($blocks as $i => $b) {
 	echo '</td>';
 }
 echo '</tr></table></div>';
-			
+
 if(isset($_GET['activity'])) // Se si seleziona un'attività
 {
 	// Visualizza elenco partecipanti
@@ -131,12 +151,12 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 	
 	if(count($studenti)) {
 		$riepilogo = '';
-		$riepilogo .= '<div class="panel panel-default noprint">
+		$riepilogo .= '<div class="panel panel-success noprint">
   			<div class="panel-heading">
   				<h3 class="panel-title">Prenotazioni trovate</h3>
   			</div>
-  			<table class="table table-bordered">';
-		$riepilogo .= '<tr><th>UID</th><th>Nome</th><th>Cognome</th><th>Classe</th>';
+  			<table class="table ">';
+		$riepilogo .= '<tr class="active">' . ($authenticated ? '<th></th>' : '') . '<th>UID</th><th>Nome</th><th>Cognome</th><th>Classe</th>';
 		foreach($blocks as $blockTitle) {
 			$blockTitle = htmlspecialchars($blockTitle);
 			$riepilogo .= "\n<th>$blockTitle</th>";
@@ -144,6 +164,11 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 		$riepilogo .= "\n</tr>";
 		foreach($studenti as $row) {
 			$riepilogo .= "\n<tr>";
+			if($authenticated) {
+				$riepilogo .= "\n<td>"
+					. '<a class="btn btn-danger btn-xs" href="' . $_SERVER['PHP_SELF'] . '?deleteUser=' . intval($row['user_id']) .'">X</a>'
+					. '</td>';
+			}
 			$riepilogo .= "\n<td>" . htmlspecialchars($row['user_id']) . '</td>';
 			$riepilogo .= "\n<td>" . htmlspecialchars($row['user_name']) . '</td>';
 			$riepilogo .= "\n<td>" . htmlspecialchars($row['user_surname']) . '</td>';
@@ -160,7 +185,7 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 		$riepilogo .= '</tr></table></div>';
 		echo $riepilogo;
 	} else {
-		printError('Nessuno studente trovato!');
+		printSuccess('Nessuno studente trovato!');
 	}
 }
 

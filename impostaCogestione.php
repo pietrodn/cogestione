@@ -264,7 +264,7 @@ $blocks = $cogestione->blocchi();
 echo '<tr>';
 foreach($blocks as $id => $b) {
 	$id = intval($id);
-	echo "\n<th>"
+	echo "\n<th class=\"active\">"
 		. "<input type=\"hidden\" name=\"block[$id][id]\" value=\"$id\" />\n"
 		. '<div class="input-group">'
 		. '<span class="checkbox input-group-addon">'
