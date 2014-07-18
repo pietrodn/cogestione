@@ -54,17 +54,23 @@ function showHeader($selectedId='', $title, $cssFiles=Array(), $jsFiles=Array())
 			echo "<li " . ($selectedId == $i['id'] ? 'class="active"' : '') . '><a href="' . $i['url'] . '">' . $i['title'] . '</a></li>';
         }
 ?>
-          </ul>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
     <?php
     if($_SESSION['auth']) {
     ?>
-        <ul class="nav navbar-nav navbar-right">
+        
         <li class="navbar-text">Signed in as <?php echo htmlentities($_SESSION['username']); ?></li>
-        <li><a href="impostaCogestione.php?logout=1">Logout</a></li>
-        </ul>
+        <li><a href="login.php?logout=1">Logout</a></li>
+        
+    <?php
+    } else {
+    ?>
+    <li><a <?php echo ($selectedId == 'ca-nstab-login' ? 'class="active"' : '') ?> href="login.php">Login</a></li>
     <?php
     }
     ?>
+    </ul>
         
 
         </div><!--/.nav-collapse -->

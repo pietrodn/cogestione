@@ -1,5 +1,11 @@
 <?php
 require_once("common.php");
+
+if(!isset($_SESSION['auth']) || !$_SESSION['auth']) {
+	header('Location: ./login.php');
+	die();
+}
+
 $css = Array('css/StiliCogestione.css');
 $js = Array('js/imposta.js');
 
@@ -7,147 +13,120 @@ showHeader('ca-nstab-imposta', "Impostazioni cogestione", $css, $js);
 
 $configurator = Configurator::configurator();
 $cogestione = new Cogestione();
-$authenticated = $_SESSION['auth'];
+if(isset($_POST['submitActivities'])) {
+	$activities = $bl = $deleteAct = $deleteBlocks = Array();
+	
+	// Escaping dati attività
+	if(isset($_POST['activity'])) {
+		foreach($_POST['activity'] as $act) {
+			if(!empty($act['id'])) {
+				$id = intval($act['id']);
+				$activities[$id]['block'] = intval($act['block']);
+				$activities[$id]['max'] = intval($act['max']);
+				$activities[$id]['title'] = htmlspecialchars_decode($act['title'], ENT_QUOTES);
+				$activities[$id]['vm'] = intval(!empty($act['vm']));
+				$activities[$id]['description'] = htmlspecialchars_decode($act['description'], ENT_QUOTES);
+				if(!empty($act['delete'])) {
+					$deleteAct[] = $id;
+				}
+			}
+		}
+	}
+	
+	// Escaping dati blocchi
+	if(isset($_POST['block'])) {
+		foreach($_POST['block'] as $b) {
+			if(!empty($b['id'])) {
+				$id = intval($b['id']);
+				$bl[$id]['title'] = htmlspecialchars_decode($b['title'], ENT_QUOTES);
+				$bl[$id]['newRows'] = intval($b['newRows']);
+				if(!empty($b['delete'])) {
+					$deleteBlocks[] = $id;
+				}
+			}
+		}
+	}
+	
+	// Cancella le attività da cancellare.
+	$cogestione->deleteActivities($deleteAct);
+	
+	// Modifica dati attività.
+	foreach($activities as $id => $in) {
+		if(in_array($id, $deleteAct))
+			continue;
+		$cogestione->updateActivity($id, $in['block'], $in['max'], $in['title'], $in['vm'], $in['description']);
+	}
+	
+	// Cancella i blocchi da cancellare
+	$cogestione->deleteBlocks($deleteBlocks);
+	
+	// Modifica dati blocchi
+	foreach($bl as $k => $b) {
+		if(in_array($k, $deleteBlocks))
+			continue;
+		$cogestione->updateBlock(intval($k), $b['title']);
+		
+		// Nuove righe attività
+		if($b['newRows']>0) {
+			$cogestione->addNewActivities($b['newRows'], $k);
+		}
+	}
+	
+	// Nuovi blocchi
+	$newBlocks = intval($_POST['newBlocks']);
+	$cogestione->addNewBlocks($newBlocks);
+		
+	printSuccess('La tabella attività è stata modificata.');
 
-if(isset($_POST['login'])) {
-	if($configurator->isAuthenticated($_POST['username'], $_POST['password'])) {
-		$_SESSION['auth'] = $authenticated = TRUE;
-		$_SESSION['username'] = $_POST['username'];
-		printSuccess('Benvenuto ' . htmlentities($_POST['username']) . ', ti sei autenticato con successo!');
-	} else {
-		$_SESSION['auth'] = $authenticated = FALSE;
-		authenticationFailed();
-	}
-} else if (isset($_GET['logout'])) {
-	unset($_SESSION['auth']);
-	unset($_SESSION['username']);
-	printSuccess('Logout avvenuto con successo.');
-} else if(isset($_POST['submitActivities'])) {
-	if($authenticated) {
-		$activities = $bl = $deleteAct = $deleteBlocks = Array();
-		
-		// Escaping dati attività
-		if(isset($_POST['activity'])) {
-			foreach($_POST['activity'] as $act) {
-				if(!empty($act['id'])) {
-					$id = intval($act['id']);
-					$activities[$id]['block'] = intval($act['block']);
-					$activities[$id]['max'] = intval($act['max']);
-					$activities[$id]['title'] = htmlspecialchars_decode($act['title'], ENT_QUOTES);
-					$activities[$id]['vm'] = intval(!empty($act['vm']));
-					$activities[$id]['description'] = htmlspecialchars_decode($act['description'], ENT_QUOTES);
-					if(!empty($act['delete'])) {
-						$deleteAct[] = $id;
-					}
-				}
-			}
-		}
-		
-		// Escaping dati blocchi
-		if(isset($_POST['block'])) {
-			foreach($_POST['block'] as $b) {
-				if(!empty($b['id'])) {
-					$id = intval($b['id']);
-					$bl[$id]['title'] = htmlspecialchars_decode($b['title'], ENT_QUOTES);
-					$bl[$id]['newRows'] = intval($b['newRows']);
-					if(!empty($b['delete'])) {
-						$deleteBlocks[] = $id;
-					}
-				}
-			}
-		}
-		
-		// Cancella le attività da cancellare.
-		$cogestione->deleteActivities($deleteAct);
-		
-		// Modifica dati attività.
-		foreach($activities as $id => $in) {
-			if(in_array($id, $deleteAct))
-				continue;
-			$cogestione->updateActivity($id, $in['block'], $in['max'], $in['title'], $in['vm'], $in['description']);
-		}
-		
-		// Cancella i blocchi da cancellare
-		$cogestione->deleteBlocks($deleteBlocks);
-		
-		// Modifica dati blocchi
-		foreach($bl as $k => $b) {
-			if(in_array($k, $deleteBlocks))
-				continue;
-			$cogestione->updateBlock(intval($k), $b['title']);
-			
-			// Nuove righe attività
-			if($b['newRows']>0) {
-				$cogestione->addNewActivities($b['newRows'], $k);
-			}
-		}
-		
-		// Nuovi blocchi
-		$newBlocks = intval($_POST['newBlocks']);
-		$cogestione->addNewBlocks($newBlocks);
-			
-		printSuccess('La tabella attività è stata modificata.');
-		
-	} else {
-		authenticationFailed();
-	}
 } else if(isset($_POST['submitDelete'])) {
-	if($authenticated) {
-		/* Cancellazione di tutte le prenotazioni */
-		if(isset($_POST['confermaTruncate'])) {
-			$res = $cogestione->clearReservations();
-			if($res) {
-				printSuccess('Tutte le prenotazioni sono state cancellate.');
-			} else {
-				printError('Errore nel cancellare le prenotazioni!');
-			}
-		} else if(isset($_POST['uid_delete']) && $_POST['uid_delete']) {
-			/* Cancellazione di un utente singolo */
-			$uid = intval($_POST['uid_delete']);
-			$uInfo = $cogestione->getUser($uid);
-			if($uInfo !== FALSE) {
-				$result = $cogestione->deleteUser($uid);
-				if($result === TRUE) {
-					printSuccess("L'utente " . $uInfo['user_name'] . " " . $uInfo['user_surname']
-					. " ($uid) è stato eliminato con successo.");
-				} else {
-					printError("L'utente $uid non ha potuto essere eliminato.");
-				}
-			} else {
-				printError("L'utente con UID $uid non esiste!");
-			}
-		}
-	} else {
-		authenticationFailed();
-	}
-} else if(isset($_POST['submitEnable'])) {
-	if($authenticated) {
-		/* Manual mode */
-		if(isset($_POST['autoEnable'])) {
-			$configurator->setManualMode(!(bool)$_POST['autoEnable']);
-		}
-		
-		if(isset($_POST['manualOn'])) {
-			$configurator->setManualOn((bool)$_POST['manualOn']);
-		}
-		
-		/* Start and end times */
-		if(isset($_POST['startTime'])) {
-			$configurator->setStartTime($_POST['startTime']);
-		}
-		if(isset($_POST['endTime'])) {
-			$configurator->setEndTime($_POST['endTime']);
-		}
-		
-		printSuccess('Impostazioni modificate con successo.');
-	} else {
-		authenticationFailed();
-	}
-}
 
-function authenticationFailed() {
-	printError('Autenticazione fallita!');
-}    
+	/* Cancellazione di tutte le prenotazioni */
+	if(isset($_POST['confermaTruncate'])) {
+		$res = $cogestione->clearReservations();
+		if($res) {
+			printSuccess('Tutte le prenotazioni sono state cancellate.');
+		} else {
+			printError('Errore nel cancellare le prenotazioni!');
+		}
+	} else if(isset($_POST['uid_delete']) && $_POST['uid_delete']) {
+		/* Cancellazione di un utente singolo */
+		$uid = intval($_POST['uid_delete']);
+		$uInfo = $cogestione->getUser($uid);
+		if($uInfo !== FALSE) {
+			$result = $cogestione->deleteUser($uid);
+			if($result === TRUE) {
+				printSuccess("L'utente " . $uInfo['user_name'] . " " . $uInfo['user_surname']
+				. " ($uid) è stato eliminato con successo.");
+			} else {
+				printError("L'utente $uid non ha potuto essere eliminato.");
+			}
+		} else {
+			printError("L'utente con UID $uid non esiste!");
+		}
+	}
+
+} else if(isset($_POST['submitEnable'])) {
+
+	/* Manual mode */
+	if(isset($_POST['autoEnable'])) {
+		$configurator->setManualMode(!(bool)$_POST['autoEnable']);
+	}
+	
+	if(isset($_POST['manualOn'])) {
+		$configurator->setManualOn((bool)$_POST['manualOn']);
+	}
+	
+	/* Start and end times */
+	if(isset($_POST['startTime'])) {
+		$configurator->setStartTime($_POST['startTime']);
+	}
+	if(isset($_POST['endTime'])) {
+		$configurator->setEndTime($_POST['endTime']);
+	}
+	
+	printSuccess('Impostazioni modificate con successo.');
+
+} 
 ?>
 
 <p>
@@ -177,29 +156,7 @@ Per segnare un'attività come <b>riservata alle quarte o alle quinte</b>, spunta
 Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo aver modificato le attività.
 </p>
 
-<!-- Authentication form -->
 <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
-	<div class="panel panel-default">
-		<div class="panel-heading">
-			<h3 class="panel-title">Autenticazione</h3>
-		</div>
-	<div class="panel-body">
-		<fieldset class="form-inline">
-			<div class="form-group">
-				<label class="sr-only" for="username">Username: </label>
-				<input class="form-control" type="text" name="username" id="username" size="20" placeholder="utente" />
-			</div>
-			<div class="form-group">
-				<label class="sr-only" for="password">Password: </label>
-				<input class="form-control" type="password" name="password" id="password" size="20" placeholder="password" />
-			</div>
-			<!-- Login button -->
-			<div class="form-group">
-				<button class="btn btn-primary" type="submit" name="login">Login</button>
-			</div>
-		</fieldset>
-	</div>
-</div>
 
 <!-- Abilitation form -->
 <div class="row">
