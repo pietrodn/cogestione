@@ -30,6 +30,12 @@ $(function(){
 			$(this).addClass('selectedActivity');
 		}
 	});
+	
+	$('.popover_activity').popover({
+  		trigger: 'hover',
+  		container: 'body',
+  		html: true,
+	});
 });
 
 /* Google Analytics */

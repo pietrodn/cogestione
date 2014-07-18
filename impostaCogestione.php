@@ -1,16 +1,29 @@
 <?php
 require_once("common.php");
 $css = Array('css/StiliCogestione.css');
-$js = Array('//code.jquery.com/jquery-1.10.2.min.js');
+$js = Array('js/imposta.js');
 
-showHeader("Impostazioni cogestione", $css, $js);
+showHeader('ca-nstab-imposta', "Impostazioni cogestione", $css, $js);
 
 $configurator = Configurator::configurator();
 $cogestione = new Cogestione();
-$validated = FALSE;
+$authenticated = $_SESSION['auth'];
 
-if(isset($_POST['confermaTutto'])) {
+if(isset($_POST['login'])) {
 	if($configurator->isAuthenticated($_POST['username'], $_POST['password'])) {
+		$_SESSION['auth'] = $authenticated = TRUE;
+		$_SESSION['username'] = $_POST['username'];
+		printSuccess('Benvenuto ' . htmlentities($_POST['username']) . ', ti sei autenticato con successo!');
+	} else {
+		$_SESSION['auth'] = $authenticated = FALSE;
+		authenticationFailed();
+	}
+} else if (isset($_GET['logout'])) {
+	unset($_SESSION['auth']);
+	unset($_SESSION['username']);
+	printSuccess('Logout avvenuto con successo.');
+} else if(isset($_POST['submitActivities'])) {
+	if($authenticated) {
 		$activities = $bl = $deleteAct = $deleteBlocks = Array();
 		
 		// Escaping dati attività
@@ -23,8 +36,9 @@ if(isset($_POST['confermaTutto'])) {
 					$activities[$id]['title'] = htmlspecialchars_decode($act['title'], ENT_QUOTES);
 					$activities[$id]['vm'] = intval(!empty($act['vm']));
 					$activities[$id]['description'] = htmlspecialchars_decode($act['description'], ENT_QUOTES);
-					if(!empty($act['delete']))
+					if(!empty($act['delete'])) {
 						$deleteAct[] = $id;
+					}
 				}
 			}
 		}
@@ -36,8 +50,9 @@ if(isset($_POST['confermaTutto'])) {
 					$id = intval($b['id']);
 					$bl[$id]['title'] = htmlspecialchars_decode($b['title'], ENT_QUOTES);
 					$bl[$id]['newRows'] = intval($b['newRows']);
-					if(!empty($b['delete']))
+					if(!empty($b['delete'])) {
 						$deleteBlocks[] = $id;
+					}
 				}
 			}
 		}
@@ -71,22 +86,29 @@ if(isset($_POST['confermaTutto'])) {
 		$newBlocks = intval($_POST['newBlocks']);
 		$cogestione->addNewBlocks($newBlocks);
 			
-		printError('I dati sono stati registrati con successo.');
+		printSuccess('La tabella attività è stata modificata.');
 		
+	} else {
+		authenticationFailed();
+	}
+} else if(isset($_POST['submitDelete'])) {
+	if($authenticated) {
 		/* Cancellazione di tutte le prenotazioni */
 		if(isset($_POST['confermaTruncate'])) {
-			$cogestione->clearReservations();
-			echo printError('Prenotazioni cancellate.');
-		}
-		
-		/* Cancellazione di un utente singolo */
-		if(isset($_POST['uid_delete']) && $_POST['uid_delete']) {
+			$res = $cogestione->clearReservations();
+			if($res) {
+				printSuccess('Tutte le prenotazioni sono state cancellate.');
+			} else {
+				printError('Errore nel cancellare le prenotazioni!');
+			}
+		} else if(isset($_POST['uid_delete']) && $_POST['uid_delete']) {
+			/* Cancellazione di un utente singolo */
 			$uid = intval($_POST['uid_delete']);
 			$uInfo = $cogestione->getUser($uid);
 			if($uInfo !== FALSE) {
 				$result = $cogestione->deleteUser($uid);
 				if($result === TRUE) {
-					printError("L'utente " . $uInfo['user_name'] . " " . $uInfo['user_surname']
+					printSuccess("L'utente " . $uInfo['user_name'] . " " . $uInfo['user_surname']
 					. " ($uid) è stato eliminato con successo.");
 				} else {
 					printError("L'utente $uid non ha potuto essere eliminato.");
@@ -95,7 +117,11 @@ if(isset($_POST['confermaTutto'])) {
 				printError("L'utente con UID $uid non esiste!");
 			}
 		}
-		
+	} else {
+		authenticationFailed();
+	}
+} else if(isset($_POST['submitEnable'])) {
+	if($authenticated) {
 		/* Manual mode */
 		if(isset($_POST['autoEnable'])) {
 			$configurator->setManualMode(!(bool)$_POST['autoEnable']);
@@ -112,16 +138,22 @@ if(isset($_POST['confermaTutto'])) {
 		if(isset($_POST['endTime'])) {
 			$configurator->setEndTime($_POST['endTime']);
 		}
+		
+		printSuccess('Impostazioni modificate con successo.');
 	} else {
-		printError('Autenticazione fallita! Capra!');
-		echo '<img src="http://www.controcopertina.com/wp-content/uploads/2012/09/sgarbi-vittorio-foto.png" alt="Sgarbi insulta" width="300" />';
+		authenticationFailed();
 	}
+}
+
+function authenticationFailed() {
+	printError('Autenticazione fallita!');
 }    
 ?>
-<div id="desc">
+
+<p>
 Cambia le impostazioni della cogestione utilizzando il form sottostante.
 Le modifiche saranno applicate soltanto dopo aver confermato cliccando sul pulsante <b>Salva modifiche orario</b> in fondo alla pagina.
-
+</p>
 <p>
 Per <b>aggiungere un nuovo blocco o una nuova attività</b> occorre dunque:
 </p>
@@ -144,59 +176,131 @@ Per segnare un'attività come <b>riservata alle quarte o alle quinte</b>, spunta
 <p>
 Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo aver modificato le attività.
 </p>
+
+<!-- Authentication form -->
+<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title">Autenticazione</h3>
+		</div>
+	<div class="panel-body">
+		<fieldset class="form-inline">
+			<div class="form-group">
+				<label class="sr-only" for="username">Username: </label>
+				<input class="form-control" type="text" name="username" id="username" size="20" placeholder="utente" />
+			</div>
+			<div class="form-group">
+				<label class="sr-only" for="password">Password: </label>
+				<input class="form-control" type="password" name="password" id="password" size="20" placeholder="password" />
+			</div>
+			<!-- Login button -->
+			<div class="form-group">
+				<button class="btn btn-primary" type="submit" name="login">Login</button>
+			</div>
+		</fieldset>
+	</div>
 </div>
 
-<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
-<fieldset style="width:50%;">
-<p>Per effettuare modifiche al software devi autenticarti.</p>
-<label for="username">Username: </label><input type="text" name="username" id="username" size="20" placeholder="utente" /><br />
-<label for="password">Password: </label><input type="password" name="password" id="password" size="20" placeholder="password" />
-</fieldset>
-<fieldset style="width: 50%;">
-<p>
-<b>Abilitazione delle prenotazioni.</b>
-</p>
-<input type="radio" name="autoEnable" value="1" <?php if(!$configurator->getManualMode()) echo "checked"; ?> />Automatica
-<input type="radio" name="autoEnable" value="0" <?php if($configurator->getManualMode()) echo "checked"; ?> />Manuale<br />
-Date inizio e fine (solo modalità automatica):<br />
-<input type="datetime-local" name="startTime" value="<?php echo $configurator->getStartTime();?>" />
-<input type="datetime-local" name="endTime" value="<?php echo $configurator->getEndTime();?>" />
-<br />
-Switch on/off (solo modalità manuale):
-<input type="radio" name="manualOn" value="1" <?php if($configurator->getManualOn()) echo "checked"; ?> />On
-<input type="radio" name="manualOn" value="0" <?php if(!$configurator->getManualOn()) echo "checked"; ?> />Off<br />
-</fieldset>
-<fieldset id="truncateField" style="width:50%; min-height:50px; padding:10px;">
-<table>
-<label for="confermaTruncate">
-<tr>
-<td>
+<!-- Abilitation form -->
+<div class="row">
+	<div class="col-md-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Abilitazione delle prenotazioni</h3>
+			</div>
+			<ul class="list-group">
+				<!-- Auto/manual switch -->
+				<li class="list-group-item">
+					<div class="radio">
+						<label>
+						<input id="automatic-switch" type="radio" name="autoEnable" value="1" <?php if(!$configurator->getManualMode()) echo "checked"; ?> />
+						Automatica
+						</label>
+					</div>
+					<div class="radio">
+						<label>
+						<input id="manual-switch" type="radio" name="autoEnable" value="0" <?php if($configurator->getManualMode()) echo "checked"; ?> />
+						Manuale
+						</label>
+					</div>
+				</li>
+				
+				<!-- Options for automatic handling -->
+				<li class="list-group-item" id="automatic-panel">
+					<fieldset class="form-inline">
+						<div class="form-group">
+							Date inizio e fine (solo modalità automatica):<br />
+							<input class="form-control" type="datetime-local" name="startTime" value="<?php echo $configurator->getStartTime();?>" /> –
+							<input class="form-control" type="datetime-local" name="endTime" value="<?php echo $configurator->getEndTime();?>" />
+						</div>
+					</fieldset>
+				</li>
+				
+				<!-- Options for manual handling -->
+				<li class="list-group-item" id="manual-panel">
+					Switch on/off (solo modalità manuale):<br />
+					<div class="radio">
+						<label>
+						<input type="radio" name="manualOn" value="1" <?php if($configurator->getManualOn()) echo "checked"; ?> />On
+						</label>
+					</div>
+					<div class="radio">
+						<label>
+						<input type="radio" name="manualOn" value="0" <?php if(!$configurator->getManualOn()) echo "checked"; ?> />Off<br />
+						</label>
+					</div>
+				</li>
+				
+				<!-- Submit button -->
+				<li class="list-group-item">
+					<button class="btn btn-primary" type="submit" name="submitEnable">Modifica impostazioni</button>
+				</li>
+			</ul>
+		</div>
+	</div>
+	
+	<!-- Deletion form -->
+	<div class="col-md-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Cancellazione prenotazioni</h3>
+			</div>
+		<ul class="list-group">
+			<li class="list-group-item">
+				<div class="checkbox">
+					<?php
+					echo 'Ci sono <b>' . $cogestione->getSubscriptionsNumber() . ' prenotazioni</b> effettuate.';
+					?> Se vuoi cancellarle, spunta la casella.
+					I dati non potranno essere recuperati.<br />
+					<label for="confermaTruncate">
+					<input type="checkbox" name="confermaTruncate" id="confermaTruncate" value="Cancella prenotazioni" />
+					Cancella tutte le prenotazioni
+					</label>
+				</div>
+			</li>
+			<li class="list-group-item" id="delete-single-reservation">
+				<div class="form-group">
+					Elimina una singola prenotazione.<br />
+					<label for="uid_delete">
+					UID: <input type="text" name="uid_delete" id="uid_delete" size="20" placeholder="123" />
+					</label>
+				</div>
+			</li>
+			<li class="list-group-item">
+				<button class="btn btn-danger" type="submit" name="submitDelete">Conferma cancellazione</button>
+			</li>
+		</ul>
+		</div>
+	</div>
+</div>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h3 class="panel-title">Modifica tabella attività</h3>
+	</div>
+	<div class="panel-body">
+		<label>Aggiungi <input type="number" min="0" name="newBlocks" value="0" /> nuovi blocchi</label>
+		<table id="ActivityTable" class="table table-bordered">
 <?php
-	echo 'Ci sono <b>' . $cogestione->getSubscriptionsNumber() . ' prenotazioni</b> effettuate.';
-?> Se vuoi cancellarle, spunta la casella.
-I dati non potranno essere recuperati.</label></td>
-<td>
-<input type="checkbox" name="confermaTruncate" id="confermaTruncate" value="Cancella prenotazioni" />
-</td>
-</tr>
-<tr>
-<td>
-<label for="uid_delete">
-Elimina una singola prenotazione inserendone l'UID:</label>
-</td>
-<td>
-<input type="text" name="uid_delete" id="uid_delete" size="20" placeholder="123" />
-</td>
-</tr>
-</table>
-</fieldset>
-
-<?php
-// New blocks
-echo '<label>Aggiungi <input type="number" min="0" name="newBlocks" value="0" /> nuovi blocchi</label>';
-
-/* Stampa la griglia */
-echo '<table id="ActivityTable" class="wideTable">';
 /* Intestazione con blocchi */
 /* Ottiene i nomi delle colonne (blocchi) */
 $blocks = $cogestione->blocchi();
@@ -205,9 +309,12 @@ foreach($blocks as $id => $b) {
 	$id = intval($id);
 	echo "\n<th>"
 		. "<input type=\"hidden\" name=\"block[$id][id]\" value=\"$id\" />\n"
-		. "<input type=\"text\" size=\"35\" name=\"block[$id][title]\" id=\"block-title-$id\" value=\"". htmlspecialchars($b, ENT_QUOTES, "UTF-8", false) . "\" />"
-		. "<br /><input type=\"checkbox\" id=\"block-delete-$id\" name=\"block[$id][delete]\" />"
-		. "<label for=\"block-delete-$id\">DEL</label>"
+		. '<div class="input-group">'
+		. '<span class="checkbox input-group-addon">'
+		. "<label><input type=\"checkbox\" id=\"block-delete-$id\" name=\"block[$id][delete]\" />DEL</label>"
+		. "</span>"
+		. "<input class=\"form-control\" type=\"text\" size=\"35\" name=\"block[$id][title]\" id=\"block-title-$id\" value=\"". htmlspecialchars($b, ENT_QUOTES, "UTF-8", false) . "\" />"
+		. "</div>"
 		. "</th>";
 }
 echo "\n</tr><tr>";
@@ -224,15 +331,25 @@ foreach($blocks as $i => $b) {
 		echo "\n<div class=\"set-activity\" id=\"activity-$id\">\n"
 			. "<input type=\"hidden\" name=\"activity[$id][id]\" value=\"$id\" />\n"
 			. "<input type=\"hidden\" name=\"activity[$id][block]\" value=\"$i\" />\n"
-			. "<input type=\"text\" class=\"activity-set-title\" id=\"activity-title-$id\" name=\"activity[$id][title]\" value=\"$title\" /><br />\n"
-			. "<input type=\"number\" min=\"0\" id=\"activity-max-$id\" name=\"activity[$id][max]\" value=\""
-			. intval($row['activity_size']) . "\" />\n"
+			. '<div class="input-group">'
+			. '<span class="checkbox input-group-addon">'
+			. "<label for=\"activity-delete-$id\">"
+			. "<input id=\"activity-delete-$id\" name=\"activity[$id][delete]\" type=\"checkbox\" />"
+			. "DEL</label></span>"
+			. "<input class=\"form-control\" type=\"text\" class=\"activity-set-title\" id=\"activity-title-$id\" name=\"activity[$id][title]\" value=\"$title\" /><br />\n"
+			. "</div>"
+			. '<div class="input-group activity-size">'
+			. '<span class="checkbox input-group-addon">'
+			. "<label for=\"activity-vm-$id\">"
 			. "<input id=\"activity-vm-$id\" name=\"activity[$id][vm]\" type=\"checkbox\" "
 			. ($row['activity_vm'] ? 'checked="checked"' : '')
-			. "/><label for=\"activity-vm-$id\">VM18</label>"
-			. "<input id=\"activity-delete-$id\" name=\"activity[$id][delete]\" type=\"checkbox\" />"
-			. "<label for=\"activity-delete-$id\">DEL</label>"
-			. "<textarea rows=\"4\" name=\"activity[$id][description]\" placeholder=\"$placeholder\">" . htmlspecialchars($row['activity_description']) . "</textarea>"
+			. "/>VM18</label>"
+			. "</span>"
+			. "<input class=\"form-control\" type=\"number\" min=\"0\" id=\"activity-max-$id\" name=\"activity[$id][max]\" value=\""
+			. intval($row['activity_size']) . "\" />\n"
+			. '<span class="input-group-addon">posti</span>'
+			. "</div>"
+			. "<textarea class=\"form-control\" rows=\"4\" name=\"activity[$id][description]\" placeholder=\"$placeholder\">" . htmlspecialchars($row['activity_description']) . "</textarea>"
 			. "\n</div>\n";
 	}
 	echo '</td>';
@@ -240,14 +357,17 @@ foreach($blocks as $i => $b) {
 echo '</tr><tr>';
 foreach($blocks as $i => $title) {
 	echo '<td>';
-	echo '<label>Aggiungi <input type="number" min="0" name="block[' . intval($i) . '][newRows]" value="0" /> nuove attività</label>';
+	echo '<label>Aggiungi <input class="form-control" type="number" min="0" name="block[' . intval($i) . '][newRows]" value="0" /> nuove attività</label>';
 	echo '</td>';
 }
-
-echo "</tr></table>\n";
-echo '<input type="submit" name="confermaTutto" value="Salva modifiche" />' . "\n";
-echo "</form>\n";
-
-showFooter('ca-nstab-imposta');
-
+?>
+</tr>
+</table>
+<button class="btn btn-primary" type="submit" name="submitActivities">Modifica attività</button>
+</li>
+</div>
+</div>
+</form>
+<?php
+	showFooter();
 ?>

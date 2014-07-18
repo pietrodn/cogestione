@@ -2,7 +2,7 @@
 	require_once("common.php");
 	
 	$css = Array('css/StiliCogestione.css');
-	showHeader('Grafico prenotazioni cogestione', $css);
+	showHeader('ca-nstab-grafico', 'Grafico prenotazioni cogestione', $css);
 	
     // Config
     $configurator = Configurator::configurator();
@@ -94,5 +94,5 @@
 			'<br /><p style="font-size:200%;">It\'s over ' . floor($pCount/100) . ' HUNDRED!</p>';
 	}
 
-showFooter('ca-nstab-grafico');
+showFooter();
 ?>

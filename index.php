@@ -3,9 +3,8 @@
 	
 	$css = Array('css/StiliCogestione.css');
 	$js = Array(
-		'//code.jquery.com/jquery-1.10.2.min.js',
 		'js/prenotazioni.js');
-	showHeader('Prenotazioni cogestione 2014', $css, $js);
+	showHeader('ca-nstab-prenota', 'Prenotazioni cogestione 2014', $css, $js);
 	
 	$configurator = Configurator::configurator();
 	$cogestione = new Cogestione();
@@ -34,7 +33,7 @@ if(inputValid($cogestione)) {
     // Riepilogo
     $riepilogo = '';
     $riepilogo .= "<p>Le tue prenotazioni:</p>\n";
-    $riepilogo .= '<table id="ActivityTable">';
+    $riepilogo .= '<table class="table table-bordered">';
     $riepilogo .= '<tr><th>Nome</th><th>Cognome</th><th>Classe</th>';
     foreach($blocks as $b) {
     	$b = htmlentities($b);
@@ -116,7 +115,7 @@ if(inputValid($cogestione)) {
     printForm($cogestione);
 }
 
-showFooter('ca-nstab-prenota');
+showFooter();
 
 /* end main */
 
@@ -154,29 +153,25 @@ function printForm($cogestione) {
 	/* Stampa il form */
 	
 	echo  '<form action="'. $_SERVER['PHP_SELF'] . '" method="post" autocomplete="off">
-			<table id="fieldTable">
-            <tr>
-            <td><label for="name">Nome: </label></td>
-            <td><input class="iField" type="text" name="name" id="name" required placeholder="Mario" /></td>
-            </tr>
-            <tr>
-            <td><label for="surname">Cognome: </label></td>
-            <td><input class="iField" type="text" name="surname" id="surname" placeholder="Rossi" required /></td>
-            </tr>
-            <tr>
-            <td><label for="class">Classe: </label></td>
-            <td>';       
+			<fieldset class="form-inline">
+			<div class="form-group">
+			<label class="sr-only" for="name">Nome: </label>
+            <input class="form-control" type="text" name="name" id="name" required placeholder="Nome" />
+            </div>
+            <div class="form-group">
+            <label class="sr-only" for="surname">Cognome: </label>
+            <input class="form-control" type="text" name="surname" id="surname" placeholder="Cognome" required />
+            </div>
+            <div class="form-group">
+            <label class="sr-only" for="class">Classe: </label>';      
     
     printClassSelector($cogestione);
     
-    echo "\n</td></tr>";
-    echo '<tr>
-    	<td colspan="2">
-    	<input id="submit" type="submit" name="submit" value="Conferma" ' . ($configurator->isEnabled() ? '' : 'disabled') . ' />
-    	</td></tr>
-    	</table>' . "\n";
+    echo "\n</div></fieldset>\n";
     
     printActivityTable($cogestione);
+    
+    echo '<button class="btn btn-primary ' . ($configurator->isEnabled() ? '' : 'disabled') . '" type="submit" name="submit">Conferma</button>' . "\n";
     
     echo '</form>';
 }
@@ -184,7 +179,7 @@ function printForm($cogestione) {
 function printClassSelector($cogestione) {
 	$classi = $cogestione->classi();
 	
-	echo '<select class="iField" name="class" id="class" onchange="getClassAndToggle(this)" required>
+	echo '<select class="form-control" name="class" id="class" onchange="getClassAndToggle(this)" required>
             <option value="" disabled selected>Seleziona la classe</option>';
     
     // Selettore classe       
@@ -202,7 +197,14 @@ function printClassSelector($cogestione) {
 function printActivityTable($cogestione) {
     /* Stampa la griglia */
     $blocks = $cogestione->blocchi();
-    echo '<table id="ActivityTable">';
+    echo '<div class="panel panel-default" style="margin-top: 10px;">
+  <!-- Default panel contents -->
+  <div class="panel-heading">
+  <h3 class="panel-title">Seleziona le attività</h3>
+  </div>
+
+  <!-- Table -->
+  <table class="table table-bordered">';
     /* Intestazione con blocchi */
     echo '<tr>';
     foreach($blocks as $b) {
@@ -219,28 +221,32 @@ function printActivityTable($cogestione) {
         	
             $full = ($row['activity_size']!=0 && $row['prenotati']>=$row['activity_size']);
             
-            echo "\n<div class=\"activity"
+            echo "\n<div class=\"radio" 
             	. ($full ? ' disabled' : '')
-            	. '">' . "\n" . '<input type="radio" name="block_' . $i . '" value="'
+            	. '">' . "\n"
+            	. '<label class="popover_activity" for="activity_' . intval($row['activity_id']) . '"'
+            	. " data-toggle=\"popover\""
+            	. " data-content=\"" . $row['activity_description'] . "\""
+            	. " title=\"" . htmlspecialchars($row['activity_title']) . "\""
+            	. '>'
+            	. '<input type="radio" name="block_' . $i . '" value="'
                 . intval($row['activity_id']) . '" id="activity_' . intval($row['activity_id']) . '"'
                 . ($full ? ' disabled ' : '')
                 . ' class="' . ($row['activity_vm'] ? 'vm' : '') . ($full ? ' full' : '') . '" ' 
-                . ' required />' . "\n" . '<label for="activity_' . intval($row['activity_id']) . '">' . "\n"
+                . ' required />' . "\n"
                 . ($row['activity_size']!=0?'<span class="posti">['
                 . ($row['activity_size']-$row['prenotati']) . "]</span>\n":'')
                 . htmlspecialchars($row['activity_title']) . "</label>"
-                . ($row['activity_description'] ? '<div id="activity_desc_' . intval($row['activity_id']) . '" class="activity_description">' . $row['activity_description'] . "</div>" : '')
                 . "</div>\n";
         }
         echo "</td>\n";
     }
-    echo '</tr></table>';
+    echo '</tr></table></div>';
 }
 
 function printTimeBox() {
 	/* Prints info on opening and closing times */
 	
-	echo '<div id="timeBox">';
 	$configurator = Configurator::configurator();
 	$enabled = $configurator->isEnabled();
 	
@@ -251,28 +257,43 @@ function printTimeBox() {
 
 	$now = new DateTime(null, $dtz);
 	
-	if(!$enabled) {
-		echo '<p class="error"><b>Avviso</b>: le prenotazioni sono ora chiuse.</p>';
+	echo '<div class="panel panel-default">
+  			<div class="panel-heading">
+  			<h3 class="panel-title">Prenotazioni '
+  			. ($enabled ? 'aperte' : 'chiuse')
+  			. '</h3>
+  			</div>';
+	
+	
+	
+	echo '<ul class="list-group">';
+	if($enabled) {
+		echo '<li class="list-group-item text-success">Le prenotazioni sono ora <b>aperte</b>.</li>';
+	} else {
+		echo '<li class="list-group-item text-danger">Le prenotazioni sono ora <b>chiuse</b>.</li>';
 	}
-	echo '<p>Prenotazioni aperte <br />da <b>'
-		. $beginTime->format('r')
-		. '</b><br />a <b>'
-		. $endTime->format('r')
-		. '</b></p>';
-
-	if($now >= $beginTime AND $now <= $endTime AND $enabled) {
-		$diffTime = date_diff($endTime, $now); 
-		echo '<p>Prenotazioni chiuse tra <b>'
-		   . $diffTime->format('%d giorni, %h ore, %i minuti, %s secondi')
-		   . '</b>.</p>';
-	} else if($now <= $beginTime AND !$enabled) {
-		$diffTime = date_diff($beginTime, $now); 
-		echo '<p>Prenotazioni aperte tra <b>'
-		   . $diffTime->format('%d giorni, %h ore, %i minuti, %s secondi')
-		   . '</b>.</p>';
+	if(!$configurator->getManualMode()) {
+		echo '<li class="list-group-item">Apertura: <b>'
+			. $beginTime->format('r')
+			. '</b></li>'
+			. '<li class="list-group-item">Chiusura: <b>'
+			. $endTime->format('r')
+			. '</b></li>';
+	
+		if($now >= $beginTime AND $now <= $endTime AND $enabled) {
+			$diffTime = date_diff($endTime, $now);
+			echo '<li class="list-group-item text-warning">Prenotazioni chiuse tra <b>'
+			   . $diffTime->format('%d giorni, %h ore, %i minuti, %s secondi')
+			   . '</b>.</li>';
+		} else if($now <= $beginTime AND !$enabled) {
+			$diffTime = date_diff($beginTime, $now); 
+			echo '<li class="list-group-item text-info">Prenotazioni aperte tra <b>'
+			   . $diffTime->format('%d giorni, %h ore, %i minuti, %s secondi')
+			   . '</b>.</li>';
+		}
 	}
 	
-	echo '</div>';
+	echo '</ul></div>';
 }
 
 ?>
