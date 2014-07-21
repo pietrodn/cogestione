@@ -1,9 +1,9 @@
 -- phpMyAdmin SQL Dump
--- version 4.1.2
+-- version 4.2.6
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Lug 17, 2014 alle 17:03
+-- Generation Time: Lug 21, 2014 alle 17:43
 -- Versione del server: 5.6.15
 -- PHP Version: 5.4.24
 
@@ -27,14 +27,12 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE IF NOT EXISTS `activity` (
-  `activity_id` int(11) NOT NULL AUTO_INCREMENT,
+`activity_id` int(11) NOT NULL,
   `activity_time` int(11) NOT NULL,
   `activity_size` int(11) NOT NULL,
   `activity_title` text NOT NULL,
   `activity_vm` tinyint(1) NOT NULL DEFAULT '0',
-  `activity_description` text,
-  UNIQUE KEY `id` (`activity_id`),
-  KEY `activity_time` (`activity_time`)
+  `activity_description` text
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -44,9 +42,8 @@ CREATE TABLE IF NOT EXISTS `activity` (
 --
 
 CREATE TABLE IF NOT EXISTS `block` (
-  `block_id` int(11) NOT NULL AUTO_INCREMENT,
-  `block_title` tinytext NOT NULL,
-  PRIMARY KEY (`block_id`)
+`block_id` int(11) NOT NULL,
+  `block_title` tinytext NOT NULL
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -56,8 +53,7 @@ CREATE TABLE IF NOT EXISTS `block` (
 --
 
 CREATE TABLE IF NOT EXISTS `class` (
-  `class_name` varchar(20) NOT NULL,
-  PRIMARY KEY (`class_name`)
+  `class_name` varchar(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -68,8 +64,7 @@ CREATE TABLE IF NOT EXISTS `class` (
 
 CREATE TABLE IF NOT EXISTS `config` (
   `config_key` varchar(255) NOT NULL,
-  `config_value` text NOT NULL,
-  PRIMARY KEY (`config_key`)
+  `config_value` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -79,11 +74,9 @@ CREATE TABLE IF NOT EXISTS `config` (
 --
 
 CREATE TABLE IF NOT EXISTS `prenotazioni` (
-  `pren_id` int(11) NOT NULL AUTO_INCREMENT,
+`pren_id` int(11) NOT NULL,
   `pren_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `pren_user` int(11) NOT NULL,
-  PRIMARY KEY (`pren_id`),
-  KEY `pren_user` (`pren_user`)
+  `pren_user` int(11) NOT NULL
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -93,12 +86,9 @@ CREATE TABLE IF NOT EXISTS `prenotazioni` (
 --
 
 CREATE TABLE IF NOT EXISTS `prenotazioni_attivita` (
-  `prenact_id` int(11) NOT NULL AUTO_INCREMENT,
+`prenact_id` int(11) NOT NULL,
   `prenact_prenotation` int(11) NOT NULL,
-  `prenact_activity` int(11) NOT NULL,
-  PRIMARY KEY (`prenact_id`),
-  KEY `prenact_prenotation` (`prenact_prenotation`),
-  KEY `prenact_activity` (`prenact_activity`)
+  `prenact_activity` int(11) NOT NULL
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -108,16 +98,88 @@ CREATE TABLE IF NOT EXISTS `prenotazioni_attivita` (
 --
 
 CREATE TABLE IF NOT EXISTS `user` (
-  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+`user_id` int(11) NOT NULL,
   `user_name` tinytext NOT NULL,
   `user_surname` tinytext NOT NULL,
   `user_class` varchar(20) NOT NULL,
-  `user_pren_latest` int(11) DEFAULT NULL,
-  PRIMARY KEY (`user_id`),
-  KEY `user_class` (`user_class`),
-  KEY `user_pren_latest` (`user_pren_latest`)
+  `user_pren_latest` int(11) DEFAULT NULL
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `activity`
+--
+ALTER TABLE `activity`
+ ADD UNIQUE KEY `id` (`activity_id`), ADD KEY `activity_time` (`activity_time`);
+
+--
+-- Indexes for table `block`
+--
+ALTER TABLE `block`
+ ADD PRIMARY KEY (`block_id`);
+
+--
+-- Indexes for table `class`
+--
+ALTER TABLE `class`
+ ADD PRIMARY KEY (`class_name`);
+
+--
+-- Indexes for table `config`
+--
+ALTER TABLE `config`
+ ADD PRIMARY KEY (`config_key`);
+
+--
+-- Indexes for table `prenotazioni`
+--
+ALTER TABLE `prenotazioni`
+ ADD PRIMARY KEY (`pren_id`), ADD KEY `pren_user` (`pren_user`);
+
+--
+-- Indexes for table `prenotazioni_attivita`
+--
+ALTER TABLE `prenotazioni_attivita`
+ ADD PRIMARY KEY (`prenact_id`), ADD KEY `prenact_prenotation` (`prenact_prenotation`), ADD KEY `prenact_activity` (`prenact_activity`);
+
+--
+-- Indexes for table `user`
+--
+ALTER TABLE `user`
+ ADD PRIMARY KEY (`user_id`), ADD KEY `user_class` (`user_class`), ADD KEY `user_pren_latest` (`user_pren_latest`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `activity`
+--
+ALTER TABLE `activity`
+MODIFY `activity_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=121;
+--
+-- AUTO_INCREMENT for table `block`
+--
+ALTER TABLE `block`
+MODIFY `block_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=6;
+--
+-- AUTO_INCREMENT for table `prenotazioni`
+--
+ALTER TABLE `prenotazioni`
+MODIFY `pren_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=37;
+--
+-- AUTO_INCREMENT for table `prenotazioni_attivita`
+--
+ALTER TABLE `prenotazioni_attivita`
+MODIFY `prenact_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=88;
+--
+-- AUTO_INCREMENT for table `user`
+--
+ALTER TABLE `user`
+MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=37;
 --
 -- Limiti per le tabelle scaricate
 --
@@ -126,27 +188,27 @@ CREATE TABLE IF NOT EXISTS `user` (
 -- Limiti per la tabella `activity`
 --
 ALTER TABLE `activity`
-  ADD CONSTRAINT `activity_block` FOREIGN KEY (`activity_time`) REFERENCES `block` (`block_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ADD CONSTRAINT `activity_block` FOREIGN KEY (`activity_time`) REFERENCES `block` (`block_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Limiti per la tabella `prenotazioni`
 --
 ALTER TABLE `prenotazioni`
-  ADD CONSTRAINT `pren_user` FOREIGN KEY (`pren_user`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ADD CONSTRAINT `pren_user` FOREIGN KEY (`pren_user`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Limiti per la tabella `prenotazioni_attivita`
 --
 ALTER TABLE `prenotazioni_attivita`
-  ADD CONSTRAINT `prenact_activity` FOREIGN KEY (`prenact_activity`) REFERENCES `activity` (`activity_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `prenact_pren` FOREIGN KEY (`prenact_prenotation`) REFERENCES `prenotazioni` (`pren_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ADD CONSTRAINT `prenact_activity` FOREIGN KEY (`prenact_activity`) REFERENCES `activity` (`activity_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+ADD CONSTRAINT `prenact_pren` FOREIGN KEY (`prenact_prenotation`) REFERENCES `prenotazioni` (`pren_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Limiti per la tabella `user`
 --
 ALTER TABLE `user`
-  ADD CONSTRAINT `user_pren_latest` FOREIGN KEY (`user_pren_latest`) REFERENCES `prenotazioni` (`pren_id`) ON DELETE SET NULL ON UPDATE SET NULL,
-  ADD CONSTRAINT `user_class` FOREIGN KEY (`user_class`) REFERENCES `class` (`class_name`) ON DELETE CASCADE ON UPDATE CASCADE;
+ADD CONSTRAINT `user_class` FOREIGN KEY (`user_class`) REFERENCES `class` (`class_name`) ON DELETE CASCADE ON UPDATE CASCADE,
+ADD CONSTRAINT `user_pren_latest` FOREIGN KEY (`user_pren_latest`) REFERENCES `prenotazioni` (`pren_id`) ON DELETE SET NULL ON UPDATE SET NULL;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
