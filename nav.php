@@ -9,10 +9,10 @@ function showHeader($selectedId='', $title, $cssFiles=Array(), $jsFiles=Array())
 	<head>
 		<meta charset="UTF-8">
 		<meta name="keywords" content="cogestione liceo einstein pietrodn" />
-		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title><?php echo htmlspecialchars($title) ?></title>
 		<link rel="icon" href="images/favicon.ico" />
-		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link href="css/bootstrap.min.css" rel="stylesheet" />
 		<script src="js/jquery-2.1.1.min.js"></script>
 		<script src="js/bootstrap.min.js"></script>
 

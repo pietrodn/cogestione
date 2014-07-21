@@ -2,8 +2,7 @@
 	require_once("common.php");
 	
 	$css = Array('css/StiliCogestione.css');
-	$js = Array(
-		'js/prenotazioni.js');
+	$js = Array('js/prenotazioni.js');
 	showHeader('ca-nstab-prenota', 'Prenotazioni cogestione 2014', $css, $js);
 	
 	$configurator = Configurator::configurator();
