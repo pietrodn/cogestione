@@ -2,7 +2,7 @@
 require_once("common.php");
 
 if($_SESSION['auth'] && !isset($_GET['logout'])) {
-	header('Location: ./impostaCogestione.php');
+	header('Location: ./imposta.php');
 	die();
 }
 
@@ -15,20 +15,20 @@ if(isset($_POST['login'])) {
 		session_regenerate_id(true);
 		$_SESSION['auth'] = TRUE;
 		$_SESSION['username'] = $_POST['username'];
-		header('Location: ./impostaCogestione.php');
+		header('Location: ./imposta.php');
 		//printSuccess('Benvenuto ' . htmlspecialchars($_POST['username']) . ', ti sei autenticato con successo!');
 		die();
 	} else {
 		destroyLogin();
-		showHeader('ca-nstab-login', "Login", $css, $js);
+		showHeader('ca-nstab-login', "Login", $css);
 		printError('Autenticazione fallita!');
 	}
 } else if (isset($_GET['logout'])) {
 	destroyLogin();
-	showHeader('ca-nstab-login', "Login", $css, $js);
+	showHeader('ca-nstab-login', "Login", $css);
 	printSuccess('Logout avvenuto con successo.');
 } else {
-	showHeader('ca-nstab-login', "Login", $css, $js);
+	showHeader('ca-nstab-login', "Login", $css);
 }
 
 function destroyLogin() {

@@ -1,8 +1,8 @@
 <?php
 	require_once("common.php");
 	
-	$css = Array('css/StiliCogestione.css');
-	$js = Array('js/prenotazioni.js');
+	$css = Array('css/prenota.css');
+	$js = Array('js/prenota.js');
 	showHeader('ca-nstab-prenota', 'Prenotazioni cogestione 2014', $css, $js);
 	
 	$configurator = Configurator::configurator();
@@ -15,75 +15,75 @@
 $blocks = $cogestione->blocchi();
    
 if(inputValid($cogestione)) {
-    $name = $_POST['name'];
-    $surname = $_POST['surname'];
-    $class = $_POST['class'];
-    $arrSplit = str_split($class, 1);
-    
-    /* La classe senza la sezione */
-    $classN = intval($arrSplit[0]);
-    
-    // Riepilogo e controllo affollamento
-    $inserts = Array();
-    $pieno = $vm = FALSE;
-    $correctBlocks = TRUE;
-    
-    // Riepilogo
-    $riepilogo = '';
-    $riepilogo .= '<p>Le tue prenotazioni:</p>
-    	<table class="table table-bordered">
-    	<tr><th>Nome</th><th>Cognome</th><th>Classe</th>';
-    foreach($blocks as $b) {
-    	$b = htmlspecialchars($b);
-        $riepilogo .= "\n<th>$b</th>";
-    }
-    $riepilogo .= "\n</tr><tr>\n";
-    
-    $riepilogo .= "<td>" . htmlspecialchars($name)
-    	. "</td>\n<td>" . htmlspecialchars($surname)
-    	. "</td>\n<td>" . htmlspecialchars($class) . "</td>\n";
-    
-    /* Ripete per ogni blocco */
-    foreach($blocks as $i => $b) {
-        $selectedActivity = intval($_POST['block_' . $i]);
-        $activityRow = $cogestione->getActivityInfo($selectedActivity);
-        
-        /* Verifico se l'attività è coerente con il blocco */
-        if($activityRow['activity_time'] != $i) {
-        	$correctBlocks = FALSE;
-        }
-        
-        /* Verifico l'affollamento. Se max=0 il vincolo non vale. */
-        if($activityRow['activity_size'] != 0 && $activityRow['prenotati'] >= $activityRow['activity_size']) {
-            $pieno = TRUE;
-        }
-        
-        /* Solo le quarte e le quinte possono accedere alle attività "VM18" */
-        if($activityRow['activity_vm'] == 1 && $classN != 4 && $classN != 5) {
-            $vm = TRUE;
-        }
-        
-        $inserts[$i] = $selectedActivity;
-        $riepilogo .= "\n<td><div class=\"activity\">" . htmlspecialchars($activityRow['activity_title']) . ($pieno ? ' <b>[Pieno!]</b>':'') . '</div></td>';
-    }
-    $riepilogo .= '</tr></table>';
-    if(!$configurator->isEnabled()) {
-        printError('Le prenotazioni sono chiuse!');
-    } else if($pieno) {
-        printError('Alcune delle attività selezionate sono troppo affollate. Rifai!');
-    } else if ($vm) {
-        printError('Alcune delle attività selezionate sono riservate a quarte e quinte. Rifai!');
-    } else if ($cogestione->isSubscribed($name, $surname, $class)) {
-        printError('Ti sei già iscritto!');
-    } else if(!$correctBlocks) {
-    	printError('Alcune delle attività scelte non sono coerenti con i blocchi.');
-    } else {
-    	/* Controlli passati. L'utente può iscriversi. */
-        echo $riepilogo;
-    	$cogestione->inserisciPrenotazione($name, $surname, $class, $inserts);    
-        printSuccess("I dati sono stati registrati con successo.");
-    }
-    
+	$name = $_POST['name'];
+	$surname = $_POST['surname'];
+	$class = $_POST['class'];
+	$arrSplit = str_split($class, 1);
+	
+	/* La classe senza la sezione */
+	$classN = intval($arrSplit[0]);
+	
+	// Riepilogo e controllo affollamento
+	$inserts = Array();
+	$pieno = $vm = FALSE;
+	$correctBlocks = TRUE;
+	
+	// Riepilogo
+	$riepilogo = '';
+	$riepilogo .= '<p>Le tue prenotazioni:</p>
+		<table class="table table-bordered">
+		<tr><th>Nome</th><th>Cognome</th><th>Classe</th>';
+	foreach($blocks as $b) {
+		$b = htmlspecialchars($b);
+		$riepilogo .= "\n<th>$b</th>";
+	}
+	$riepilogo .= "\n</tr><tr>\n";
+	
+	$riepilogo .= "<td>" . htmlspecialchars($name)
+		. "</td>\n<td>" . htmlspecialchars($surname)
+		. "</td>\n<td>" . htmlspecialchars($class) . "</td>\n";
+	
+	/* Ripete per ogni blocco */
+	foreach($blocks as $i => $b) {
+		$selectedActivity = intval($_POST['block_' . $i]);
+		$activityRow = $cogestione->getActivityInfo($selectedActivity);
+		
+		/* Verifico se l'attività è coerente con il blocco */
+		if($activityRow['activity_time'] != $i) {
+			$correctBlocks = FALSE;
+		}
+		
+		/* Verifico l'affollamento. Se max=0 il vincolo non vale. */
+		if($activityRow['activity_size'] != 0 && $activityRow['prenotati'] >= $activityRow['activity_size']) {
+			$pieno = TRUE;
+		}
+		
+		/* Solo le quarte e le quinte possono accedere alle attività "VM18" */
+		if($activityRow['activity_vm'] == 1 && $classN != 4 && $classN != 5) {
+			$vm = TRUE;
+		}
+		
+		$inserts[$i] = $selectedActivity;
+		$riepilogo .= "\n<td><div class=\"activity\">" . htmlspecialchars($activityRow['activity_title']) . ($pieno ? ' <b>[Pieno!]</b>':'') . '</div></td>';
+	}
+	$riepilogo .= '</tr></table>';
+	if(!$configurator->isEnabled()) {
+		printError('Le prenotazioni sono chiuse!');
+	} else if($pieno) {
+		printError('Alcune delle attività selezionate sono troppo affollate. Rifai!');
+	} else if ($vm) {
+		printError('Alcune delle attività selezionate sono riservate a quarte e quinte. Rifai!');
+	} else if ($cogestione->isSubscribed($name, $surname, $class)) {
+		printError('Ti sei già iscritto!');
+	} else if(!$correctBlocks) {
+		printError('Alcune delle attività scelte non sono coerenti con i blocchi.');
+	} else {
+		/* Controlli passati. L'utente può iscriversi. */
+		echo $riepilogo;
+		$cogestione->inserisciPrenotazione($name, $surname, $class, $inserts);	  
+		printSuccess("I dati sono stati registrati con successo.");
+	}
+	
 } else {
 	printTimeBox();
 ?>
@@ -107,11 +107,11 @@ if(inputValid($cogestione)) {
 <p>In caso di difficoltà o di problemi con il sistema, contattare <a href="mailto:cogestione@cogestione2014.netsons.org">l'assistenza</a>.</p>
 </div>
 <?php
-    if(isset($_POST['submit'])) {
-        printError('Non hai compilato correttamente tutti i campi. Riprova.');
-    }
-    
-    printForm($cogestione);
+	if(isset($_POST['submit'])) {
+		printError('Non hai compilato correttamente tutti i campi. Riprova.');
+	}
+	
+	printForm($cogestione);
 }
 
 showFooter();
@@ -155,48 +155,48 @@ function printForm($cogestione) {
 			<fieldset class="form-inline">
 			<div class="form-group">
 			<label class="sr-only" for="name">Nome: </label>
-            <input class="form-control" type="text" name="name" id="name" required placeholder="Nome" />
-            </div>
-            <div class="form-group">
-            <label class="sr-only" for="surname">Cognome: </label>
-            <input class="form-control" type="text" name="surname" id="surname" placeholder="Cognome" required />
-            </div>
-            <div class="form-group">
-            <label class="sr-only" for="class">Classe: </label>';      
-    
-    printClassSelector($cogestione);
-    
-    echo "\n</div></fieldset>\n";
-    
-    printActivityTable($cogestione);
-    
-    echo '<button class="btn btn-primary ' . ($configurator->isEnabled() ? '' : 'disabled') . '" type="submit" name="submit">Conferma</button>' . "\n";
-    
-    echo '</form>';
+			<input class="form-control" type="text" name="name" id="name" required placeholder="Nome" />
+			</div>
+			<div class="form-group">
+			<label class="sr-only" for="surname">Cognome: </label>
+			<input class="form-control" type="text" name="surname" id="surname" placeholder="Cognome" required />
+			</div>
+			<div class="form-group">
+			<label class="sr-only" for="class">Classe: </label>';	   
+	
+	printClassSelector($cogestione);
+	
+	echo "\n</div></fieldset>\n";
+	
+	printActivityTable($cogestione);
+	
+	echo '<button class="btn btn-primary ' . ($configurator->isEnabled() ? '' : 'disabled') . '" type="submit" name="submit">Conferma</button>' . "\n";
+	
+	echo '</form>';
 }
 
 function printClassSelector($cogestione) {
 	$classi = $cogestione->classi();
 	
 	echo '<select class="form-control" name="class" id="classSelector" required>
-            <option value="" disabled selected>Seleziona la classe</option>';
-    
-    // Selettore classe       
-    foreach($classi as $cl) {
-    	if(isset($_POST['class']) && $cl == $_POST['class'])
-    		$selected = 'selected';
-    	else
-    		$selected = '';
-        echo "\n<option value=\"$cl\" $selected>$cl</option>";
-    }        
-            
-    echo "\n</select>";
+			<option value="" disabled selected>Seleziona la classe</option>';
+	
+	// Selettore classe		  
+	foreach($classi as $cl) {
+		if(isset($_POST['class']) && $cl == $_POST['class'])
+			$selected = 'selected';
+		else
+			$selected = '';
+		echo "\n<option value=\"$cl\" $selected>$cl</option>";
+	}		 
+			
+	echo "\n</select>";
 }
 
 function printActivityTable($cogestione) {
-    /* Stampa la griglia */
-    $blocks = $cogestione->blocchi();
-    echo '<div class="panel panel-default" style="margin-top: 10px;">
+	/* Stampa la griglia */
+	$blocks = $cogestione->blocchi();
+	echo '<div class="panel panel-default" id="activity-table">
   <!-- Default panel contents -->
   <div class="panel-heading">
   <h3 class="panel-title">Seleziona le attività</h3>
@@ -204,42 +204,44 @@ function printActivityTable($cogestione) {
 
   <!-- Table -->
   <table class="table table-bordered">';
-    /* Intestazione con blocchi */
-    echo '<tr>';
-    foreach($blocks as $b) {
-        echo "\n<th class=\"active\">$b</th>";
-    }
-    echo "\n</tr><tr>";
-    /* Procede colonna per colonna */
-    foreach($blocks as $i => $b) {
-        echo '<td>';
-        $activities = $cogestione->getActivitiesForBlock($i);
-        
-        /* Stampa tutte le attività che si svolgono contemporaneamente */
-        foreach($activities as $row) {
-        	
-            $full = ($row['activity_size']!=0 && $row['prenotati']>=$row['activity_size']);
-            
-            echo "\n<div class=\"radio\">" . "\n"
-            	. '<label for="activity_' . intval($row['activity_id']). '" '
-            	. ' class="popover_activity" data-toggle="popover"'
-            	. " title=\"" . htmlspecialchars($row['activity_title']) . "\">"
-            	. '<span class="description-wrapper">'
-            	. $row['activity_description']
-            	. '</span>'
-            	. '<input type="radio" name="block_' . $i . '" value="'
-                . intval($row['activity_id']) . '" id="activity_' . intval($row['activity_id']) . '"'
-                . ($full ? ' disabled ' : '')
-                . ' class="' . ($row['activity_vm'] ? 'vm' : '') . ($full ? ' full' : '') . '" ' 
-                . ' required />' . "\n"
-                . ($row['activity_size']!=0 ? '<span class="text-danger">['
-                . ($row['activity_size']-$row['prenotati']) . "]</span>\n" : '')
-                . htmlspecialchars($row['activity_title']) . "</label>"
-                . "</div>\n";
-        }
-        echo "</td>\n";
-    }
-    echo '</tr></table></div>';
+	/* Intestazione con blocchi */
+	echo '<tr>';
+	foreach($blocks as $b) {
+		echo "\n<th class=\"active\">$b</th>";
+	}
+	echo "\n</tr><tr>";
+	/* Procede colonna per colonna */
+	foreach($blocks as $i => $b) {
+		echo '<td>';
+		$activities = $cogestione->getActivitiesForBlock($i);
+		
+		/* Stampa tutte le attività che si svolgono contemporaneamente */
+		foreach($activities as $row) {
+			
+			$full = ($row['activity_size']!=0 && $row['prenotati']>=$row['activity_size']);
+			
+			echo "\n" . '<div class="radio">' . "\n";
+			printf('<label for="activity_%d" class="popover_activity" data-toggle="popover" title="%s">' . "\n",
+				intval($row['activity_id']), 
+				htmlspecialchars($row['activity_title']));
+			printf('<div class="description-wrapper">%s</div>' . "\n", $row['activity_description']);
+			printf('<input type="radio" name="block_%d" value="%d" id="activity_%d" %s class="%s %s" required />' . "\n",
+				$i,
+				intval($row['activity_id']),
+				intval($row['activity_id']),
+				($full ? 'disabled' : ''),
+				($row['activity_vm'] ? 'vm' : ''),
+				($full ? 'full' : '')
+				);
+				
+			if($row['activity_size']!=0) {
+				printf('<span class="text-danger">[%d]</span>' . "\n", ($row['activity_size']-$row['prenotati']));
+			}
+			echo htmlspecialchars($row['activity_title']) . "\n</label>\n</div>\n";
+		}
+		echo "</td>\n";
+	}
+	echo "</tr>\n</table>\n</div>";
 }
 
 function printTimeBox() {
@@ -256,11 +258,11 @@ function printTimeBox() {
 	$now = new DateTime(null, $dtz);
 	
 	echo '<div class="panel panel-default">
-  			<div class="panel-heading">
-  			<h3 class="panel-title">Prenotazioni '
-  			. ($enabled ? 'aperte' : 'chiuse')
-  			. '</h3>
-  			</div>';
+			<div class="panel-heading">
+			<h3 class="panel-title">Prenotazioni '
+			. ($enabled ? 'aperte' : 'chiuse')
+			. '</h3>
+			</div>';
 	
 	
 	

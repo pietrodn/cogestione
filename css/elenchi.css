@@ -9,6 +9,10 @@
 		font-family: Verdana, sans-serif;
 		padding-left: 5px;
 	}
+	
+	.noprint {
+		display: none;
+	}
 }
 
 @media screen {

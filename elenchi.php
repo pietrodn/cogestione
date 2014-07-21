@@ -1,12 +1,10 @@
 <?php
 require_once("common.php");
-$css = Array('css/StiliCogestione.css', 'css/elenchi.css');
+$css = Array('css/elenchi.css');
 showHeader('ca-nstab-elenchi', "Elenco prenotazioni cogestione", $css);
 
 $authenticated = !empty($_SESSION['auth']);
 $cogestione = new Cogestione();
-
-// MAIN
 
 $blocks = $cogestione->blocchi();
 $classi = $cogestione->classi();
@@ -27,8 +25,8 @@ if(isset($_GET['deleteUser'])) {
 		if($uInfo !== FALSE) {
 			$result = $cogestione->deleteUser($uid);
 			if($result === TRUE) {
-				printSuccess("L'utente " . $uInfo['user_name'] . " " . $uInfo['user_surname']
-				. " (" . $uInfo['user_class'] . ") è stato eliminato con successo.");
+				printSuccess("L'utente ". htmlspecialchars($uInfo['user_name']) . " " . htmlspecialchars($uInfo['user_surname']) .
+				" (" . htmlspecialchars($uInfo['user_class']) . ") è stato eliminato con successo.");
 			} else {
 				printError("L'utente $uid non ha potuto essere eliminato.");
 			}
@@ -153,7 +151,7 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
   			<div class="panel-heading">
   				<h3 class="panel-title">Prenotazioni trovate</h3>
   			</div>
-  			<table class="table ">';
+  			<table class="table">';
 		$riepilogo .= '<tr class="active">' . ($authenticated ? '<th></th>' : '') . '<th>UID</th><th>Nome</th><th>Cognome</th><th>Classe</th>';
 		foreach($blocks as $blockTitle) {
 			$blockTitle = htmlspecialchars($blockTitle);

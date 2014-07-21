@@ -1,8 +1,7 @@
 <?php
 	require_once("common.php");
 	
-	$css = Array('css/StiliCogestione.css');
-	showHeader('ca-nstab-grafico', 'Grafico prenotazioni cogestione', $css);
+	showHeader('ca-nstab-grafico', 'Grafico prenotazioni cogestione');
 	
     // Config
     $configurator = Configurator::configurator();

@@ -1,13 +1,3 @@
-.set-activity {
-   margin-bottom: 20px;
-}
-
-@media print {
-	.noprint {
-		display: none;
-	}
-}
-
 /* Popover styles */
 .popover {
 	max-width: 400px;
@@ -19,4 +9,9 @@
 
 .description-wrapper {
 	display: none;
+}
+
+/* Altri stili */
+#activity-table {
+	margin-top: 10px;
 }

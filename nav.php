@@ -45,9 +45,9 @@ function showHeader($selectedId='', $title, $cssFiles=Array(), $jsFiles=Array())
 <?php
 	$tablinks = array(
 		array('id' => 'ca-nstab-prenota', 'title' => 'Prenota', 'url' => '.'),
-		array('id' => 'ca-nstab-elenchi', 'title' => 'Elenchi', 'url' => 'elenchiCogestione.php'),
-		array('id' => 'ca-nstab-grafico', 'title' => 'Grafico', 'url' => 'graficoPrenotazioni.php'),
-		array('id' => 'ca-nstab-imposta', 'title' => 'Imposta', 'url' => 'impostaCogestione.php')
+		array('id' => 'ca-nstab-elenchi', 'title' => 'Elenchi', 'url' => 'elenchi.php'),
+		array('id' => 'ca-nstab-grafico', 'title' => 'Grafico', 'url' => 'grafico.php'),
+		array('id' => 'ca-nstab-imposta', 'title' => 'Imposta', 'url' => 'imposta.php')
 		);
 		
 		foreach($tablinks as $i) {

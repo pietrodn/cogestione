@@ -6,7 +6,7 @@ if(empty($_SESSION['auth'])) {
 	die();
 }
 
-$css = Array('css/StiliCogestione.css');
+$css = Array('css/imposta.css');
 $js = Array('js/imposta.js');
 
 showHeader('ca-nstab-imposta', "Impostazioni cogestione", $css, $js);
