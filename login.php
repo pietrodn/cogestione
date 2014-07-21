@@ -16,7 +16,7 @@ if(isset($_POST['login'])) {
 		$_SESSION['auth'] = TRUE;
 		$_SESSION['username'] = $_POST['username'];
 		header('Location: ./impostaCogestione.php');
-		//printSuccess('Benvenuto ' . htmlentities($_POST['username']) . ', ti sei autenticato con successo!');
+		//printSuccess('Benvenuto ' . htmlspecialchars($_POST['username']) . ', ti sei autenticato con successo!');
 		die();
 	} else {
 		destroyLogin();

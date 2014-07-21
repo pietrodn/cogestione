@@ -1,8 +1,6 @@
-/* Ottiene la classe dal selettore */
-function getClassAndToggle(selectItem) {
-	 var classe = $(selectItem).children(':selected').text();
-	 var arr = classe.split('', 1);
-	 var classN = parseInt(arr[0]);
+/* Ottiene la classe dal selettore e attiva o disattiva gli elementi */
+function getClassAndToggle() {
+	 var classN = parseInt($(this).children(':selected').text());
 	 toggleVm(classN);
 }
 
@@ -10,36 +8,30 @@ function getClassAndToggle(selectItem) {
 	Le attività senza posti disponibili rimangono disabilitate. */
 function toggleVm(classN) {
 	var disabled = (classN < 4 || !classN ? true : false);
-	$("input.vm:not(.full)")
-		.prop('disabled', disabled); 
-	$('.activity:has(input[type="radio"]:enabled)').removeClass('disabled'); 
-	$('.activity:has(input[type="radio"]:disabled)').addClass('disabled').removeClass('selectedActivity');  
+	$("input.vm:not(.full)").prop('disabled', disabled);
+	
+	// Deseleziona gli elementi disabilitati
 	$('input[type="radio"]:disabled').prop('checked', false);
 }
 
 function getPopoverContent() {
-	var content = $(this).children('.description-wrapper').html();
-	return content;
+	return $(this).children('.description-wrapper').html();
 }
 
 $(function(){
+	/* Callback per il selettore della classe */
+	$('#classSelector').change(getClassAndToggle);
+	
 	/* Di default le attività "VM18" sono disattivate */
 	toggleVm(1);
 	
-	$('.activity').click(function(){
-		if(! $('input[type="radio"]', this).prop('disabled')) {
-			$('input[type="radio"]', this).prop('checked', 'checked');
-		
-			$('.activity.selectedActivity', $(this).parent()).removeClass('selectedActivity');
-			$(this).addClass('selectedActivity');
-		}
-	});
-	
+	/* Popover per descrizioni attività */
 	$('.popover_activity').popover({
   		trigger: 'hover',
   		container: 'body',
   		html: true,
   		content: getPopoverContent,
+  		animation: false,
 	});
 });
 

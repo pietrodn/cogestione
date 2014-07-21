@@ -82,7 +82,7 @@
 	'chg' => "$xStep,$yStep",					// Grid steps
 	'chd' => $chd);							// Data
     $url = $preurl . '&' . http_build_query($chart);
-    echo '<img id="graph" src="' . htmlentities($url) . '" alt="Grafico delle prenotazioni" />';
+    echo '<img id="graph" src="' . htmlspecialchars($url) . '" alt="Grafico delle prenotazioni" />';
     ?>
 <p>Il grafico mostra il numero di prenotazioni effettuate in funzione del tempo.</p>
 <p>Powered by <a href="http://code.google.com/apis/chart/">Google Chart Tools</a>.</p>

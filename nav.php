@@ -10,7 +10,7 @@ function showHeader($selectedId='', $title, $cssFiles=Array(), $jsFiles=Array())
 		<meta charset="UTF-8">
 		<meta name="keywords" content="cogestione liceo einstein pietrodn" />
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title><?php echo htmlentities($title) ?></title>
+		<title><?php echo htmlspecialchars($title) ?></title>
 		<link rel="icon" href="images/favicon.ico" />
 		<link href="css/bootstrap.min.css" rel="stylesheet">
 		<script src="js/jquery-2.1.1.min.js"></script>
@@ -19,11 +19,11 @@ function showHeader($selectedId='', $title, $cssFiles=Array(), $jsFiles=Array())
 
 <?php
 	foreach($cssFiles as $f) {
-		echo '<link rel="stylesheet" href="' . htmlentities($f, ENT_QUOTES) . '" />' . "\n";
+		echo '<link rel="stylesheet" href="' . htmlspecialchars($f) . '" />' . "\n";
 	}
 	
 	foreach($jsFiles as $f) {
-		echo '<script src="' . htmlentities($f, ENT_QUOTES) . '"></script>' . "\n";
+		echo '<script src="' . htmlspecialchars($f) . '"></script>' . "\n";
 	}
 ?>
 </head>
@@ -60,7 +60,7 @@ function showHeader($selectedId='', $title, $cssFiles=Array(), $jsFiles=Array())
     if($_SESSION['auth']) {
     ?>
         
-        <li class="navbar-text">Signed in as <?php echo htmlentities($_SESSION['username']); ?></li>
+        <li class="navbar-text">Signed in as <?php echo htmlspecialchars($_SESSION['username']); ?></li>
         <li><a href="login.php?logout=1">Logout</a></li>
         
     <?php
@@ -83,7 +83,7 @@ function showHeader($selectedId='', $title, $cssFiles=Array(), $jsFiles=Array())
 					<img id="wikitech-logo" class="media-object" src="images/Wiki.png" alt="Einsteinwiki">
 				</a>-->
 				<div class="media-body">
-					<h1><?php echo htmlentities($title) ?></h1>
+					<h1><?php echo htmlspecialchars($title) ?></h1>
 				</div>
 			</div>
 			<!-- start content -->

@@ -31,11 +31,11 @@ if(inputValid($cogestione)) {
     
     // Riepilogo
     $riepilogo = '';
-    $riepilogo .= "<p>Le tue prenotazioni:</p>\n";
-    $riepilogo .= '<table class="table table-bordered">';
-    $riepilogo .= '<tr><th>Nome</th><th>Cognome</th><th>Classe</th>';
+    $riepilogo .= '<p>Le tue prenotazioni:</p>
+    	<table class="table table-bordered">
+    	<tr><th>Nome</th><th>Cognome</th><th>Classe</th>';
     foreach($blocks as $b) {
-    	$b = htmlentities($b);
+    	$b = htmlspecialchars($b);
         $riepilogo .= "\n<th>$b</th>";
     }
     $riepilogo .= "\n</tr><tr>\n";
@@ -65,7 +65,7 @@ if(inputValid($cogestione)) {
         }
         
         $inserts[$i] = $selectedActivity;
-        $riepilogo .= "\n<td><div class=\"activity\">" . htmlentities($activityRow['activity_title']) . ($pieno ? ' <b>[Pieno!]</b>':'') . '</div></td>';
+        $riepilogo .= "\n<td><div class=\"activity\">" . htmlspecialchars($activityRow['activity_title']) . ($pieno ? ' <b>[Pieno!]</b>':'') . '</div></td>';
     }
     $riepilogo .= '</tr></table>';
     if(!$configurator->isEnabled()) {
@@ -179,7 +179,7 @@ function printForm($cogestione) {
 function printClassSelector($cogestione) {
 	$classi = $cogestione->classi();
 	
-	echo '<select class="form-control" name="class" id="class" onchange="getClassAndToggle(this)" required>
+	echo '<select class="form-control" name="class" id="classSelector" required>
             <option value="" disabled selected>Seleziona la classe</option>';
     
     // Selettore classe       
@@ -221,8 +221,7 @@ function printActivityTable($cogestione) {
         	
             $full = ($row['activity_size']!=0 && $row['prenotati']>=$row['activity_size']);
             
-            echo "\n<div class=\"radio" 
-            	. ($full ? ' disabled' : '') . '">' . "\n"
+            echo "\n<div class=\"radio\">" . "\n"
             	. '<label for="activity_' . intval($row['activity_id']). '" '
             	. ' class="popover_activity" data-toggle="popover"'
             	. " title=\"" . htmlspecialchars($row['activity_title']) . "\">"
