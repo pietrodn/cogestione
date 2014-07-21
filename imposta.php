@@ -153,7 +153,7 @@ Per <b>cancellare un blocco o un'attività</b>, spuntare la casella <b>"DEL"</b>
 Per segnare un'attività come <b>riservata alle quarte o alle quinte</b>, spuntare la casella <b>"VM18"</b> relativa e poi confermare.
 </p>
 <p>
-Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo aver modificato le attività.
+Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo aver cancellato attività o blocchi.
 </p>
 
 <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
