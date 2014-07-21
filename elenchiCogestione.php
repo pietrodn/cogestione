@@ -116,11 +116,11 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 		Attività: <b>" . htmlspecialchars($aRow['activity_title'])
 		. "</b>.\n";
 	if ($aRow['activity_description']) {
-		echo "<br />Descrizione: <br />
-		<blockquote>" . $aRow['activity_description'] . "
+		echo "<br />Descrizione:
+		<blockquote id=\"desc-box\">" . $aRow['activity_description'] . "
 		</blockquote>";
 	}
-	echo "\n<br />Quando: <b>" . htmlspecialchars($blocks[$aRow['activity_time']])
+	echo "\nQuando: <b>" . htmlspecialchars($blocks[$aRow['activity_time']])
 		. "</b>\n<br />Partecipanti: <b>" . intval($aRow['prenotati']) . ($aRow['activity_size'] ? '/' . intval($aRow['activity_size']) : '') . '</b>';
 	
 	if($aRow['prenotati']>0)
@@ -137,8 +137,6 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 		}
 		echo "\n</ol>";
 		
-	} else {
-		echo "<br/>Nessun partecipante!";
 	}
 	echo "\n</div></div>";
 	

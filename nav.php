@@ -66,7 +66,7 @@ function showHeader($selectedId='', $title, $cssFiles=Array(), $jsFiles=Array())
     <?php
     } else {
     ?>
-    <li><a <?php echo ($selectedId == 'ca-nstab-login' ? 'class="active"' : '') ?> href="login.php">Login</a></li>
+    <li <?php echo ($selectedId == 'ca-nstab-login' ? 'class="active"' : '') ?>><a href="login.php">Login</a></li>
     <?php
     }
     ?>

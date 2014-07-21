@@ -12,6 +12,7 @@
 }
 
 @media screen {
+	/* Partecipanti su 3 colonne */
 	#partecipanti {
 		-moz-column-count: 3;
 		-moz-column-gap: 10px;
@@ -19,9 +20,15 @@
 		-webkit-column-gap: 10px;
 		column-count: 3;
 		column-gap: 10px;
-		
-		list-style-position:inside;
-		padding: 10px;
-		margin-left:10px;
 	}
+}
+
+#partecipanti {
+	list-style-position:inside;
+	padding: 10px;
+	margin-left:10px;
+}
+
+#desc-box {
+	font-size: smaller;
 }
