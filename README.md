@@ -16,6 +16,8 @@ Installazione
 4. Modificare config.php con le impostazioni di MySQL e le credenziali per modificare le attività.
 5. Ora potete andare sul sito nel vostro browser e impostare tutto attraverso la pagina "Imposta".
 
+![Schermata di impostazione della cogestione](http://i.imgur.com/5p7TCgc.png)
+
 Blocchi
 -------
 
@@ -29,9 +31,9 @@ Ad esempio si potranno impostare 4 blocchi:
 - Lunedì dalle 11 alle 13
 - Martedì dalle 8.30 alle 10.30
 - Martedì dalle 10.30 alle 12.30
+
 La descrizione di ogni blocco è assolutamente arbitraria.
 Per aggiungere dei blocchi, digitare il numero di blocchi che si vogliono aggiungere nella casella "Aggiungi ... blocchi" e poi, in basso, fare clic su "Modifica attività".
-
 
 Attività
 --------
@@ -73,15 +75,17 @@ La cancellazione delle prenotazioni è sempre irreversibile.
 Abilitazione
 ------------
 
-Le prenotazioni si possono attivare o disattivare in modalità automatica o manuale, dalla schermata Imposta.
+Le prenotazioni si possono attivare o disattivare in modalità automatica o manuale, dalla schermata **Imposta**.
 
 * **Modalità automatica**: si specificano data e ora di inizio e di fine. Il sistema accetterà prenotazioni a partire dall'ora di partenza e cesserà di farlo all'ora di chiusura specificata. Una volta impostato, il sistema non necessita di ulteriore supervisione. Gli orari di inizio e di fine sono visibili nella pagina **Prenota**.
 * **Modalità manuale**: il sistema si attiva e si disattiva manualmente dalla schermata Imposta.
 
+![Schermata di prenotazione per gli utenti](http://i.imgur.com/dZD4StH.png)
+
 Elenchi
 -------
 
-È possibile visualizzare i nomi degli studenti prenotati dalla pagina degli elenchi.
+È possibile visualizzare i nomi degli studenti prenotati dalla pagina **Elenchi**.
 Questa interfaccia ha due modi di utilizzo.
 
 Si può selezionare un'attività dalla tabella e verrà visualizzato l'elenco dei partecipanti a quell'attività. La pagina è anche stampabile per avere una comoda lista cartacea di prenotati.
