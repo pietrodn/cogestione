@@ -1,6 +1,10 @@
 <?php
 
 require_once("common.php");
+if(!file_exists(CONFIG_FILE)) {
+	header('Location: ./setup.php');
+	die();
+}
 
 $css = Array('css/prenota.css');
 $js = Array('js/prenota.js');

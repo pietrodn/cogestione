@@ -1,5 +1,4 @@
 <?php
-define('CONFIG_FILE', 'config.php');
 require_once("common.php");
 
 showHeader('ca-nstab-setup', 'Setup cogestione');
@@ -17,13 +16,19 @@ if(is_readable(CONFIG_FILE)) {
 	} else {
 		if(isset($_POST['submit'])) {
 			
-			echo "Provo a connettermi al database...";
+			echo "<p>Provo a connettermi al database...";
 			$db = new mysqli($_POST['host'], $_POST['username'], $_POST['password'], $_POST['dbname']);
 			if ($db->connect_error) {
-				printError('Non riesco a connettermi al database! Hai sbagliato qualcosa.');
+				printError('Errore nella connessione al database: ' . $db->connect_error);
 			} else {
-				echo " <b>OK!</b>\n";
-				echo "Provo a creare il file di configurazione...";
+				echo " <b>OK!</b></p>\n";
+				
+				echo "<p>Provo a creare il database...</p>";
+				$sql_setup = file_get_contents('sql/cogestione.sql');
+				$db->multi_query($sql_setup);
+				$db->close();
+				
+				echo "<p>Provo a creare il file di configurazione...";
 				$template = file_get_contents('config.template.php');
 				$template = str_replace('DB_HOST', addslashes($_POST['host']), $template);
 				$template = str_replace('DB_USER', addslashes($_POST['username']), $template);
@@ -36,11 +41,11 @@ if(is_readable(CONFIG_FILE)) {
 				umask($old);
 				
 				if($res === FALSE) {
-					echo " <b>FAIL!</b>\n";
+					echo " <b>FAIL!</b></p>\n";
 					printError('Errore nella creazione del file di configurazione!');
 				} else {
 					$showForm = FALSE;
-					echo " <b>OK!</b>\n";
+					echo " <b>OK!</b></p>\n";
 					printSuccess('Il file di configurazione è stato creato correttamente. Vai alla <a href=".">pagina iniziale</a>.');
 				}
 			}
