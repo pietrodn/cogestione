@@ -22,7 +22,7 @@ if(inputValid($cogestione)) {
 	/* La classe senza la sezione */
 	$class_info = $cogestione->getClassInfo($class_id);
 	$classN = $class_info['class_year'];
-	$class_name = $class_info['class_year'] . $class_info['class_section'];
+	$class_name = $class_info['class_name'];
 	
 	// Riepilogo e controllo affollamento
 	$inserts = Array();
@@ -188,7 +188,7 @@ function printClassSelector($cogestione) {
 			$selected = ' selected';
 		else
 			$selected = '';
-		echo "\n<option value=\"$cl_id\"$selected>" . htmlspecialchars($cl_val['class_year'] . $cl_val['class_section']) . "</option>";
+		echo "\n<option value=\"$cl_id\"$selected>" . htmlspecialchars($cl_val['class_name']) . "</option>";
 	}		 
 			
 	echo "\n</select>";

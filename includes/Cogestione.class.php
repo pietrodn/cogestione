@@ -311,7 +311,8 @@ class Cogestione {
 	}
 	
 	public function setClasses($classes_arr) {
-		/* $classes_arr is an array of arrays [class_year, class_section] */
+		/* 	This function updates the class table with the classes in $classes_arr.
+			$classes_arr is an array of arrays [class_year, class_section] */
 		
 		// Removes deleted classes
 		$toDelete = Array();
@@ -345,6 +346,8 @@ class Cogestione {
 	}
 	
 	public function deleteClass($cl_id) {
+		/* This function deletes a single class with id $cl_id. */
+		
 		$this->classi = null; // resets cache
 		
 		$res = $this->db->query("DELETE FROM class WHERE class_id = " . intval($cl_id) . ";");

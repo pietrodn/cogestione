@@ -243,9 +243,7 @@ Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo 
 	$class_names = Array();
 	
 	foreach($classes_array as $cl_id => $cl_val) {
-	
-		$class_names[] = $cl_val['class_year'] . $cl_val['class_section'];
-		
+		$class_names[] = $cl_val['class_name'];
 	}
 	
 	echo implode('; ', $class_names);

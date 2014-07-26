@@ -60,8 +60,9 @@ CREATE TABLE `class` (
   `class_id` int(11) NOT NULL AUTO_INCREMENT,
   `class_year` int(11) NOT NULL,
   `class_section` varchar(20) NOT NULL,
-  PRIMARY KEY (`class_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8;
+  PRIMARY KEY (`class_id`),
+  UNIQUE KEY `class_title` (`class_year`,`class_section`) COMMENT 'The name of the class must be unique.'
+) ENGINE=InnoDB AUTO_INCREMENT=1097 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -92,7 +93,7 @@ CREATE TABLE `prenotazioni` (
   PRIMARY KEY (`pren_id`),
   KEY `pren_user` (`pren_user`),
   CONSTRAINT `pren_user` FOREIGN KEY (`pren_user`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -111,7 +112,7 @@ CREATE TABLE `prenotazioni_attivita` (
   KEY `prenact_activity` (`prenact_activity`),
   CONSTRAINT `prenact_activity` FOREIGN KEY (`prenact_activity`) REFERENCES `activity` (`activity_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `prenact_pren` FOREIGN KEY (`prenact_prenotation`) REFERENCES `prenotazioni` (`pren_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=98 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -123,16 +124,17 @@ DROP TABLE IF EXISTS `user`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `user` (
   `user_id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_name` tinytext NOT NULL,
-  `user_surname` tinytext NOT NULL,
+  `user_name` varchar(255) NOT NULL,
+  `user_surname` varchar(255) NOT NULL,
   `user_class` int(11) NOT NULL,
   `user_pren_latest` int(11) DEFAULT NULL,
   PRIMARY KEY (`user_id`),
+  UNIQUE KEY `user_name` (`user_name`,`user_surname`,`user_class`),
   KEY `user_class` (`user_class`),
   KEY `user_pren_latest` (`user_pren_latest`),
   CONSTRAINT `user_class` FOREIGN KEY (`user_class`) REFERENCES `class` (`class_id`),
   CONSTRAINT `user_pren_latest` FOREIGN KEY (`user_pren_latest`) REFERENCES `prenotazioni` (`pren_id`) ON DELETE SET NULL ON UPDATE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -144,4 +146,4 @@ CREATE TABLE `user` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-07-26  9:36:40
+-- Dump completed on 2014-07-26 12:04:46

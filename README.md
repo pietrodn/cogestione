@@ -61,6 +61,13 @@ Non c'è invece alcun problema a rinominare le attività, cambiarne le descrizio
 - Se si modifica la capienza di un'attività, in nessun caso saranno cancellate le prenotazioni relative.
 - Se si imposta il flag VM18, non sarà comunque rimossa alcuna prenotazione, neppure quelle non rispondenti al requisito.
 
+Classi
+------
+
+È possibile modificare le classi dalla pagina **Imposta**, specificando l'elenco completo delle classi nell'apposita casella di testo. I nomi delle classi devono essere separati da punto e virgola (";"); la spaziatura verrà ignorata.
+
+Se si tenta di rimuovere una classe con delle prenotazioni associate, il sistema lo impedirà. Bisognerà dunque rimuovere prima tutte le prenotazioni associate alla classe che si vuole eliminare.
+
 Prenotazioni
 ------------
 

@@ -66,7 +66,7 @@ foreach($classi as $cl_id => $cl_val) {
 		$selected = 'selected';
 	else
 		$selected = '';
-	echo "\n<option value=\"$cl_id\" $selected>" . htmlspecialchars($cl_val['class_year'] . $cl_val['class_section']) . "</option>";
+	echo "\n<option value=\"$cl_id\" $selected>" . htmlspecialchars($cl_val['class_name']) . "</option>";
 }		 
 	
 echo "\n</select></div>";
