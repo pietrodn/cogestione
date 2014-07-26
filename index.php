@@ -17,11 +17,12 @@ $blocks = $cogestione->blocchi();
 if(inputValid($cogestione)) {
 	$name = $_POST['name'];
 	$surname = $_POST['surname'];
-	$class = $_POST['class'];
-	$arrSplit = str_split($class, 1);
+	$class_id = intval($_POST['class']);
 	
 	/* La classe senza la sezione */
-	$classN = intval($arrSplit[0]);
+	$class_info = $cogestione->getClassInfo($class_id);
+	$classN = $class_info['class_year'];
+	$class_name = $class_info['class_year'] . $class_info['class_section'];
 	
 	// Riepilogo e controllo affollamento
 	$inserts = Array();
@@ -41,7 +42,7 @@ if(inputValid($cogestione)) {
 	
 	$riepilogo .= "<td>" . htmlspecialchars($name)
 		. "</td>\n<td>" . htmlspecialchars($surname)
-		. "</td>\n<td>" . htmlspecialchars($class) . "</td>\n";
+		. "</td>\n<td>" . htmlspecialchars($class_name) . "</td>\n";
 	
 	/* Ripete per ogni blocco */
 	foreach($blocks as $i => $b) {
@@ -59,7 +60,7 @@ if(inputValid($cogestione)) {
 		}
 		
 		/* Solo le quarte e le quinte possono accedere alle attività "VM18" */
-		if($activityRow['activity_vm'] == 1 && $classN != 4 && $classN != 5) {
+		if(!$cogestione->activityOkForClass($activityRow['activity_id'], $class_id)) {
 			$vm = TRUE;
 		}
 		
@@ -80,7 +81,7 @@ if(inputValid($cogestione)) {
 	} else {
 		/* Controlli passati. L'utente può iscriversi. */
 		echo $riepilogo;
-		$cogestione->inserisciPrenotazione($name, $surname, $class, $inserts);	  
+		$cogestione->inserisciPrenotazione($name, $surname, $class_id, $inserts);	  
 		printSuccess("I dati sono stati registrati con successo.");
 	}
 	
@@ -139,7 +140,7 @@ function inputValid($cogestione) {
 		}
 	
 		/* La classe deve essere in elenco */
-		if(!in_array($_POST['class'], $classi))
+		if(!array_key_exists($_POST['class'], $classi))
 			$validated = FALSE;
 	}
 	
@@ -182,12 +183,12 @@ function printClassSelector($cogestione) {
 			<option value="" disabled selected>Seleziona la classe</option>';
 	
 	// Selettore classe		  
-	foreach($classi as $cl) {
-		if(isset($_POST['class']) && $cl == $_POST['class'])
+	foreach($classi as $cl_id => $cl_val) {
+		if(isset($_POST['class']) && $cl_id == $_POST['class'])
 			$selected = 'selected';
 		else
 			$selected = '';
-		echo "\n<option value=\"$cl\" $selected>$cl</option>";
+		echo "\n<option value=\"$cl_id\" $selected>" . htmlspecialchars($cl_val['class_year'] . $cl_val['class_section']) . "</option>";
 	}		 
 			
 	echo "\n</select>";

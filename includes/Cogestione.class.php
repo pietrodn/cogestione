@@ -24,17 +24,28 @@ class Cogestione {
 	}
 	
 	public function classi() {
+		/* Returns an array like this: {class_id => [class_year, class_section]} */
 		if($this->classi === null) {
 			// Ottiene l'array delle classi.
-			$res = $this->db->query("SELECT * FROM class ORDER BY class_name;");
+			$res = $this->db->query("SELECT * FROM class ORDER BY class_year, class_section;");
 			$this->classi = Array();
 			foreach($res as $row) {
-				$this->classi[] = $row['class_name'];
+				$this->classi[$row['class_id']] = Array(
+					'class_year' => intval($row['class_year']),
+					'class_section' => $row['class_section'],
+				);
 			}
 		}
 		return $this->classi;
 	}
-
+	
+	public function getClassInfo($id) {
+		/* Ottiene anno e sezione della classe con id $id.
+		*/
+		$this->classi(); // Sets the internal array if necessary
+		return $this->classi[$id];
+	}
+	
 	public function getActivityInfo($id) {
 		/* Ottiene title, time e n. prenotati di una data attività.
 			Restituisce una riga siffatta:
@@ -53,13 +64,13 @@ class Cogestione {
 		return $this->activityInfo[$id];
 	}
 
-	public function isSubscribed($name, $surname, $class) {
+	public function isSubscribed($name, $surname, $class_id) {
 		// Has the user already subscribed?
 		$res = $this->db->query('SELECT user_id
 								FROM user
 								WHERE user_name="' . $this->db->escape($name) . '"
 								AND user_surname="' . $this->db->escape($surname) . '"
-								AND user_class="' . $this->db->escape($class) . '";');
+								AND user_class="' . $this->db->escape($class_id) . '";');
 		$n = count($res);
 		return ( $n ? TRUE : FALSE );
 	}
@@ -110,17 +121,17 @@ class Cogestione {
 		return $res;
 	}
 
-	public function inserisciPrenotazione($name, $surname, $class, $prenotazione) {
+	public function inserisciPrenotazione($name, $surname, $class_id, $prenotazione) {
 		/* $prenotazione array associativo "id blocco" => "id attività" */
 	
 		// Escaping
 		$name = $this->db->escape($name);
 		$surname = $this->db->escape($surname);
-		$class = $this->db->escape($class);
+		$class_id = intval($class_id);
 		// Inserimento dati
 	
 		$res = $this->db->query("INSERT INTO user (user_name, user_surname, user_class)
-			VALUES ('$name', '$surname', '$class');");
+			VALUES ('$name', '$surname', $class_id);");
 		
 		$user_id = $this->db->insert_id();
 		$res = $this->db->query("INSERT INTO prenotazioni (pren_user)
@@ -158,12 +169,11 @@ class Cogestione {
 	}
 
 	public function getUsersForActivity($activity_id) {
-		$res = $this->db->query("SELECT user_name, user_surname, user_class
+		$res = $this->db->query("SELECT user_name, user_surname, user_class, CONCAT(class_year, class_section) AS class_name
 				FROM prenotazioni_attivita
-				LEFT JOIN prenotazioni
-				ON prenact_prenotation=pren_id
-				LEFT JOIN user
-				ON user_id=pren_user
+				LEFT JOIN prenotazioni ON prenact_prenotation=pren_id
+				LEFT JOIN user ON user_id=pren_user
+				LEFT JOIN class ON user_class = class_id
 				WHERE prenact_activity = " . intval($activity_id) . "
 				ORDER BY pren_timestamp;");
 								
@@ -181,12 +191,13 @@ class Cogestione {
 			$conditions[] = "user_surname=\"$surname\"";
 		}
 		if(!empty($user_class)) {
-			$class = $this->db->escape($user_class);
-			$conditions[] = "user_class=\"$class\"";
+			$class = intval($user_class);
+			$conditions[] = "user_class=$class";
 		}
 		$conditionString = implode($conditions, ' AND ');
-		$res = $this->db->query("SELECT DISTINCT user_id, user_name, user_surname, user_class
+		$res = $this->db->query("SELECT DISTINCT user_id, user_name, user_surname, user_class, CONCAT(class_year, class_section) AS class_name
 			FROM user
+			LEFT JOIN class ON user_class = class_id
 			WHERE $conditionString
 			ORDER BY CONCAT(user_surname, user_name);");
 	
@@ -194,8 +205,9 @@ class Cogestione {
 	}
 	
 	public function getUser($user_id) {
-		$res = $this->db->query("SELECT DISTINCT user_id, user_name, user_surname, user_class
+		$res = $this->db->query("SELECT DISTINCT user_id, user_name, user_surname, user_class, CONCAT(class_year, class_section) AS class_name
 			FROM user
+			LEFT JOIN class ON user_class = class_id
 			WHERE user_id = " . intval($user_id) . "
 			LIMIT 1;");
 		if(count($res) == 0) {
@@ -204,9 +216,11 @@ class Cogestione {
 		return $res[0];
 	}
 	
-	public function activityOkForClass($activity_id, $class_n) {
+	public function activityOkForClass($activity_id, $class_id) {
 		$act_info = $this->getActivityInfo($activity_id);
-		if($act_info['activity_vm'] == 1 && $class_n != 4 && $class_n != 5) {
+		$class_info = $this->getClassInfo($class_id);
+		$year = $class_info['class_year'];
+		if($act_info['activity_vm'] == 1 && $year != 4 && $year != 5) {
             return FALSE;
         }
         return TRUE;

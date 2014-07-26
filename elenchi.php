@@ -26,7 +26,7 @@ if(isset($_GET['deleteUser'])) {
 			$result = $cogestione->deleteUser($uid);
 			if($result === TRUE) {
 				printSuccess("L'utente ". htmlspecialchars($uInfo['user_name']) . " " . htmlspecialchars($uInfo['user_surname']) .
-				" (" . htmlspecialchars($uInfo['user_class']) . ") è stato eliminato con successo.");
+				" (" . htmlspecialchars($uInfo['class_name']) . ") è stato eliminato con successo.");
 			} else {
 				printError("L'utente $uid non ha potuto essere eliminato.");
 			}
@@ -60,16 +60,15 @@ echo '<form class="form-inline noprint" role="form" action="'. $_SERVER['PHP_SEL
 	<select class="form-control" name="class" id="class">
 	<option value="" selected>Tutte le classi</option>';
 	
-// Selettore classe	   
-foreach($classi as $cl) {
-	if(isset($_GET['class']) && $cl == $_GET['class'])
+// Selettore classe		  
+foreach($classi as $cl_id => $cl_val) {
+	if(isset($_GET['class']) && $cl_id == $_GET['class'])
 		$selected = 'selected';
 	else
 		$selected = '';
-	$cl = htmlspecialchars($cl);
-	echo "\n<option value=\"$cl\" $selected>$cl</option>";
-}		
-		
+	echo "\n<option value=\"$cl_id\" $selected>" . htmlspecialchars($cl_val['class_year'] . $cl_val['class_section']) . "</option>";
+}		 
+	
 echo "\n</select></div>";
 echo '<button style="margin-left: 5px;" type="submit" class="btn btn-primary" name="cercastud">Cerca</button>';
 echo "</fieldset></form></div></div>\n";
@@ -131,7 +130,7 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 			echo "\n<li>"
 				. htmlspecialchars($row['user_surname']) . ' '
 				. htmlspecialchars($row['user_name'])
-				. ' (' . $row['user_class'] . ") </li>";
+				. ' (' . $row['class_name'] . ") </li>";
 		}
 		echo "\n</ol>";
 		
@@ -168,7 +167,7 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 			$riepilogo .= "\n<td>" . htmlspecialchars($row['user_id']) . '</td>';
 			$riepilogo .= "\n<td>" . htmlspecialchars($row['user_name']) . '</td>';
 			$riepilogo .= "\n<td>" . htmlspecialchars($row['user_surname']) . '</td>';
-			$riepilogo .= "\n<td>" . htmlspecialchars($row['user_class']) . '</td>';
+			$riepilogo .= "\n<td>" . htmlspecialchars($row['class_name']) . '</td>';
 			
 			$studentId = intval($row['user_id']);
 			
