@@ -165,7 +165,7 @@ function printForm($cogestione) {
 			<input class="form-control" type="text" name="surname" id="surname" placeholder="Cognome" required />
 			</div>
 			<div class="form-group">
-			<label class="sr-only" for="class">Classe: </label>';	   
+			<label class="sr-only" for="class-selector">Classe: </label>';	   
 	
 	printClassSelector($cogestione);
 	
@@ -181,7 +181,7 @@ function printForm($cogestione) {
 function printClassSelector($cogestione) {
 	$classi = $cogestione->classi();
 	
-	echo '<select class="form-control" name="class" id="classSelector" required>
+	echo '<select class="form-control" name="class" id="class-selector" required>
 			<option value="" disabled selected>Seleziona la classe</option>';
 	
 	// Selettore classe		  
@@ -227,7 +227,7 @@ function printActivityTable($cogestione) {
 			printf('<label for="activity_%d" class="popover_activity" data-toggle="popover" title="%s">' . "\n",
 				intval($row['activity_id']), 
 				htmlspecialchars($row['activity_title']));
-			printf('<div class="description-wrapper">%s</div>' . "\n", $row['activity_description']);
+			printf('<span class="description-wrapper">%s</span>' . "\n", $row['activity_description']);
 			printf('<input type="radio" name="block_%d" value="%d" id="activity_%d" %s class="%s %s" required />' . "\n",
 				$i,
 				intval($row['activity_id']),
