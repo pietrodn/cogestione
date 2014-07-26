@@ -16,6 +16,12 @@ $(function(){
 });
 
 function setAutomaticMode(flag) {
-	$('#automatic-panel').toggle(flag);
-	$('#manual-panel').toggle(!flag);
+	/* Don't use .toggle() because it causes a glitch in the animation. */
+	if(flag) {
+		$('#manual-panel').hide();
+		$('#automatic-panel').show();
+	} else {
+		$('#automatic-panel').hide();
+		$('#manual-panel').show();
+	}
 }

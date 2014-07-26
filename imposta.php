@@ -143,13 +143,9 @@ if(isset($_POST['submitActivities'])) {
 	printSuccess('Classi aggiornate con successo.');
 }
 ?>
-
+<!--
 <p>
-Cambia le impostazioni della cogestione utilizzando il form sottostante.
-Le modifiche saranno applicate soltanto dopo aver confermato cliccando sul pulsante <b>Salva modifiche orario</b> in fondo alla pagina.
-</p>
-<p>
-Per <b>aggiungere un nuovo blocco o una nuova attività</b> occorre dunque:
+Per <b>aggiungere un nuovo blocco o una nuova attività</b> occorre:
 </p>
 <ol>
 	<li>incrementare gli appositi contatori;</li>
@@ -170,11 +166,24 @@ Per segnare un'attività come <b>riservata alle quarte o alle quinte</b>, spunta
 <p>
 Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo aver cancellato attività o blocchi.
 </p>
-
+-->
 <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
 
-<div class="row">
-	<div class="col-md-6">
+<!-- Nav tabs -->
+<div class="panel panel-default">
+	<div class="panel-body">
+		<ul class="nav nav-pills" role="tablist">
+			<li class="active"><a href="#abilitazione" role="tab" data-toggle="tab">Abilitazione prenotazioni</a></li>
+			<li><a href="#classi" role="tab" data-toggle="tab">Classi</a></li>
+			<li><a href="#cancella" role="tab" data-toggle="tab">Cancellazione prenotazioni</a></li>
+			<li><a href="#attivita" role="tab" data-toggle="tab">Attività</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- Tab panes -->
+<div class="tab-content">
+	<div class="tab-pane active" id="abilitazione">
 		<!-- Abilitation form -->
 		<div class="panel panel-default">
 			<div class="panel-heading">
@@ -229,6 +238,8 @@ Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo 
 				</li>
 			</ul>
 		</div>
+	</div>
+	<div class="tab-pane" id="classi">
 		<!-- Classes form -->
 		<div class="panel panel-default">
 			<div class="panel-heading">
@@ -256,8 +267,7 @@ Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo 
 			</ul>
 		</div>
 	</div>
-	
-	<div class="col-md-6">
+	<div class="tab-pane" id="cancella">
 		<!-- Deletion form -->
 		<div class="panel panel-default">
 			<div class="panel-heading">
@@ -290,7 +300,7 @@ Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo 
 			</ul>
 		</div>
 	</div>
-</div>
+<div class="tab-pane" id="attivita">
 
 <!-- Activity form -->
 <div class="panel panel-default">
@@ -364,8 +374,10 @@ foreach($blocks as $i => $title) {
 </tr>
 </table>
 <button class="btn btn-primary" type="submit" name="submitActivities">Modifica attività</button>
-</div>
-</div>
+			</div><!-- panel-body -->
+		</div><!-- panel -->
+	</div><!-- tab-pane -->
+</div><!-- tab-content -->
 </form>
 <?php
 	showFooter();
