@@ -1,15 +1,13 @@
 <?php
-	require_once("common.php");
-	
-	$css = Array('css/prenota.css');
-	$js = Array('js/prenota.js');
-	showHeader('ca-nstab-prenota', 'Prenotazioni cogestione 2014', $css, $js);
-	
-	$configurator = Configurator::configurator();
-	$cogestione = new Cogestione();
-?>
 
-<?php
+require_once("common.php");
+
+$css = Array('css/prenota.css');
+$js = Array('js/prenota.js');
+showHeader('ca-nstab-prenota', 'Prenotazioni cogestione 2014', $css, $js);
+
+$configurator = Configurator::configurator();
+$cogestione = new Cogestione();
 
 /* Ottiene i nomi delle colonne (blocchi) */
 $blocks = $cogestione->blocchi();

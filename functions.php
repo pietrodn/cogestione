@@ -6,7 +6,7 @@ function printError($message) {
 				<h3 class="panel-title">Errore</h3>
 			  </div>
 			  <div class="panel-body">
-				' . htmlspecialchars($message) . '
+				' . $message . '
 			  </div>
 		</div>';
 }
@@ -17,7 +17,7 @@ function printSuccess($message) {
 				<h3 class="panel-title">Operazione riuscita</h3>
 			  </div>
 			  <div class="panel-body">
-				' . htmlspecialchars($message) . '
+				' . $message . '
 			  </div>
 		</div>';
 }

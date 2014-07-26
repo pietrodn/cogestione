@@ -1,5 +1,5 @@
 <?php
-	require_once("config.php");
+	include_once("config.php");
 	
 	require_once("includes/Configurator.class.php");
 	require_once("includes/Cogestione.class.php");

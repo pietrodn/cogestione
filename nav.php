@@ -1,5 +1,5 @@
 <?php
-require_once("config.php");
+include_once("config.php");
 
 function showHeader($selectedId='', $title, $cssFiles=Array(), $jsFiles=Array())
 {
