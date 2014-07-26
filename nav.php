@@ -57,7 +57,7 @@ function showHeader($selectedId='', $title, $cssFiles=Array(), $jsFiles=Array())
         </ul>
         <ul class="nav navbar-nav navbar-right">
     <?php
-    if($_SESSION['auth']) {
+    if(isset($_SESSION['auth'])) {
     ?>
         
         <li class="navbar-text">Signed in as <?php echo htmlspecialchars($_SESSION['username']); ?></li>

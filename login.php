@@ -1,12 +1,10 @@
 <?php
 require_once("common.php");
 
-if($_SESSION['auth'] && !isset($_GET['logout'])) {
+if(isset($_SESSION['auth']) && !isset($_GET['logout'])) {
 	header('Location: ./imposta.php');
 	die();
 }
-
-$css = Array('css/StiliCogestione.css');
 
 $configurator = Configurator::configurator();
 
@@ -20,15 +18,15 @@ if(isset($_POST['login'])) {
 		die();
 	} else {
 		destroyLogin();
-		showHeader('ca-nstab-login', "Login", $css);
+		showHeader('ca-nstab-login', "Login");
 		printError('Autenticazione fallita!');
 	}
 } else if (isset($_GET['logout'])) {
 	destroyLogin();
-	showHeader('ca-nstab-login', "Login", $css);
+	showHeader('ca-nstab-login', "Login");
 	printSuccess('Logout avvenuto con successo.');
 } else {
-	showHeader('ca-nstab-login', "Login", $css);
+	showHeader('ca-nstab-login', "Login");
 }
 
 function destroyLogin() {
