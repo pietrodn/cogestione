@@ -158,9 +158,9 @@ Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo 
 
 <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
 
-<!-- Abilitation form -->
 <div class="row">
 	<div class="col-md-6">
+		<!-- Abilitation form -->
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title">Abilitazione delle prenotazioni</h3>
@@ -216,40 +216,42 @@ Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo 
 		</div>
 	</div>
 	
-	<!-- Deletion form -->
 	<div class="col-md-6">
+		<!-- Deletion form -->
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title">Cancellazione prenotazioni</h3>
 			</div>
-		<ul class="list-group">
-			<li class="list-group-item">
-				<div class="checkbox">
-					<?php
-					echo 'Ci sono <b>' . $cogestione->getSubscriptionsNumber() . ' prenotazioni</b> effettuate.';
-					?> Se vuoi cancellarle, spunta la casella.
-					I dati non potranno essere recuperati.<br />
-					<label for="confermaTruncate">
-					<input type="checkbox" name="confermaTruncate" id="confermaTruncate" value="Cancella prenotazioni" />
-					Cancella tutte le prenotazioni
-					</label>
-				</div>
-			</li>
-			<li class="list-group-item" id="delete-single-reservation">
-				<div class="form-group">
-					Elimina una singola prenotazione.<br />
-					<label for="uid_delete">
-					UID: <input type="text" name="uid_delete" id="uid_delete" size="20" placeholder="123" />
-					</label>
-				</div>
-			</li>
-			<li class="list-group-item">
-				<button class="btn btn-danger" type="submit" name="submitDelete">Conferma cancellazione</button>
-			</li>
-		</ul>
+			<ul class="list-group">
+				<li class="list-group-item">
+					<div class="checkbox">
+						<?php
+						echo 'Ci sono <b>' . $cogestione->getSubscriptionsNumber() . ' prenotazioni</b> effettuate.';
+						?> Se vuoi cancellarle, spunta la casella.
+						I dati non potranno essere recuperati.<br />
+						<label for="confermaTruncate">
+						<input type="checkbox" name="confermaTruncate" id="confermaTruncate" value="Cancella prenotazioni" />
+						Cancella tutte le prenotazioni
+						</label>
+					</div>
+				</li>
+				<li class="list-group-item" id="delete-single-reservation">
+					<div class="form-group">
+						Elimina una singola prenotazione.<br />
+						<label for="uid_delete">
+						UID: <input type="text" name="uid_delete" id="uid_delete" size="20" placeholder="123" />
+						</label>
+					</div>
+				</li>
+				<li class="list-group-item">
+					<button class="btn btn-danger" type="submit" name="submitDelete">Conferma cancellazione</button>
+				</li>
+			</ul>
 		</div>
 	</div>
 </div>
+
+<!-- Activity form -->
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<h3 class="panel-title">Modifica tabella attività</h3>

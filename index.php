@@ -185,10 +185,10 @@ function printClassSelector($cogestione) {
 	// Selettore classe		  
 	foreach($classi as $cl_id => $cl_val) {
 		if(isset($_POST['class']) && $cl_id == $_POST['class'])
-			$selected = 'selected';
+			$selected = ' selected';
 		else
 			$selected = '';
-		echo "\n<option value=\"$cl_id\" $selected>" . htmlspecialchars($cl_val['class_year'] . $cl_val['class_section']) . "</option>";
+		echo "\n<option value=\"$cl_id\"$selected>" . htmlspecialchars($cl_val['class_year'] . $cl_val['class_section']) . "</option>";
 	}		 
 			
 	echo "\n</select>";
