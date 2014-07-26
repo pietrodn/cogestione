@@ -7,8 +7,22 @@ Devo ancora stabilirne le politiche di distribuzione.
 L'uso dell'applicativo dovrebbe risultare ovvio a partire dall'interfaccia.
 In caso contrario, essa necessiterà di miglioramenti.
 
-Installazione
--------------
+Installazione automatica
+------------------------
+
+È disponibile uno script per la configurazione automatica, che si usa come segue:
+
+1. Copiare la cartella "cogestione" nel proprio spazio web.
+2. Rendere la cartella "cogestione" scrivibile dal webserver.
+3. Creare in MySQL un nuovo database vuoto.
+4. Navigare nel browser nella cartella "cogestione" e seguire le indicazioni dello script di setup.
+5. Finita la configurazione, ripristinare permessi restrittivi sulla cartella "cogestione" e su config.php.
+6. Se volete ripetere la configurazione automatica, eliminate o spostate prima il file config.php.
+
+Installazione manuale
+---------------------
+
+Se per qualche motivo non potete o volete usare lo script automatico di configurazione, ecco i passi da seguire per la configurazione manuale.
 
 1. Copiare la cartella "cogestione" nel proprio spazio web.
 2. Importare il file sql/cogestione.sql in un database di MySQL.
