@@ -11,3 +11,7 @@
 textarea#classes-form {
 	max-width: 100%;
 }
+
+#active-tab {
+	display: none;
+}

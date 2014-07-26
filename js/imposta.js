@@ -13,6 +13,11 @@ $(function(){
 	$('#confermaTruncate').change(function(){
 		$('#delete-single-reservation').toggle($(this).checked);
 	});
+	
+	/* Remembers the active tab after submitting */
+	activeTab = $('#active-tab').text();
+	$('#imposta-tab a[href="#' + activeTab + '"]').tab('show');
+	
 });
 
 function setAutomaticMode(flag) {

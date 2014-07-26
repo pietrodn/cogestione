@@ -14,6 +14,7 @@ showHeader('ca-nstab-imposta', "Impostazioni cogestione", $css, $js);
 $configurator = Configurator::configurator();
 $cogestione = new Cogestione();
 if(isset($_POST['submitActivities'])) {
+	activeTab('attivita');
 	$activities = $bl = $deleteAct = $deleteBlocks = Array();
 	
 	// Escaping dati attività
@@ -79,7 +80,7 @@ if(isset($_POST['submitActivities'])) {
 	printSuccess('La tabella attività è stata modificata.');
 
 } else if(isset($_POST['submitDelete'])) {
-
+	activeTab('cancella');
 	/* Cancellazione di tutte le prenotazioni */
 	if(isset($_POST['confermaTruncate'])) {
 		$res = $cogestione->clearReservations();
@@ -106,7 +107,7 @@ if(isset($_POST['submitActivities'])) {
 	}
 
 } else if(isset($_POST['submitEnable'])) {
-
+	activeTab('abilita');
 	/* Manual mode */
 	if(isset($_POST['autoEnable'])) {
 		$configurator->setManualMode(!(bool)$_POST['autoEnable']);
@@ -127,6 +128,7 @@ if(isset($_POST['submitActivities'])) {
 	printSuccess('Impostazioni modificate con successo.');
 
 } else if(isset($_POST['submitClasses'])) {
+	activeTab('classi');
 	$raw_classes = $_POST['classes'];
 	$classes_input = explode(';', $raw_classes);
 	$classes_output = Array();
@@ -172,7 +174,7 @@ Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo 
 <!-- Nav tabs -->
 <div class="panel panel-default">
 	<div class="panel-body">
-		<ul class="nav nav-pills" role="tablist">
+		<ul class="nav nav-pills" role="tablist" id="imposta-tab">
 			<li class="active"><a href="#abilitazione" role="tab" data-toggle="tab">Abilitazione prenotazioni</a></li>
 			<li><a href="#classi" role="tab" data-toggle="tab">Classi</a></li>
 			<li><a href="#cancella" role="tab" data-toggle="tab">Cancellazione prenotazioni</a></li>
@@ -381,4 +383,9 @@ foreach($blocks as $i => $title) {
 </form>
 <?php
 	showFooter();
+	
+	function activeTab($tabid) {
+		/* Invisibile element that remembers the active tab on submit */
+		echo '<div id="active-tab">' . $tabid . '</div>';
+	}
 ?>
