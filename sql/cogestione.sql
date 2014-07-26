@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Lug 21, 2014 alle 17:43
+-- Generation Time: Lug 26, 2014 alle 08:44
 -- Versione del server: 5.6.15
 -- PHP Version: 5.4.24
 
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `activity` (
   `activity_title` text NOT NULL,
   `activity_vm` tinyint(1) NOT NULL DEFAULT '0',
   `activity_description` text
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=120 ;
 
 -- --------------------------------------------------------
 
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS `activity` (
 CREATE TABLE IF NOT EXISTS `block` (
 `block_id` int(11) NOT NULL,
   `block_title` tinytext NOT NULL
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;
 
 -- --------------------------------------------------------
 
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS `prenotazioni` (
 `pren_id` int(11) NOT NULL,
   `pren_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `pren_user` int(11) NOT NULL
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=38 ;
 
 -- --------------------------------------------------------
 
@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS `prenotazioni_attivita` (
 `prenact_id` int(11) NOT NULL,
   `prenact_prenotation` int(11) NOT NULL,
   `prenact_activity` int(11) NOT NULL
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=90 ;
 
 -- --------------------------------------------------------
 
@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `user_surname` tinytext NOT NULL,
   `user_class` varchar(20) NOT NULL,
   `user_pren_latest` int(11) DEFAULT NULL
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=38 ;
 
 --
 -- Indexes for dumped tables
@@ -159,27 +159,27 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `activity`
 --
 ALTER TABLE `activity`
-MODIFY `activity_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=121;
+MODIFY `activity_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=120;
 --
 -- AUTO_INCREMENT for table `block`
 --
 ALTER TABLE `block`
-MODIFY `block_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=6;
+MODIFY `block_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=3;
 --
 -- AUTO_INCREMENT for table `prenotazioni`
 --
 ALTER TABLE `prenotazioni`
-MODIFY `pren_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=37;
+MODIFY `pren_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=38;
 --
 -- AUTO_INCREMENT for table `prenotazioni_attivita`
 --
 ALTER TABLE `prenotazioni_attivita`
-MODIFY `prenact_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=88;
+MODIFY `prenact_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=90;
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=37;
+MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=38;
 --
 -- Limiti per le tabelle scaricate
 --
