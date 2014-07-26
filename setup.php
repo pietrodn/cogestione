@@ -15,6 +15,8 @@ if(is_readable(CONFIG_FILE)) {
 		printError('Non posso creare il file di configurazione perché la directory corrente non è scrivibile.');
 	} else {
 		if(isset($_POST['submit'])) {
+			/* Resets login */
+			destroyLogin();
 			
 			echo "<p>Provo a connettermi al database...";
 			$db = new mysqli($_POST['host'], $_POST['username'], $_POST['password'], $_POST['dbname']);
@@ -23,6 +25,7 @@ if(is_readable(CONFIG_FILE)) {
 			} else {
 				echo " <b>OK!</b></p>\n";
 				
+				/* Initial database setup. Overwrites tables, if they exist. */
 				echo "<p>Provo a creare il database...</p>";
 				$sql_setup = file_get_contents('sql/cogestione.sql');
 				$db->multi_query($sql_setup);
@@ -34,6 +37,8 @@ if(is_readable(CONFIG_FILE)) {
 				$template = str_replace('DB_USER', addslashes($_POST['username']), $template);
 				$template = str_replace('DB_PASSWORD', addslashes($_POST['password']), $template);
 				$template = str_replace('DB_NAME', addslashes($_POST['dbname']), $template);
+				$template = str_replace('ADMIN_USER', addslashes($_POST['admin_user']), $template);
+				$template = str_replace('ADMIN_PASSWORD', addslashes($_POST['admin_password']), $template);
 				
 				$old = umask();
 				umask(0037);
@@ -67,8 +72,8 @@ function showConfigForm() {
 		<div class="panel-heading">
 			<h3 class="panel-title">Configura</h3>
 		</div>
-		<div class="panel-body">
-			<fieldset>
+		<ul class="list-group">
+			<li class="list-group-item">
 				<div class="form-group">
 					<label for="host">DB host: </label>
 					<input class="form-control" type="text" name="host" id="host" size="20" placeholder="MySQL server host" value="<?php
@@ -101,12 +106,29 @@ function showConfigForm() {
 					}
 					?>" />
 				</div>
+				
+			</li>
+			<li class="list-group-item">
+				<div class="form-group">
+					<label for="admin_user">Admin user: </label>
+					<input class="form-control" type="text" name="admin_user" id="admin_user" size="20" placeholder="Admin username" value="<?php
+					if(isset($_POST['admin_user'])) {
+						echo htmlspecialchars($_POST['admin_user']);
+					}
+					?>" />
+				</div>
+				<div class="form-group">
+					<label for="admin_password">Admin password: </label>
+					<input class="form-control" type="password" name="admin_password" id="admin_password" size="20" placeholder="Admin password" value="" />
+				</div>
+			</li>
+			<li class="list-group-item">
 				<!-- Submit button -->
 				<div class="form-group">
 					<button class="btn btn-primary" type="submit" name="submit">Configura</button>
 				</div>
-			</fieldset>
-		</div>
+			</li>
+		</ul>
 	</div>
 </form>
 <?php

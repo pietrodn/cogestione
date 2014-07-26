@@ -29,11 +29,7 @@ if(isset($_POST['login'])) {
 	showHeader('ca-nstab-login', "Login");
 }
 
-function destroyLogin() {
-	unset($_SESSION['auth']);
-	unset($_SESSION['username']);
-	session_regenerate_id(true);
-}  
+ 
 ?>
 
 <!-- Authentication form -->

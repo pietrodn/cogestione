@@ -13,7 +13,7 @@ class Configurator {
 	
 	private function __construct() {
 		/* Loads parameters from configuration file */
-		require('config.php');
+		require(CONFIG_FILE);
 		
 		$this->db = Database::database();
 		

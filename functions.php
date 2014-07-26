@@ -22,4 +22,9 @@ function printSuccess($message) {
 		</div>';
 }
 
+function destroyLogin() {
+	unset($_SESSION['auth']);
+	unset($_SESSION['username']);
+	session_regenerate_id(true);
+} 
 ?>
