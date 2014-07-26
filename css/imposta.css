@@ -7,3 +7,7 @@
      -moz-border-radius: 0 !important;
           border-radius: 0 !important;
 }
+
+textarea#classes-form {
+	max-width: 100%;
+}

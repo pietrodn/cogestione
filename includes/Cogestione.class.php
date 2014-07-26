@@ -33,6 +33,7 @@ class Cogestione {
 				$this->classi[$row['class_id']] = Array(
 					'class_year' => intval($row['class_year']),
 					'class_section' => $row['class_section'],
+					'class_name' => strval(intval($row['class_year'])) . $row['class_section'],
 				);
 			}
 		}
@@ -306,6 +307,47 @@ class Cogestione {
 	public function deleteUser($uid) {
 		$res = $this->db->query("DELETE FROM user
 								WHERE user_id = " . intval($uid) . ";");
+		return $res;
+	}
+	
+	public function setClasses($classes_arr) {
+		/* $classes_arr is an array of arrays [class_year, class_section] */
+		
+		// Removes deleted classes
+		$toDelete = Array();
+		foreach($this->classi() as $cl_id => $cl_val) {
+			$needle = Array($cl_val['class_year'], $cl_val['class_section']);
+			if(!array_search($needle, $classes_arr)) {
+				$toDelete[] = intval($cl_id);
+			}
+		}
+		if(count($toDelete)) {
+			$query = "DELETE FROM class WHERE class_id IN (" . implode(',', $toDelete) . ');';
+			$this->db->query($query);
+		}
+		
+		// Insert new classes
+		$query = "INSERT IGNORE INTO class
+			(class_year, class_section)
+			VALUES ";
+		$tuples = Array();
+		foreach($classes_arr as $cl_val) {
+			$cl_year = intval($cl_val[0]);
+			$cl_section = $this->db->escape($cl_val[1]);
+			$tuples[] = "($cl_year, '$cl_section')";
+		}
+		$query .= implode(', ', $tuples);
+		$query .= ';';
+		$res = $this->db->query($query);
+		
+		$this->classi = null; // resets cache
+		
+	}
+	
+	public function deleteClass($cl_id) {
+		$this->classi = null; // resets cache
+		
+		$res = $this->db->query("DELETE FROM class WHERE class_id = " . intval($cl_id) . ";");
 		return $res;
 	}
 

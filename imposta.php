@@ -126,7 +126,22 @@ if(isset($_POST['submitActivities'])) {
 	
 	printSuccess('Impostazioni modificate con successo.');
 
-} 
+} else if(isset($_POST['submitClasses'])) {
+	$raw_classes = $_POST['classes'];
+	$classes_input = explode(';', $raw_classes);
+	$classes_output = Array();
+	foreach($classes_input as $cl_name) {
+		$cl_name = trim($cl_name);
+		if($cl_name) { // if not empty
+			$cl_year = intval($cl_name);
+			$cl_section = substr($cl_name, 1);
+			$classes_output[] = Array($cl_year, $cl_section);
+		}
+	}
+	$cogestione->setClasses($classes_output);
+	
+	printSuccess('Classi aggiornate con successo.');
+}
 ?>
 
 <p>
@@ -211,6 +226,34 @@ Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo 
 				<!-- Submit button -->
 				<li class="list-group-item">
 					<button class="btn btn-primary" type="submit" name="submitEnable">Modifica impostazioni</button>
+				</li>
+			</ul>
+		</div>
+		<!-- Classes form -->
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Classi</h3>
+			</div>
+			<ul class="list-group">
+				<li class="list-group-item">
+					<div class="form-group">
+						<label for="classes-form">Inserisci le classi, separate da punto e virgola (";"). Gli spazi saranno ignorati.</label>
+						<textarea class="form-control" rows="4" name="classes" id="classes-form" placeholder="1A; 1B; 1C; 2A; 2B"><?php
+	$classes_array = $cogestione->classi();
+	$class_names = Array();
+	
+	foreach($classes_array as $cl_id => $cl_val) {
+	
+		$class_names[] = $cl_val['class_year'] . $cl_val['class_section'];
+		
+	}
+	
+	echo implode('; ', $class_names);
+?></textarea>
+					</div>
+				</li>
+				<li class="list-group-item">
+					<button class="btn btn-primary" type="submit" name="submitClasses">Modifica classi</button>
 				</li>
 			</ul>
 		</div>
