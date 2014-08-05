@@ -20,7 +20,7 @@ function getPopoverContent() {
 
 $(function(){
 	/* Callback per il selettore della classe */
-	$('#classSelector').change(getClassAndToggle);
+	$('#class-selector').change(getClassAndToggle);
 	
 	/* Di default le attività "VM18" sono disattivate */
 	toggleVm(1);

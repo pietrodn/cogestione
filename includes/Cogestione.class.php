@@ -67,7 +67,15 @@ class Cogestione {
 		}
 		return $this->activityInfo[$id];
 	}
-
+	
+	public function activityFull($activity_id) {
+		$activityRow = $this->getActivityInfo($activity_id);
+		if($activityRow['activity_size'] != 0 && $activityRow['prenotati'] >= $activityRow['activity_size']) {
+			return true;
+		}
+		return false;
+	}
+	
 	public function isSubscribed($name, $surname, $class_id) {
 		// Has the user already subscribed?
 		$res = $this->db->query('SELECT user_id

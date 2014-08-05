@@ -57,7 +57,7 @@ if(inputValid($cogestione)) {
 		}
 		
 		/* Verifico l'affollamento. Se max=0 il vincolo non vale. */
-		if($activityRow['activity_size'] != 0 && $activityRow['prenotati'] >= $activityRow['activity_size']) {
+		if($cogestione->activityFull($activityRow['activity_id'])) {
 			$pieno = TRUE;
 		}
 		
@@ -224,7 +224,7 @@ function printActivityTable($cogestione) {
 		/* Stampa tutte le attività che si svolgono contemporaneamente */
 		foreach($activities as $row) {
 			
-			$full = ($row['activity_size']!=0 && $row['prenotati']>=$row['activity_size']);
+			$full = $cogestione->activityFull($row['activity_id']);
 			
 			echo "\n" . '<div class="radio">' . "\n";
 			printf('<label for="activity_%d" class="popover_activity" data-toggle="popover" title="%s">' . "\n",
