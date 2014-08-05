@@ -80,6 +80,8 @@ if(inputValid($cogestione)) {
 		printError('Ti sei già iscritto!');
 	} else if(!$correctBlocks) {
 		printError('Alcune delle attività scelte non sono coerenti con i blocchi.');
+	} else if($cogestione->isBad($name) || $cogestione->isBad($surname)) {
+		printError('Non puoi iscriverti con questo nome e cognome.');
 	} else {
 		/* Controlli passati. L'utente può iscriversi. */
 		echo $riepilogo;

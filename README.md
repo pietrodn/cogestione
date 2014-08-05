@@ -103,6 +103,16 @@ Le prenotazioni si possono attivare o disattivare in modalità automatica o manu
 
 ![Schermata di prenotazione per gli utenti](http://i.imgur.com/dZD4StH.png)
 
+Blacklist
+---------
+
+È possibile specificare una serie di "parole vietate" che saranno confrontate con il nome e il cognome inseriti da ogni utente, prima di registrare l'iscrizione.
+
+È possibile usare la sintassi delle [espressioni regolari](https://it.wikipedia.org/wiki/Espressione_regolare).
+
+La blacklist può essere impostata nell'apposita scheda della pagina _Imposta_.
+Di default la blacklist è vuota.
+
 Elenchi
 -------
 

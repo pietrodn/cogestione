@@ -357,10 +357,10 @@ class Cogestione {
 		return $res;
 	}
 	
-	public function isBad($string) {
+	public function isBad($str) {
 		foreach($this->configurator->getBlacklist() as $regex) {
-			$regex = '§' . $regex . '§i'; // to fix
-			if(preg_match($regex, $string) === 1) {
+			$regex = '/' . trim($regex) . '/i'; // to fix
+			if(preg_match($regex, $str) === 1) {
 				return true;
 			}
 		}

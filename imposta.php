@@ -286,8 +286,9 @@ Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo 
 			<ul class="list-group">
 				<li class="list-group-item">
 					<div class="form-group">
-						<label for="blacklist-form">Inserisci le espressioni vietate, una per linea.</label>
-						<textarea class="form-control" rows="4" name="blacklist" id="blacklist-form" placeholder="parolacce"><?php
+						<label for="blacklist-form">Inserisci le espressioni vietate, una per riga.
+						Puoi usare la sintassi delle <a href="//it.wikipedia.org/wiki/Espressione_regolare">espressioni regolari</a>.</label>
+						<textarea class="form-control" rows="10" name="blacklist" id="blacklist-form" placeholder="parolacce"><?php
 	echo htmlspecialchars(implode("\n", $cogestione->getBlacklist()));
 ?></textarea>
 					</div>
