@@ -6,6 +6,7 @@ class Configurator {
 	private $coge_users = Array();
 	private $startTime;
 	private $endTime;
+	private $blacklist;
 	
 	private $db;
 	
@@ -39,6 +40,9 @@ class Configurator {
 		}
 		if(isset($kvConf['endTime'])) {
 			$this->endTime = $kvConf['endTime'];
+		}
+		if(isset($kvConf['blacklist'])) {
+			$this->blacklist = explode("\n", $kvConf['blacklist']);
 		}
 	
 	}
@@ -77,6 +81,12 @@ class Configurator {
 		return ($now >= $beginTime AND $now <= $endTime);
 	}
 	
+	private function saveToDb($key, $value) {
+		$this->db->query("REPLACE config SET
+							config_value = '" . $this->db->escape($value) . "', 
+							config_key = '" . $this->db->escape($key) . "'");
+	}
+	
 	public function getStartTime() {
 		return $this->startTime;
 	}
@@ -93,39 +103,42 @@ class Configurator {
 		return $this->manualOn;
 	}
 	
+	public function getBlacklist() {
+		return $this->blacklist;
+	}
+	
 	public function setManualMode($on) {
 		if($on != $this->manualMode) {
 			$this->manualMode = (bool)$on;
-			$this->db->query("REPLACE config SET
-							config_value = " . intval($this->manualMode) . ", 
-							config_key = 'manualMode'");
+			$this->saveToDb('manualMode', intval($this->manualMode));
 		}
 	}
 	
 	public function setManualOn($on) {
 		if($on != $this->manualOn) {
 			$this->manualOn = (bool)$on;
-			$this->db->query("REPLACE config SET
-							config_value = " . intval($this->manualOn) . ", 
-							config_key = 'manualOn'");
+			$this->saveToDb('manualOn', intval($this->manualOn));
 		}
 	}
 	
 	public function setStartTime($time) {
 		if($time != $this->startTime) {
 			$this->startTime = $time;
-			$this->db->query("REPLACE config SET
-							config_value = '" . $this->db->escape($this->startTime) . "', 
-							config_key = 'startTime'");
+			$this->saveToDb('startTime', $this->startTime);
 		}
 	}
 	
 	public function setEndTime($time) {
 		if($time != $this->endTime) {
 			$this->endTime = $time;
-			$this->db->query("REPLACE config SET
-							config_value = '" . $this->db->escape($this->endTime) . "', 
-							config_key = 'endTime'");
+			$this->saveToDb('endTime', $this->endTime);
+		}
+	}
+	
+	public function setBlacklist($black) {
+		if($black != $this->blacklist) {
+			$this->blacklist = $black;
+			$this->saveToDb('blacklist', implode("\n", $this->blacklist));
 		}
 	}
 

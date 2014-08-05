@@ -143,6 +143,13 @@ if(isset($_POST['submitActivities'])) {
 	$cogestione->setClasses($classes_output);
 	
 	printSuccess('Classi aggiornate con successo.');
+} else if(isset($_POST['submitBlacklist'])) {
+	activeTab('blacklist');
+	$raw_blacklist = $_POST['blacklist'];
+	$black_arr = explode("\n", $raw_blacklist);
+	$cogestione->setBlacklist($black_arr);
+	
+	printSuccess('Blacklist aggiornata con successo.');
 }
 ?>
 <!--
@@ -179,6 +186,7 @@ Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo 
 			<li><a href="#classi" role="tab" data-toggle="tab">Classi</a></li>
 			<li><a href="#cancella" role="tab" data-toggle="tab">Cancellazione prenotazioni</a></li>
 			<li><a href="#attivita" role="tab" data-toggle="tab">Attività</a></li>
+			<li><a href="#blacklist" role="tab" data-toggle="tab">Blacklist</a></li>
 		</ul>
 	</div>
 </div>
@@ -265,6 +273,27 @@ Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo 
 				</li>
 				<li class="list-group-item">
 					<button class="btn btn-primary" type="submit" name="submitClasses">Modifica classi</button>
+				</li>
+			</ul>
+		</div>
+	</div>
+	<div class="tab-pane" id="blacklist">
+		<!-- Blacklist form -->
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Blacklist</h3>
+			</div>
+			<ul class="list-group">
+				<li class="list-group-item">
+					<div class="form-group">
+						<label for="blacklist-form">Inserisci le espressioni vietate, una per linea.</label>
+						<textarea class="form-control" rows="4" name="blacklist" id="blacklist-form" placeholder="parolacce"><?php
+	echo htmlspecialchars(implode("\n", $cogestione->getBlacklist()));
+?></textarea>
+					</div>
+				</li>
+				<li class="list-group-item">
+					<button class="btn btn-primary" type="submit" name="submitBlacklist">Modifica blacklist</button>
 				</li>
 			</ul>
 		</div>

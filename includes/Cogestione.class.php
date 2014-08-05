@@ -1,14 +1,17 @@
 <?php
-include('Database.class.php');
+include_once('Configurator.class.php');
+include_once('Database.class.php');
 
 class Cogestione {
 	private $db;
+	private $configurator;
 	private $blocks = null; // Block cache
 	private $classi = null; // Class cache
 	private $activityInfo = Array();
 	
 	function __construct() {
 		$this->db = Database::database();
+		$this->configurator = Configurator::configurator();
 	}
 	
 	public function blocchi() {
@@ -352,6 +355,25 @@ class Cogestione {
 		
 		$res = $this->db->query("DELETE FROM class WHERE class_id = " . intval($cl_id) . ";");
 		return $res;
+	}
+	
+	public function isBad($string) {
+		foreach($this->configurator->getBlacklist() as $regex) {
+			$regex = '§' . $regex . '§i'; // to fix
+			if(preg_match($regex, $string) === 1) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public function getBlacklist() {
+		return $this->configurator->getBlacklist();
+	}
+	
+	public function setBlacklist($arr) {
+		return $this->configurator->setBlacklist($arr);
 	}
 
 }
