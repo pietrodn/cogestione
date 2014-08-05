@@ -357,6 +357,22 @@ class Cogestione {
 		return $res;
 	}
 	
+	public function userValid($name, $surname) {
+		$strings = [	$name,
+						$surname,
+						$name . ' ' . $surname,
+						$surname . ' ' . $name,
+					];
+					
+		foreach($strings as $str) {
+			if($this->isBad($str)) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
 	public function isBad($str) {
 		foreach($this->configurator->getBlacklist() as $regex) {
 			$regex = '/' . trim($regex) . '/i'; // to fix

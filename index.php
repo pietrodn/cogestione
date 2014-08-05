@@ -76,12 +76,13 @@ if(inputValid($cogestione)) {
 		printError('Alcune delle attività selezionate sono troppo affollate. Rifai!');
 	} else if ($vm) {
 		printError('Alcune delle attività selezionate sono riservate a quarte e quinte. Rifai!');
-	} else if ($cogestione->isSubscribed($name, $surname, $class)) {
+	} else if ($cogestione->isSubscribed($name, $surname, $class_name)) {
 		printError('Ti sei già iscritto!');
 	} else if(!$correctBlocks) {
 		printError('Alcune delle attività scelte non sono coerenti con i blocchi.');
-	} else if($cogestione->isBad($name) || $cogestione->isBad($surname)) {
-		printError('Non puoi iscriverti con questo nome e cognome.');
+	} else if(!$cogestione->userValid($name, $surname)) {
+		$full_name = htmlspecialchars($name . ' ' . $surname);
+		printError("Non puoi iscriverti con il nome <b>$full_name</b>.");
 	} else {
 		/* Controlli passati. L'utente può iscriversi. */
 		echo $riepilogo;
