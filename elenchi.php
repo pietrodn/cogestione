@@ -2,8 +2,16 @@
 require_once("common.php");
 require_once("includes/UserListView.class.php");
 
-$css = Array('css/elenchi.css', 'css/tablesorter/theme.bootstrap.css', 'css/tablesorter/theme.bootstrap_2.css');
-$js = Array('js/tablesorter/jquery.tablesorter.min.js', 'js/tablesorter/jquery.tablesorter.widgets.min.js', 'js/elenchi.js');
+$css = Array(
+	'css/elenchi.css',
+	'css/tablesorter/theme.bootstrap.css',
+	'css/tablesorter/theme.bootstrap_2.css'
+);
+$js = Array(
+	'js/tablesorter/jquery.tablesorter.min.js',
+	'js/tablesorter/jquery.tablesorter.widgets.min.js',
+	'js/elenchi.js'
+);
 showHeader('ca-nstab-elenchi', "Elenco prenotazioni cogestione", $css, $js);
 
 $authenticated = !empty($_SESSION['auth']);

@@ -108,7 +108,7 @@ Blacklist
 
 È possibile specificare una serie di "parole vietate" che saranno confrontate con il nome e il cognome inseriti da ogni utente, prima di registrare l'iscrizione.
 
-È possibile usare la sintassi delle [espressioni regolari](https://it.wikipedia.org/wiki/Espressione_regolare).
+È possibile usare la sintassi delle [espressioni regolari](https://it.wikipedia.org/wiki/Espressione_regolare), oppure usare una blacklist in testo semplice.
 
 La blacklist può essere impostata nell'apposita scheda della pagina _Imposta_.
 Di default la blacklist è vuota.
@@ -123,6 +123,8 @@ Si può selezionare un'attività dalla tabella e verrà visualizzato l'elenco de
 
 Si può anche cercare un utente per nome, cognome e/o classe. È possibile specificare anche uno solo di questi campi, per esempio per vedere dove sono prenotati tutti gli studenti di una data classe.
 
+La tabella così ottenuta è riordinabile dinamicamente, cliccando sui titoli delle colonne.
+
 Da quest'ultima vista, se si è fatto il login in zona amministrativa, si possono anche cancellare le prenotazioni cliccando sulla "X" rossa accanto alla riga dell'utente prenotato. Non sarà richiesta ulteriore conferma.
 
 Grafico
@@ -131,12 +133,10 @@ Grafico
 Il grafico mostra l'andamento del numero cumulativo di iscrizioni in funzione del tempo.
 Serve più per curiosità che per altro. È ancora uno strumento da migliorare.
 
-To do
------
+Software di terze parti
+-----------------------
 
-* Blacklist nomi
-* Ordinamento liste per nome, cognome o classe
-* Impostazione delle credenziali di autenticazione via web, da memorizzare in database (con hash)
-* Possibilità di cancellare le prenotazioni dalla ricerca per attività
-* Template per rendere più leggibile il codice (?)
-* Pulizia codice
+Questa applicazione fa uso delle seguenti librerie:
+* [jQuery](https://jquery.com/)
+* [tablesorter](http://tablesorter.com/docs/) plugin for jQuery
+* [Bootstrap](http://getbootstrap.com/)
