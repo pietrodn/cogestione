@@ -25,8 +25,8 @@ if(isset($_GET['deleteUser'])) {
 		if($uInfo !== FALSE) {
 			$result = $cogestione->deleteUser($uid);
 			if($result === TRUE) {
-				printSuccess("L'utente ". htmlspecialchars($uInfo['user_name']) . " " . htmlspecialchars($uInfo['user_surname']) .
-				" (" . htmlspecialchars($uInfo['class_name']) . ") è stato eliminato con successo.");
+				printSuccess("L'utente ". htmlspecialchars($uInfo->fullName()) .
+				" (" . htmlspecialchars($uInfo->classe()->name()) . ") è stato eliminato con successo.");
 			} else {
 				printError("L'utente $uid non ha potuto essere eliminato.");
 			}
@@ -61,12 +61,13 @@ echo '<form class="form-inline noprint" role="form" action="'. $_SERVER['PHP_SEL
 	<option value="" selected>Tutte le classi</option>';
 	
 // Selettore classe		  
-foreach($classi as $cl_id => $cl_val) {
+foreach($classi as $cl) {
+	$cl_id = $cl->id();
 	if(isset($_GET['class']) && $cl_id == $_GET['class'])
 		$selected = 'selected';
 	else
 		$selected = '';
-	echo "\n<option value=\"$cl_id\" $selected>" . htmlspecialchars($cl_val['class_name']) . "</option>";
+	echo "\n<option value=\"$cl_id\" $selected>" . htmlspecialchars($cl->name()) . "</option>";
 }		 
 	
 echo "\n</select></div>";
@@ -80,17 +81,17 @@ echo '<div class="panel panel-default noprint">
   <table class="table table-bordered noprint">';
 echo '<tr>';
 foreach($blocks as $b) {
-	$b = htmlspecialchars($b);
-	echo "\n<th>$b</th>";
+	$bt = htmlspecialchars($b->title());
+	echo "\n<th>$bt</th>";
 }
 echo "\n</tr><tr>";
 foreach($blocks as $i => $b) {
 	echo '<td>';
-	$activities = $cogestione->getActivitiesForBlock($i);
-	foreach($activities as $row) {
-		$url = $_SERVER['PHP_SELF'] . '?activity=' . intval($row['activity_id']);
-		echo "\n<div class=\"activity\"><span class=\"posti\">[" . intval($row['prenotati']) . ($row['activity_size']!=0?'/' . intval($row['activity_size']):'') . "]</span> 
-			<a href=\"" . $url . "\">" . htmlspecialchars($row['activity_title']) . '</a></div>';
+	$activities = $cogestione->getActivitiesForBlock($b);
+	foreach($activities as $act) {
+		$url = $_SERVER['PHP_SELF'] . '?activity=' . $act->id();
+		echo "\n<div class=\"activity\"><span class=\"posti\">[" . (int)$act->prenotati() . ($act->size() != 0 ?'/' . intval($act->size()):'') . "]</span> 
+			<a href=\"" . $url . "\">" . htmlspecialchars($act->title()) . '</a></div>';
 	}
 	
 	echo '</td>';
@@ -100,37 +101,37 @@ echo '</tr></table></div>';
 if(isset($_GET['activity'])) // Se si seleziona un'attività
 {
 	// Visualizza elenco partecipanti
-	$activity = intval($_GET['activity']);
-	$aRow = $cogestione->getActivityInfo($activity);
+	$activity_id = intval($_GET['activity']);
+	$act = $cogestione->getActivityInfo($activity_id);
 	echo '<div class="panel panel-default">
 		<div class="panel-heading">
 		<h3 class="panel-title">'
-		. htmlspecialchars($blocks[$aRow['activity_time']]) . ' – ' . htmlspecialchars($aRow['activity_title'])
+		. htmlspecialchars($act->block()->title()) . ' – ' . htmlspecialchars($act->title())
 		.'</h3>
 		</div>
 		<div class="panel-body">';
 	echo "\n
-		Attività: <b>" . htmlspecialchars($aRow['activity_title'])
+		Attività: <b>" . htmlspecialchars($act->title())
 		. "</b>.\n";
-	if ($aRow['activity_description']) {
+	if ($act->description()) {
 		echo "<br />Descrizione:
-		<blockquote id=\"desc-box\">" . $aRow['activity_description'] . "
+		<blockquote id=\"desc-box\">" . $act->description() . "
 		</blockquote>";
 	}
-	echo "\nQuando: <b>" . htmlspecialchars($blocks[$aRow['activity_time']])
-		. "</b>\n<br />Partecipanti: <b>" . intval($aRow['prenotati']) . ($aRow['activity_size'] ? '/' . intval($aRow['activity_size']) : '') . '</b>';
+	echo "\nQuando: <b>" . htmlspecialchars($act->block()->title())
+		. "</b>\n<br />Partecipanti: <b>" . intval($act->prenotati()) . ($act->size() ? '/' . intval($act->size()) : '') . '</b>';
 	
-	if($aRow['prenotati']>0)
+	if($act->prenotati()>0)
 	{	
-		$user_list = $cogestione->getUsersForActivity($activity);
+		$user_list = $cogestione->getUsersForActivity($act);
 								
 		echo "<br />Elenco dei partecipanti:\n
 			<ol id=\"partecipanti\" class=\"well\">";
-		foreach($user_list as $row) {
+		foreach($user_list as $u) {
 			echo "\n<li>"
-				. htmlspecialchars($row['user_surname']) . ' '
-				. htmlspecialchars($row['user_name'])
-				. ' (' . $row['class_name'] . ") </li>";
+				. htmlspecialchars($u->surname()) . ' '
+				. htmlspecialchars($u->name())
+				. ' (' . $u->classe()->name() . ") </li>";
 		}
 		echo "\n</ol>";
 		
@@ -152,29 +153,27 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
   			</div>
   			<table class="table">';
 		$riepilogo .= '<tr class="active">' . ($authenticated ? '<th></th>' : '') . '<th>UID</th><th>Nome</th><th>Cognome</th><th>Classe</th>';
-		foreach($blocks as $blockTitle) {
-			$blockTitle = htmlspecialchars($blockTitle);
+		foreach($blocks as $b) {
+			$blockTitle = htmlspecialchars($b->title());
 			$riepilogo .= "\n<th>$blockTitle</th>";
 		}
 		$riepilogo .= "\n</tr>";
-		foreach($studenti as $row) {
+		foreach($studenti as $u) {
 			$riepilogo .= "\n<tr>";
 			if($authenticated) {
 				$riepilogo .= "\n<td>"
-					. '<a class="btn btn-danger btn-xs" href="' . $_SERVER['PHP_SELF'] . '?deleteUser=' . intval($row['user_id']) .'">X</a>'
+					. '<a class="btn btn-danger btn-xs" href="' . $_SERVER['PHP_SELF'] . '?deleteUser=' . intval($u->id()) .'">X</a>'
 					. '</td>';
 			}
-			$riepilogo .= "\n<td>" . htmlspecialchars($row['user_id']) . '</td>';
-			$riepilogo .= "\n<td>" . htmlspecialchars($row['user_name']) . '</td>';
-			$riepilogo .= "\n<td>" . htmlspecialchars($row['user_surname']) . '</td>';
-			$riepilogo .= "\n<td>" . htmlspecialchars($row['class_name']) . '</td>';
+			$riepilogo .= "\n<td>" . htmlspecialchars($u->id()) . '</td>';
+			$riepilogo .= "\n<td>" . htmlspecialchars($u->name()) . '</td>';
+			$riepilogo .= "\n<td>" . htmlspecialchars($u->surname()) . '</td>';
+			$riepilogo .= "\n<td>" . htmlspecialchars($u->classe()->name()) . '</td>';
 			
-			$studentId = intval($row['user_id']);
-			
-			$prenotazione = $cogestione->getReservationsForUser($studentId);
+			$prenotazione = $cogestione->getReservationsForUser($u);
 			
 			foreach($blocks as $i => $b) {
-				$riepilogo .= "\n<td>" . htmlspecialchars($prenotazione[$i]) . '</td>';
+				$riepilogo .= "\n<td>" . htmlspecialchars($prenotazione[$i]->title()) . '</td>';
 			}
 		}
 		$riepilogo .= '</tr></table></div>';

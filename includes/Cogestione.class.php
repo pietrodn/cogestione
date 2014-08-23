@@ -2,6 +2,11 @@
 include_once('Configurator.class.php');
 include_once('Database.class.php');
 
+include_once('Activity.class.php');
+include_once('Block.class.php');
+include_once('Classe.class.php');
+include_once('User.class.php');
+
 class Cogestione {
 	private $db;
 	private $configurator;
@@ -16,27 +21,27 @@ class Cogestione {
 	
 	public function blocchi() {
 		if($this->blocks === null) {
-			// Ottiene id e nome dei blocchi come array associativo.
+			/* Returns an array like this: {block_id => Block()} */
 			$arr = $this->db->query("SELECT * FROM block ORDER BY block_id;");
 			$this->blocks = Array();
 			foreach($arr as $row) {
-				$this->blocks[$row['block_id']] = $row['block_title'];
+				$this->blocks[$row['block_id']] = new Block($row['block_id'], $row['block_title']);
 			}
 		}
 		return $this->blocks;
 	}
 	
 	public function classi() {
-		/* Returns an array like this: {class_id => [class_year, class_section]} */
+		/* Returns an array like this: {class_id => Classe()} */
 		if($this->classi === null) {
 			// Ottiene l'array delle classi.
 			$res = $this->db->query("SELECT * FROM class ORDER BY class_year, class_section;");
 			$this->classi = Array();
 			foreach($res as $row) {
-				$this->classi[$row['class_id']] = Array(
-					'class_year' => intval($row['class_year']),
-					'class_section' => $row['class_section'],
-					'class_name' => strval(intval($row['class_year'])) . $row['class_section'],
+				$this->classi[$row['class_id']] = new Classe(
+					(int)$row['class_id'],
+					(int)$row['class_year'],
+					$row['class_section']
 				);
 			}
 		}
@@ -55,6 +60,7 @@ class Cogestione {
 			Restituisce una riga siffatta:
 			(id, time, max, title, vm, prenotati)
 		*/
+		$this->blocchi();
 		if(!array_key_exists($id, $this->activityInfo)) {
 			$res = $this->db->query('SELECT activity.*, COUNT(prenact_id) AS prenotati,
 									(activity_size != 0 AND COUNT(prenact_id)>=activity_size) AS full
@@ -63,26 +69,27 @@ class Cogestione {
 									ON activity_id=prenact_activity
 									WHERE activity_id=' . intval($id) . '
 									GROUP BY activity_id;');
-			$this->activityInfo[$id] = $res[0];
+			$row = $res[0];
+			$this->activityInfo[$id] = new Activity(
+				(int)$row['activity_id'],
+				$this->blocks[$row['activity_time']],
+				$row['activity_title'],
+				(int)$row['activity_size'],
+				(int)$row['activity_vm'],
+				$row['activity_description'],
+				(int)$row['prenotati']
+			);
 		}
 		return $this->activityInfo[$id];
 	}
 	
-	public function activityFull($activity_id) {
-		$activityRow = $this->getActivityInfo($activity_id);
-		if($activityRow['activity_size'] != 0 && $activityRow['prenotati'] >= $activityRow['activity_size']) {
-			return true;
-		}
-		return false;
-	}
-	
-	public function isSubscribed($name, $surname, $class_id) {
+	public function isSubscribed($user) {
 		// Has the user already subscribed?
 		$res = $this->db->query('SELECT user_id
 								FROM user
-								WHERE user_name="' . $this->db->escape($name) . '"
-								AND user_surname="' . $this->db->escape($surname) . '"
-								AND user_class="' . $this->db->escape($class_id) . '";');
+								WHERE user_name="' . $this->db->escape($user->name()) . '"
+								AND user_surname="' . $this->db->escape($user->surname()) . '"
+								AND user_class="' . $this->db->escape($user->classe()->id()) . '";');
 		$n = count($res);
 		return ( $n ? TRUE : FALSE );
 	}
@@ -126,20 +133,32 @@ class Cogestione {
 		$res = $this->db->query('SELECT activity.*, COUNT(prenact_id) AS prenotati
 			FROM activity
 			LEFT JOIN prenotazioni_attivita ON activity_id=prenact_activity
-			WHERE activity_time=' . intval($blk) . '
+			WHERE activity_time=' . (int)$blk->id() . '
 			GROUP BY activity_id
 			ORDER BY activity_id;');
-	
-		return $res;
+		
+		$acts = Array();
+		foreach($res as $row) {
+			$acts[(int)$row['activity_id']] = new Activity(
+				(int)$row['activity_id'],
+				$this->blocks[$row['activity_time']],
+				$row['activity_title'],
+				(int)$row['activity_size'],
+				(int)$row['activity_vm'],
+				$row['activity_description'],
+				(int)$row['prenotati']
+			);
+		}
+		return $acts;
 	}
 
-	public function inserisciPrenotazione($name, $surname, $class_id, $prenotazione) {
+	public function inserisciPrenotazione($user, $prenotazione) {
 		/* $prenotazione array associativo "id blocco" => "id attività" */
 	
 		// Escaping
-		$name = $this->db->escape($name);
-		$surname = $this->db->escape($surname);
-		$class_id = intval($class_id);
+		$name = $this->db->escape($user->name());
+		$surname = $this->db->escape($user->surname());
+		$class_id = (int)$user->classe()->id();
 		// Inserimento dati
 	
 		$res = $this->db->query("INSERT INTO user (user_name, user_surname, user_class)
@@ -163,33 +182,42 @@ class Cogestione {
 			WHERE user_id = " . $user_id . ";");
 	}
 
-	public function getReservationsForUser($userId) {
-		$prenotazione = $this->db->query("SELECT activity_title, activity_time
+	public function getReservationsForUser($user) {
+		$prenotazione = $this->db->query("SELECT activity_id, activity_title, activity_time
 			FROM activity
 			LEFT JOIN prenotazioni_attivita
 			ON prenact_activity = activity_id
 			LEFT JOIN prenotazioni
 			ON prenact_prenotation=pren_id
-			WHERE pren_user = " . intval($userId) . "
+			WHERE pren_user = " . (int)$user->id() . "
 			ORDER BY activity_time;");
 	
 		$activities = [];
 		foreach($prenotazione as $p) {
-			$activities[$p['activity_time']] = $p['activity_title'];
+			$activities[$p['activity_time']] = $this->getActivityInfo($p['activity_id']);
 		}
 		return $activities;
 	}
 
-	public function getUsersForActivity($activity_id) {
-		$res = $this->db->query("SELECT user_name, user_surname, user_class, CONCAT(class_year, class_section) AS class_name
+	public function getUsersForActivity($activity) {
+		$res = $this->db->query("SELECT user_id, user_name, user_surname, user_class
 				FROM prenotazioni_attivita
 				LEFT JOIN prenotazioni ON prenact_prenotation=pren_id
 				LEFT JOIN user ON user_id=pren_user
-				LEFT JOIN class ON user_class = class_id
-				WHERE prenact_activity = " . intval($activity_id) . "
+				WHERE prenact_activity = " . (int)$activity->id() . "
 				ORDER BY pren_timestamp;");
-								
-		return $res;
+		
+		$uArr = Array();						
+		foreach($res as $row) {
+			$classe = $this->getClassInfo($row['user_class']);
+			$uArr[$row['user_id']] = new User(
+				(int)$row['user_id'],
+				$row['user_name'],
+				$row['user_surname'],
+				$classe
+			);	
+		}
+		return $uArr;
 	}
 
 	public function findUser($user_name, $user_surname, $user_class) {
@@ -207,32 +235,49 @@ class Cogestione {
 			$conditions[] = "user_class=$class";
 		}
 		$conditionString = implode($conditions, ' AND ');
-		$res = $this->db->query("SELECT DISTINCT user_id, user_name, user_surname, user_class, CONCAT(class_year, class_section) AS class_name
+		$res = $this->db->query("SELECT DISTINCT user_id, user_name, user_surname, user_class
 			FROM user
-			LEFT JOIN class ON user_class = class_id
 			WHERE $conditionString
 			ORDER BY CONCAT(user_surname, user_name);");
 	
-		return $res;
+		$uArr = Array();						
+		foreach($res as $row) {
+			$classe = $this->getClassInfo($row['user_class']);
+			$uArr[$row['user_id']] = new User(
+				(int)$row['user_id'],
+				$row['user_name'],
+				$row['user_surname'],
+				$classe
+			);	
+		}
+		return $uArr;
 	}
 	
 	public function getUser($user_id) {
-		$res = $this->db->query("SELECT DISTINCT user_id, user_name, user_surname, user_class, CONCAT(class_year, class_section) AS class_name
+		$res = $this->db->query("SELECT DISTINCT user_id, user_name, user_surname, user_class
 			FROM user
-			LEFT JOIN class ON user_class = class_id
 			WHERE user_id = " . intval($user_id) . "
 			LIMIT 1;");
+		
 		if(count($res) == 0) {
 			return FALSE;
 		}
-		return $res[0];
+		
+		$row = $res[0];
+		$classe = $this->getClassInfo($row['user_class']);
+		$user = new User(
+			(int)$row['user_id'],
+			$row['user_name'],
+			$row['user_surname'],
+			$classe
+		);
+			
+		return $user;
 	}
 	
-	public function activityOkForClass($activity_id, $class_id) {
-		$act_info = $this->getActivityInfo($activity_id);
-		$class_info = $this->getClassInfo($class_id);
-		$year = $class_info['class_year'];
-		if($act_info['activity_vm'] == 1 && $year != 4 && $year != 5) {
+	public function activityOkForClass($activity, $class) {
+		$year = $class->year();
+		if($activity->vm() == 1 && $year != 4 && $year != 5) {
             return FALSE;
         }
         return TRUE;
@@ -323,12 +368,12 @@ class Cogestione {
 	
 	public function setClasses($classes_arr) {
 		/* 	This function updates the class table with the classes in $classes_arr.
-			$classes_arr is an array of arrays [class_year, class_section] */
+			$classes_arr is an array of [class_year, class_section] */
 		
 		// Removes deleted classes
 		$toDelete = Array();
 		foreach($this->classi() as $cl_id => $cl_val) {
-			$needle = Array($cl_val['class_year'], $cl_val['class_section']);
+			$needle = Array($cl_val->year(), $cl_val->section());
 			if(!array_search($needle, $classes_arr)) {
 				$toDelete[] = intval($cl_id);
 			}
@@ -365,7 +410,9 @@ class Cogestione {
 		return $res;
 	}
 	
-	public function userValid($name, $surname) {
+	public function userValid($user) {
+		$name = $user->name();
+		$surname = $user->surname();
 		$strings = [	$name,
 						$surname,
 						$name . ' ' . $surname,
@@ -398,6 +445,16 @@ class Cogestione {
 	
 	public function setBlacklist($arr) {
 		return $this->configurator->setBlacklist($arr);
+	}
+	
+	public function classExists($ci) {
+		foreach($this->classi() as $cl) {
+			if($cl->id() == $ci) {
+				return TRUE;
+			}
+		}
+		
+		return FALSE;
 	}
 
 }

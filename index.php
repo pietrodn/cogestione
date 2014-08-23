@@ -17,14 +17,13 @@ $cogestione = new Cogestione();
 $blocks = $cogestione->blocchi();
    
 if(inputValid($cogestione)) {
-	$name = $_POST['name'];
-	$surname = $_POST['surname'];
-	$class_id = intval($_POST['class']);
 	
 	/* La classe senza la sezione */
-	$class_info = $cogestione->getClassInfo($class_id);
-	$classN = $class_info['class_year'];
-	$class_name = $class_info['class_name'];
+	$class_info = $cogestione->getClassInfo(intval($_POST['class']));
+	$classN = $class_info->year();
+	$class_name = $class_info->name();
+	
+	$user = new User(null, $_POST['name'], $_POST['surname'], $class_info);
 	
 	// Riepilogo e controllo affollamento
 	$inserts = Array();
@@ -37,37 +36,37 @@ if(inputValid($cogestione)) {
 		<table class="table table-bordered">
 		<tr><th>Nome</th><th>Cognome</th><th>Classe</th>';
 	foreach($blocks as $b) {
-		$b = htmlspecialchars($b);
-		$riepilogo .= "\n<th>$b</th>";
+		$bt = htmlspecialchars($b->title());
+		$riepilogo .= "\n<th>$bt</th>";
 	}
 	$riepilogo .= "\n</tr><tr>\n";
 	
-	$riepilogo .= "<td>" . htmlspecialchars($name)
-		. "</td>\n<td>" . htmlspecialchars($surname)
-		. "</td>\n<td>" . htmlspecialchars($class_name) . "</td>\n";
+	$riepilogo .= "<td>" . htmlspecialchars($user->name())
+		. "</td>\n<td>" . htmlspecialchars($user->surname())
+		. "</td>\n<td>" . htmlspecialchars($user->classe()->name()) . "</td>\n";
 	
 	/* Ripete per ogni blocco */
 	foreach($blocks as $i => $b) {
 		$selectedActivity = intval($_POST['block_' . $i]);
-		$activityRow = $cogestione->getActivityInfo($selectedActivity);
+		$activity = $cogestione->getActivityInfo($selectedActivity);
 		
 		/* Verifico se l'attività è coerente con il blocco */
-		if($activityRow['activity_time'] != $i) {
+		if($activity->block()->id() != $i) {
 			$correctBlocks = FALSE;
 		}
 		
 		/* Verifico l'affollamento. Se max=0 il vincolo non vale. */
-		if($cogestione->activityFull($activityRow['activity_id'])) {
+		if($activity->full()) {
 			$pieno = TRUE;
 		}
 		
 		/* Solo le quarte e le quinte possono accedere alle attività "VM18" */
-		if(!$cogestione->activityOkForClass($activityRow['activity_id'], $class_id)) {
+		if(!$cogestione->activityOkForClass($activity, $class_info)) {
 			$vm = TRUE;
 		}
 		
 		$inserts[$i] = $selectedActivity;
-		$riepilogo .= "\n<td><div class=\"activity\">" . htmlspecialchars($activityRow['activity_title']) . ($pieno ? ' <b>[Pieno!]</b>':'') . '</div></td>';
+		$riepilogo .= "\n<td><div class=\"activity\">" . htmlspecialchars($activity->title()) . ($pieno ? ' <b>[Pieno!]</b>':'') . '</div></td>';
 	}
 	$riepilogo .= '</tr></table>';
 	if(!$configurator->isEnabled()) {
@@ -76,17 +75,17 @@ if(inputValid($cogestione)) {
 		printError('Alcune delle attività selezionate sono troppo affollate. Rifai!');
 	} else if ($vm) {
 		printError('Alcune delle attività selezionate sono riservate a quarte e quinte. Rifai!');
-	} else if ($cogestione->isSubscribed($name, $surname, $class_name)) {
+	} else if ($cogestione->isSubscribed($user)) {
 		printError('Ti sei già iscritto!');
 	} else if(!$correctBlocks) {
 		printError('Alcune delle attività scelte non sono coerenti con i blocchi.');
-	} else if(!$cogestione->userValid($name, $surname)) {
-		$full_name = htmlspecialchars($name . ' ' . $surname);
+	} else if(!$cogestione->userValid($user)) {
+		$full_name = htmlspecialchars($user->fullName());
 		printError("Non puoi iscriverti con il nome <b>$full_name</b>.");
 	} else {
 		/* Controlli passati. L'utente può iscriversi. */
 		echo $riepilogo;
-		$cogestione->inserisciPrenotazione($name, $surname, $class_id, $inserts);	  
+		$cogestione->inserisciPrenotazione($user, $inserts);	  
 		printSuccess("I dati sono stati registrati con successo.");
 	}
 	
@@ -145,8 +144,9 @@ function inputValid($cogestione) {
 		}
 	
 		/* La classe deve essere in elenco */
-		if(!array_key_exists($_POST['class'], $classi))
+		if(!$cogestione->classExists($_POST['class'])) {
 			$validated = FALSE;
+		}
 	}
 	
 	return $validated;
@@ -188,12 +188,13 @@ function printClassSelector($cogestione) {
 			<option value="" disabled selected>Seleziona la classe</option>';
 	
 	// Selettore classe		  
-	foreach($classi as $cl_id => $cl_val) {
+	foreach($classi as $cl) {
+		$cl_id = $cl->id();
 		if(isset($_POST['class']) && $cl_id == $_POST['class'])
 			$selected = ' selected';
 		else
 			$selected = '';
-		echo "\n<option value=\"$cl_id\"$selected>" . htmlspecialchars($cl_val['class_name']) . "</option>";
+		echo "\n<option value=\"$cl_id\"$selected>" . htmlspecialchars($cl->name()) . "</option>";
 	}		 
 			
 	echo "\n</select>";
@@ -213,37 +214,38 @@ function printActivityTable($cogestione) {
 	/* Intestazione con blocchi */
 	echo '<tr>';
 	foreach($blocks as $b) {
-		echo "\n<th class=\"active\">$b</th>";
+		$bt = $b->title();
+		echo "\n<th class=\"active\">$bt</th>";
 	}
 	echo "\n</tr><tr>";
 	/* Procede colonna per colonna */
 	foreach($blocks as $i => $b) {
 		echo '<td>';
-		$activities = $cogestione->getActivitiesForBlock($i);
+		$activities = $cogestione->getActivitiesForBlock($b);
 		
 		/* Stampa tutte le attività che si svolgono contemporaneamente */
-		foreach($activities as $row) {
+		foreach($activities as $act) {
 			
-			$full = $cogestione->activityFull($row['activity_id']);
+			$full = $act->full();
 			
 			echo "\n" . '<div class="radio">' . "\n";
 			printf('<label for="activity_%d" class="popover_activity" data-toggle="popover" title="%s">' . "\n",
-				intval($row['activity_id']), 
-				htmlspecialchars($row['activity_title']));
-			printf('<span class="description-wrapper">%s</span>' . "\n", $row['activity_description']);
+				intval($act->id()), 
+				htmlspecialchars($act->title()));
+			printf('<span class="description-wrapper">%s</span>' . "\n", $act->description());
 			printf('<input type="radio" name="block_%d" value="%d" id="activity_%d" %s class="%s %s" required />' . "\n",
 				$i,
-				intval($row['activity_id']),
-				intval($row['activity_id']),
+				$act->id(),
+				$act->id(),
 				($full ? 'disabled' : ''),
-				($row['activity_vm'] ? 'vm' : ''),
+				($act->vm() ? 'vm' : ''),
 				($full ? 'full' : '')
 				);
 				
-			if($row['activity_size']!=0) {
-				printf('<span class="text-danger">[%d]</span>' . "\n", ($row['activity_size']-$row['prenotati']));
+			if($act->size() != 0) {
+				printf('<span class="text-danger">[%d]</span>' . "\n", ($act->size() - $act->prenotati()));
 			}
-			echo htmlspecialchars($row['activity_title']) . "\n</label>\n</div>\n";
+			echo htmlspecialchars($act->title()) . "\n</label>\n</div>\n";
 		}
 		echo "</td>\n";
 	}

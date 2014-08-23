@@ -264,7 +264,7 @@ Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo 
 	$class_names = Array();
 	
 	foreach($classes_array as $cl_id => $cl_val) {
-		$class_names[] = $cl_val['class_name'];
+		$class_names[] = $cl_val->name();
 	}
 	
 	echo implode('; ', $class_names);
@@ -348,14 +348,15 @@ Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo 
 /* Ottiene i nomi delle colonne (blocchi) */
 $blocks = $cogestione->blocchi();
 foreach($blocks as $id => $b) {
-	$id = intval($id);
+	$id = $b->id();
+	$bt = $b->title();
 	echo "\n<th class=\"active\">"
 		. "<input type=\"hidden\" name=\"block[$id][id]\" value=\"$id\" />\n"
 		. '<div class="input-group">'
 		. '<span class="checkbox input-group-addon">'
 		. "<label><input type=\"checkbox\" id=\"block-delete-$id\" name=\"block[$id][delete]\" />DEL</label>"
 		. "</span>"
-		. "<input class=\"form-control\" type=\"text\" size=\"35\" name=\"block[$id][title]\" id=\"block-title-$id\" value=\"". htmlspecialchars($b, ENT_QUOTES, "UTF-8", false) . "\" />"
+		. "<input class=\"form-control\" type=\"text\" size=\"35\" name=\"block[$id][title]\" id=\"block-title-$id\" value=\"". htmlspecialchars($bt, ENT_QUOTES, "UTF-8", false) . "\" />"
 		. "</div>"
 		. "</th>";
 }
@@ -363,13 +364,13 @@ echo "\n</tr><tr>";
 /* Procede colonna per colonna */
 foreach($blocks as $i => $b) {
 	echo '<td id="block-' . $i . '">';
-	$activities = $cogestione->getActivitiesForBlock($i);
+	$activities = $cogestione->getActivitiesForBlock($b);
 	
 	/* Stampa tutte le attività che si svolgono contemporaneamente */
-	foreach($activities as $row) {
-		$title = htmlspecialchars($row['activity_title'], ENT_QUOTES, "UTF-8", false);
-		$id = $row['activity_id'];
-		$placeholder = htmlspecialchars('Descrizione per "' . $row['activity_title'] . '"');
+	foreach($activities as $act) {
+		$title = htmlspecialchars($act->title(), ENT_QUOTES, "UTF-8", false);
+		$id = $act->id();
+		$placeholder = htmlspecialchars('Descrizione per "' . $title . '"');
 		echo "\n<div class=\"set-activity\" id=\"activity-$id\">\n"
 			. "<input type=\"hidden\" name=\"activity[$id][id]\" value=\"$id\" />\n"
 			. "<input type=\"hidden\" name=\"activity[$id][block]\" value=\"$i\" />\n"
@@ -384,20 +385,20 @@ foreach($blocks as $i => $b) {
 			. '<span class="checkbox input-group-addon">'
 			. "<label for=\"activity-vm-$id\">"
 			. "<input id=\"activity-vm-$id\" name=\"activity[$id][vm]\" type=\"checkbox\" "
-			. ($row['activity_vm'] ? 'checked="checked"' : '')
+			. ($act->vm() ? 'checked="checked"' : '')
 			. "/>VM18</label>"
 			. "</span>"
 			. "<input class=\"form-control\" type=\"number\" min=\"0\" id=\"activity-max-$id\" name=\"activity[$id][max]\" value=\""
-			. intval($row['activity_size']) . "\" />\n"
+			. intval($act->size()) . "\" />\n"
 			. '<span class="input-group-addon">posti</span>'
 			. "</div>"
-			. "<textarea class=\"form-control\" rows=\"4\" name=\"activity[$id][description]\" placeholder=\"$placeholder\">" . htmlspecialchars($row['activity_description']) . "</textarea>"
+			. "<textarea class=\"form-control\" rows=\"4\" name=\"activity[$id][description]\" placeholder=\"$placeholder\">" . htmlspecialchars($act->description()) . "</textarea>"
 			. "\n</div>\n";
 	}
 	echo '</td>';
 }
 echo '</tr><tr>';
-foreach($blocks as $i => $title) {
+foreach($blocks as $i => $b) {
 	echo '<td>';
 	echo '<label>Aggiungi <input class="form-control" type="number" min="0" name="block[' . intval($i) . '][newRows]" value="0" /> nuove attività</label>';
 	echo '</td>';
