@@ -49,8 +49,8 @@ class Cogestione {
 	}
 	
 	public function getClassInfo($id) {
-		/* Ottiene anno e sezione della classe con id $id.
-		*/
+		/* Ottiene anno e sezione della classe con id $id. */
+		
 		$this->classi(); // Sets the internal array if necessary
 		return $this->classi[$id];
 	}
@@ -274,14 +274,6 @@ class Cogestione {
 			
 		return $user;
 	}
-	
-	public function activityOkForClass($activity, $class) {
-		$year = $class->year();
-		if($activity->vm() == 1 && $year != 4 && $year != 5) {
-            return FALSE;
-        }
-        return TRUE;
-	}
 
 	public function addNewActivities($n, $blk) {
 		// Adds $n new activities for block $blk.
@@ -330,24 +322,24 @@ class Cogestione {
 		}
 	}
 
-	public function updateActivity($act_id, $act_time, $act_size, $act_title, $act_vm, $act_description) {
+	public function updateActivity($act) {
 		// Replaces the activity associated with the id $act_id with the new values.
 		$query = "UPDATE activity SET "
-			. 'activity_time = ' . intval($act_time) . ', '
-			. 'activity_size = ' . intval($act_size) . ', '
-			. "activity_title = '" . $this->db->escape($act_title) . "', "
-			. 'activity_vm = ' . intval($act_vm) . ', '
-			. "activity_description = '" . $this->db->escape($act_description) . "' "
-			. ' WHERE activity_id = ' . intval($act_id) . ';';
+			. 'activity_time = ' . $act->block() . ', '
+			. 'activity_size = ' . $act->size() . ', '
+			. "activity_title = '" . $this->db->escape($act->title()) . "', "
+			. 'activity_vm = ' . intval($act->vm()) . ', '
+			. "activity_description = '" . $this->db->escape($act->description()) . "' "
+			. ' WHERE activity_id = ' . intval($act->id()) . ';';
 		$res = $this->db->query($query);
 		return $res;
 	}
 
-	public function updateBlock($blk_id, $blk_title) {
+	public function updateBlock($blk) {
 		// Replaces the title of block $blk_id.
 		$query = "UPDATE block SET "
-			. "block_title = '" . $this->db->escape($blk_title) . "' "
-			. "WHERE block_id = " . intval($blk_id)
+			. "block_title = '" . $this->db->escape($blk->title()) . "' "
+			. "WHERE block_id = " . $blk->id()
 			. ';';
 		$res = $this->db->query($query);
 		return $res;
@@ -368,14 +360,22 @@ class Cogestione {
 	
 	public function setClasses($classes_arr) {
 		/* 	This function updates the class table with the classes in $classes_arr.
-			$classes_arr is an array of [class_year, class_section] */
+			$classes_arr is an array of Classe-s */
 		
 		// Removes deleted classes
 		$toDelete = Array();
-		foreach($this->classi() as $cl_id => $cl_val) {
-			$needle = Array($cl_val->year(), $cl_val->section());
-			if(!array_search($needle, $classes_arr)) {
-				$toDelete[] = intval($cl_id);
+		foreach($this->classi() as $cl) {
+			$found = FALSE;
+			
+			foreach($classes_arr as $new_cl) {
+				if($new_cl->name() == $cl->name()) {
+					$found = TRUE;
+					break;
+				}
+			}
+			
+			if(!$found) {
+				$toDelete[] = intval($cl->id());
 			}
 		}
 		if(count($toDelete)) {
@@ -388,9 +388,9 @@ class Cogestione {
 			(class_year, class_section)
 			VALUES ";
 		$tuples = Array();
-		foreach($classes_arr as $cl_val) {
-			$cl_year = intval($cl_val[0]);
-			$cl_section = $this->db->escape($cl_val[1]);
+		foreach($classes_arr as $cl) {
+			$cl_year = $cl->year();
+			$cl_section = $this->db->escape($cl->section());
 			$tuples[] = "($cl_year, '$cl_section')";
 		}
 		$query .= implode(', ', $tuples);

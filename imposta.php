@@ -1,6 +1,8 @@
 <?php
 require_once("common.php");
 
+require_once("includes/Classe.class.php");
+
 if(empty($_SESSION['auth'])) {
 	header('Location: ./login.php');
 	die();
@@ -22,11 +24,16 @@ if(isset($_POST['submitActivities'])) {
 		foreach($_POST['activity'] as $act) {
 			if(!empty($act['id'])) {
 				$id = intval($act['id']);
-				$activities[$id]['block'] = intval($act['block']);
-				$activities[$id]['max'] = intval($act['max']);
-				$activities[$id]['title'] = htmlspecialchars_decode($act['title'], ENT_QUOTES);
-				$activities[$id]['vm'] = intval(!empty($act['vm']));
-				$activities[$id]['description'] = htmlspecialchars_decode($act['description'], ENT_QUOTES);
+				$activities[$id] = new Activity(
+					$id,
+					intval($act['block']),
+					htmlspecialchars_decode($act['title'], ENT_QUOTES),
+					intval($act['max']),
+					intval(!empty($act['vm'])),
+					htmlspecialchars_decode($act['description'], ENT_QUOTES),
+					null
+				);
+				
 				if(!empty($act['delete'])) {
 					$deleteAct[] = $id;
 				}
@@ -35,12 +42,17 @@ if(isset($_POST['submitActivities'])) {
 	}
 	
 	// Escaping dati blocchi
+	$newRows = Array();
 	if(isset($_POST['block'])) {
 		foreach($_POST['block'] as $b) {
 			if(!empty($b['id'])) {
 				$id = intval($b['id']);
-				$bl[$id]['title'] = htmlspecialchars_decode($b['title'], ENT_QUOTES);
-				$bl[$id]['newRows'] = intval($b['newRows']);
+				$bl[$id] = new Block(
+					$id,
+					htmlspecialchars_decode($b['title'], ENT_QUOTES)
+				);
+					
+				$newRows[$id] = intval($b['newRows']);
 				if(!empty($b['delete'])) {
 					$deleteBlocks[] = $id;
 				}
@@ -55,21 +67,21 @@ if(isset($_POST['submitActivities'])) {
 	foreach($activities as $id => $in) {
 		if(in_array($id, $deleteAct))
 			continue;
-		$cogestione->updateActivity($id, $in['block'], $in['max'], $in['title'], $in['vm'], $in['description']);
+		$cogestione->updateActivity($in);
 	}
 	
 	// Cancella i blocchi da cancellare
 	$cogestione->deleteBlocks($deleteBlocks);
 	
 	// Modifica dati blocchi
-	foreach($bl as $k => $b) {
-		if(in_array($k, $deleteBlocks))
+	foreach($bl as $id => $b) {
+		if(in_array($id, $deleteBlocks))
 			continue;
-		$cogestione->updateBlock(intval($k), $b['title']);
+		$cogestione->updateBlock($b);
 		
 		// Nuove righe attività
-		if($b['newRows']>0) {
-			$cogestione->addNewActivities($b['newRows'], $k);
+		if($newRows[$id]>0) {
+			$cogestione->addNewActivities($newRows[$id], $id);
 		}
 	}
 	
@@ -96,7 +108,7 @@ if(isset($_POST['submitActivities'])) {
 		if($uInfo !== FALSE) {
 			$result = $cogestione->deleteUser($uid);
 			if($result === TRUE) {
-				printSuccess("L'utente " . $uInfo['user_name'] . " " . $uInfo['user_surname']
+				printSuccess("L'utente " . $uInfo->fullName()
 				. " ($uid) è stato eliminato con successo.");
 			} else {
 				printError("L'utente $uid non ha potuto essere eliminato.");
@@ -135,9 +147,7 @@ if(isset($_POST['submitActivities'])) {
 	foreach($classes_input as $cl_name) {
 		$cl_name = trim($cl_name);
 		if($cl_name) { // if not empty
-			$cl_year = intval($cl_name);
-			$cl_section = substr($cl_name, 1);
-			$classes_output[] = Array($cl_year, $cl_section);
+			$classes_output[] = Classe::parseClass($cl_name);
 		}
 	}
 	$cogestione->setClasses($classes_output);

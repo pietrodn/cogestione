@@ -8,14 +8,14 @@ class User {
 	
 	public function __construct($id, $name, $surname, $classe)
 	{
-		$this->id = $id;
+		$this->id = (int)$id;
 		$this->name = $name;
 		$this->surname = $surname;
 		$this->classe = $classe;
 	}
 	
 	public function id() {
-		return $this->id;
+		return (int)$this->id;
 	}
 	
 	public function name() {

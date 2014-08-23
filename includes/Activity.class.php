@@ -21,7 +21,7 @@ class Activity {
 	}
 	
 	public function id() {
-		return $this->id;
+		return (int)$this->id;
 	}
 	
 	public function title() {
@@ -29,7 +29,7 @@ class Activity {
 	}
 	
 	public function size() {
-		return $this->size;
+		return (int)$this->size;
 	}
 	
 	public function block() {
@@ -37,7 +37,7 @@ class Activity {
 	}
 	
 	public function vm() {
-		return $this->vm;
+		return (bool)$this->vm;
 	}
 	
 	public function description() {
@@ -45,14 +45,22 @@ class Activity {
 	}
 	
 	public function prenotati() {
-		return $this->prenotati;
+		return (int)$this->prenotati;
 	}
 	
 	public function full() {
 		if($this->size != 0 && $this->prenotati >= $this->size) {
-			return true;
+			return TRUE;
 		}
-		return false;
+		return FALSE;
+	}
+	
+	public function okForClass($class) {
+		$year = $class->year();
+		if($this->vm() == 1 && $year != 4 && $year != 5) {
+            return FALSE;
+        }
+        return TRUE;
 	}
 	
 }

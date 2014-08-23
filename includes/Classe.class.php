@@ -7,13 +7,13 @@ class Classe {
 	
 	public function __construct($id, $year, $section)
 	{
-		$this->id = intval($id);
-		$this->year = intval($year);
+		$this->id = (int)$id;
+		$this->year = (int)$year;
 		$this->section = $section;
 	}
 	
 	public function id() {
-		return $this->id;
+		return (int)$this->id;
 	}
 	
 	public function year() {
@@ -28,6 +28,10 @@ class Classe {
 		return strval($this->year) . $this->section;
 	}
 	
+	public static function parseClass($cl_name) {
+		$cl = new Classe(null, intval($cl_name), substr($cl_name, 1));
+		return $cl;
+	}
 }
 	
 ?>

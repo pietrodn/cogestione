@@ -18,11 +18,7 @@ $blocks = $cogestione->blocchi();
    
 if(inputValid($cogestione)) {
 	
-	/* La classe senza la sezione */
 	$class_info = $cogestione->getClassInfo(intval($_POST['class']));
-	$classN = $class_info->year();
-	$class_name = $class_info->name();
-	
 	$user = new User(null, $_POST['name'], $_POST['surname'], $class_info);
 	
 	// Riepilogo e controllo affollamento
@@ -46,12 +42,11 @@ if(inputValid($cogestione)) {
 		. "</td>\n<td>" . htmlspecialchars($user->classe()->name()) . "</td>\n";
 	
 	/* Ripete per ogni blocco */
-	foreach($blocks as $i => $b) {
-		$selectedActivity = intval($_POST['block_' . $i]);
-		$activity = $cogestione->getActivityInfo($selectedActivity);
+	foreach($blocks as $b) {
+		$activity = $cogestione->getActivityInfo(intval($_POST['block_' . $b->id()]));
 		
 		/* Verifico se l'attività è coerente con il blocco */
-		if($activity->block()->id() != $i) {
+		if($activity->block()->id() != $b->id()) {
 			$correctBlocks = FALSE;
 		}
 		
@@ -61,11 +56,11 @@ if(inputValid($cogestione)) {
 		}
 		
 		/* Solo le quarte e le quinte possono accedere alle attività "VM18" */
-		if(!$cogestione->activityOkForClass($activity, $class_info)) {
+		if(!$activity->okForClass($class_info)) {
 			$vm = TRUE;
 		}
 		
-		$inserts[$i] = $selectedActivity;
+		$inserts[$b->id()] = $activity->id();
 		$riepilogo .= "\n<td><div class=\"activity\">" . htmlspecialchars($activity->title()) . ($pieno ? ' <b>[Pieno!]</b>':'') . '</div></td>';
 	}
 	$riepilogo .= '</tr></table>';
@@ -137,9 +132,9 @@ function inputValid($cogestione) {
 			$validated = FALSE;
 	
 		/* L'utente deve aver prenotato tutti i blocchi */
-		foreach($blocks as $i => $b)
+		foreach($blocks as $blk)
 		{
-			if(!isset($_POST['block_' . $i]) || !is_numeric($_POST['block_' . $i]))
+			if(!isset($_POST['block_' . $blk->id()]) || !is_numeric($_POST['block_' . $blk->id()]))
 				$validated = FALSE;
 		}
 	
@@ -219,9 +214,9 @@ function printActivityTable($cogestione) {
 	}
 	echo "\n</tr><tr>";
 	/* Procede colonna per colonna */
-	foreach($blocks as $i => $b) {
+	foreach($blocks as $blk) {
 		echo '<td>';
-		$activities = $cogestione->getActivitiesForBlock($b);
+		$activities = $cogestione->getActivitiesForBlock($blk);
 		
 		/* Stampa tutte le attività che si svolgono contemporaneamente */
 		foreach($activities as $act) {
@@ -234,7 +229,7 @@ function printActivityTable($cogestione) {
 				htmlspecialchars($act->title()));
 			printf('<span class="description-wrapper">%s</span>' . "\n", $act->description());
 			printf('<input type="radio" name="block_%d" value="%d" id="activity_%d" %s class="%s %s" required />' . "\n",
-				$i,
+				$blk->id(),
 				$act->id(),
 				$act->id(),
 				($full ? 'disabled' : ''),
