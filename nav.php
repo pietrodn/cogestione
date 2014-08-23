@@ -75,17 +75,11 @@ function showHeader($selectedId='', $title, $cssFiles=Array(), $jsFiles=Array())
         </div><!--/.nav-collapse -->
       </div>
     </div>
-    <div class="jumbotron">
-		<div class="container">
-			<div class="media">
-				<!--<a class="pull-left" href="#">
-					<img id="wikitech-logo" class="media-object" src="images/Wiki.png" alt="Einsteinwiki">
-				</a>-->
-				<div class="media-body">
-					<h1><?php echo htmlspecialchars($title) ?></h1>
-				</div>
-			</div>
-			<!-- start content -->
+	<div class="container">
+		<div class="page-header">
+			<h1><?php echo htmlspecialchars($title) ?></h1>
+		</div>
+		<!-- start content -->
 <?php
 }
 
@@ -94,11 +88,8 @@ function showFooter()
 
 ?>
 
-		</div>
 	</div>
-	<div class="container">
 
-	</div>
 	<div class="footer">
 		<div class="container">
 			<p class="text-muted">

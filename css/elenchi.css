@@ -1,6 +1,6 @@
 @media print
 {
-	.media
+	.page-header, .footer
 	{
 		display:none;
 	}
