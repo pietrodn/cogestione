@@ -1,4 +1,5 @@
 <?php
+	error_reporting(E_ALL);
 	define('CONFIG_FILE', 'config.php');
 	include_once(CONFIG_FILE);
 	

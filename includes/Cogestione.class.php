@@ -25,7 +25,10 @@ class Cogestione {
 			$arr = $this->db->query("SELECT * FROM block ORDER BY block_id;");
 			$this->blocks = Array();
 			foreach($arr as $row) {
-				$this->blocks[$row['block_id']] = new Block($row['block_id'], $row['block_title']);
+				$this->blocks[$row['block_id']] = new Block(
+					$row['block_id'],
+					$row['block_title']
+				);
 			}
 		}
 		return $this->blocks;
@@ -120,15 +123,7 @@ class Cogestione {
 	}
 
 	public function getActivitiesForBlock($blk) {
-		/* 	Returns an array of activities in the specified block.
-			Each row contains:
-			* activity_title
-			* activity_time
-			* activity_description
-			* prenotati
-			* activity_vm
-			* activity_size
-		*/
+		/* 	Returns an array of activities in the specified block. */
 		
 		$res = $this->db->query('SELECT activity.*, COUNT(prenact_id) AS prenotati
 			FROM activity
@@ -410,52 +405,14 @@ class Cogestione {
 		return $res;
 	}
 	
-	public function userValid($user) {
-		$name = $user->name();
-		$surname = $user->surname();
-		$strings = [	$name,
-						$surname,
-						$name . ' ' . $surname,
-						$surname . ' ' . $name,
-					];
-					
-		foreach($strings as $str) {
-			if($this->isBad($str)) {
-				return false;
-			}
-		}
-		
-		return true;
-	}
-	
-	public function isBad($str) {
-		foreach($this->configurator->getBlacklist() as $regex) {
-			$regex = '/' . trim($regex) . '/i'; // to fix
-			if(preg_match($regex, $str) === 1) {
-				return true;
-			}
-		}
-		
-		return false;
-	}
-	
-	public function getBlacklist() {
-		return $this->configurator->getBlacklist();
-	}
-	
-	public function setBlacklist($arr) {
-		return $this->configurator->setBlacklist($arr);
-	}
-	
-	public function classExists($ci) {
+	public function classExists($class_id) {
 		foreach($this->classi() as $cl) {
-			if($cl->id() == $ci) {
+			if($cl->id() == $class_id) {
 				return TRUE;
 			}
 		}
 		
 		return FALSE;
 	}
-
 }
 ?>

@@ -1,5 +1,8 @@
 <?php
-class User {
+
+require_once('BlacklistableInterface.php');
+
+class User implements Blacklistable {
 	
 	private $id = null;
 	private $name;
@@ -32,6 +35,17 @@ class User {
 	
 	public function classe() {
 		return $this->classe;
+	}
+	
+	public function blacklistTokens() {
+		$name = $this->name();
+		$surname = $this->surname();
+		$strings = [	$name,
+						$surname,
+						$name . ' ' . $surname,
+						$surname . ' ' . $name,
+					];
+		return $strings;
 	}
 	
 }

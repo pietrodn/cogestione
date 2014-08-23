@@ -1,6 +1,7 @@
 <?php
 require_once("common.php");
 
+require_once("includes/RegexBlacklist.class.php");
 require_once("includes/Classe.class.php");
 
 if(empty($_SESSION['auth'])) {
@@ -157,7 +158,8 @@ if(isset($_POST['submitActivities'])) {
 	activeTab('blacklist');
 	$raw_blacklist = $_POST['blacklist'];
 	$black_arr = explode("\n", $raw_blacklist);
-	$cogestione->setBlacklist($black_arr);
+	$blacklist = new RegexBlacklist($black_arr);
+	$configurator->setBlacklist($blacklist);
 	
 	printSuccess('Blacklist aggiornata con successo.');
 }
@@ -299,7 +301,7 @@ Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo 
 						<label for="blacklist-form">Inserisci le espressioni vietate, una per riga.
 						Puoi usare la sintassi delle <a href="//it.wikipedia.org/wiki/Espressione_regolare">espressioni regolari</a>.</label>
 						<textarea class="form-control" rows="10" name="blacklist" id="blacklist-form" placeholder="parolacce"><?php
-	echo htmlspecialchars(implode("\n", $cogestione->getBlacklist()));
+	echo htmlspecialchars(implode("\n", $configurator->getBlacklist()->getList()));
 ?></textarea>
 					</div>
 				</li>

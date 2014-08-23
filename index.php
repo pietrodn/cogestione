@@ -20,6 +20,7 @@ if(inputValid($cogestione)) {
 	
 	$class_info = $cogestione->getClassInfo(intval($_POST['class']));
 	$user = new User(null, $_POST['name'], $_POST['surname'], $class_info);
+	$blacklist = $configurator->getBlacklist();
 	
 	// Riepilogo e controllo affollamento
 	$inserts = Array();
@@ -46,7 +47,7 @@ if(inputValid($cogestione)) {
 		$activity = $cogestione->getActivityInfo(intval($_POST['block_' . $b->id()]));
 		
 		/* Verifico se l'attività è coerente con il blocco */
-		if($activity->block()->id() != $b->id()) {
+		if($activity->block() != $b) {
 			$correctBlocks = FALSE;
 		}
 		
@@ -74,7 +75,7 @@ if(inputValid($cogestione)) {
 		printError('Ti sei già iscritto!');
 	} else if(!$correctBlocks) {
 		printError('Alcune delle attività scelte non sono coerenti con i blocchi.');
-	} else if(!$cogestione->userValid($user)) {
+	} else if(!$blacklist->checkObject($user)) {
 		$full_name = htmlspecialchars($user->fullName());
 		printError("Non puoi iscriverti con il nome <b>$full_name</b>.");
 	} else {
@@ -120,9 +121,6 @@ showFooter();
 
 function inputValid($cogestione) {
 	$validated = FALSE;
-	
-	$blocks = $cogestione->blocchi();
-	$classi = $cogestione->classi();
 
 	if(isset($_POST['class'])) {
 		$validated = TRUE;
@@ -132,10 +130,12 @@ function inputValid($cogestione) {
 			$validated = FALSE;
 	
 		/* L'utente deve aver prenotato tutti i blocchi */
-		foreach($blocks as $blk)
+		foreach($cogestione->blocchi() as $blk)
 		{
-			if(!isset($_POST['block_' . $blk->id()]) || !is_numeric($_POST['block_' . $blk->id()]))
+			if(!isset($_POST['block_' . $blk->id()]) || !is_numeric($_POST['block_' . $blk->id()])) {
 				$validated = FALSE;
+				break;
+			}
 		}
 	
 		/* La classe deve essere in elenco */
@@ -208,8 +208,8 @@ function printActivityTable($cogestione) {
   <table class="table table-bordered">';
 	/* Intestazione con blocchi */
 	echo '<tr>';
-	foreach($blocks as $b) {
-		$bt = $b->title();
+	foreach($blocks as $blk) {
+		$bt = $blk->title();
 		echo "\n<th class=\"active\">$bt</th>";
 	}
 	echo "\n</tr><tr>";
@@ -235,7 +235,7 @@ function printActivityTable($cogestione) {
 				($full ? 'disabled' : ''),
 				($act->vm() ? 'vm' : ''),
 				($full ? 'full' : '')
-				);
+			);
 				
 			if($act->size() != 0) {
 				printf('<span class="text-danger">[%d]</span>' . "\n", ($act->size() - $act->prenotati()));

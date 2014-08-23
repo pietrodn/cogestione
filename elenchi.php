@@ -1,5 +1,7 @@
 <?php
 require_once("common.php");
+require_once("includes/UserListView.class.php");
+
 $css = Array('css/elenchi.css');
 showHeader('ca-nstab-elenchi', "Elenco prenotazioni cogestione", $css);
 
@@ -7,8 +9,6 @@ $authenticated = !empty($_SESSION['auth']);
 $cogestione = new Cogestione();
 
 $blocks = $cogestione->blocchi();
-$classi = $cogestione->classi();
-$validated = FALSE;
 
 $postiTot = $cogestione->getTotalSeats();
 $nPrenot = $cogestione->getSubscriptionsNumber();
@@ -61,7 +61,7 @@ echo '<form class="form-inline noprint" role="form" action="'. $_SERVER['PHP_SEL
 	<option value="" selected>Tutte le classi</option>';
 	
 // Selettore classe		  
-foreach($classi as $cl) {
+foreach($cogestione->classi() as $cl) {
 	$cl_id = $cl->id();
 	if(isset($_GET['class']) && $cl_id == $_GET['class'])
 		$selected = 'selected';
@@ -128,60 +128,37 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 		echo "<br />Elenco dei partecipanti:\n
 			<ol id=\"partecipanti\" class=\"well\">";
 		foreach($user_list as $u) {
-			echo "\n<li>"
+			echo "\n<li><a href=\"?uid=" . $u->id() . "\">"
 				. htmlspecialchars($u->surname()) . ' '
 				. htmlspecialchars($u->name())
-				. ' (' . $u->classe()->name() . ") </li>";
+				. '</a> (<a href="?cercastud=1&class=' . $u->classe()->id() . '">' . $u->classe()->name() . "</a>)</li>";
 		}
 		echo "\n</ol>";
 		
 	}
 	echo "\n</div></div>";
 	
+} else if(isset($_GET['uid'])) {
+	
+	$users = Array($cogestione->getUser((int)$_GET['uid']));
+	$view = new UserListView($users);
+	$view->setAuthenticated($authenticated);
+	$view->render();
+	
 } else if(isset($_GET['cercastud'])
 	AND (!empty($_GET['name']) OR !empty($_GET['surname']) OR !empty($_GET['class']))) {
 		
 	// Se si cerca uno studente
+	$name = (!empty($_GET['name'])) ? $_GET['name'] : NULL;
+	$surname = (!empty($_GET['surname'])) ? $_GET['surname'] : NULL;
+	$class = (!empty($_GET['class'])) ? $_GET['class'] : NULL;
 	
-	$studenti = $cogestione->findUser($_GET['name'], $_GET['surname'], $_GET['class']);
-	
-	if(count($studenti)) {
-		$riepilogo = '';
-		$riepilogo .= '<div class="panel panel-success noprint">
-  			<div class="panel-heading">
-  				<h3 class="panel-title">Prenotazioni trovate</h3>
-  			</div>
-  			<table class="table">';
-		$riepilogo .= '<tr class="active">' . ($authenticated ? '<th></th>' : '') . '<th>UID</th><th>Nome</th><th>Cognome</th><th>Classe</th>';
-		foreach($blocks as $b) {
-			$blockTitle = htmlspecialchars($b->title());
-			$riepilogo .= "\n<th>$blockTitle</th>";
-		}
-		$riepilogo .= "\n</tr>";
-		foreach($studenti as $u) {
-			$riepilogo .= "\n<tr>";
-			if($authenticated) {
-				$riepilogo .= "\n<td>"
-					. '<a class="btn btn-danger btn-xs" href="' . $_SERVER['PHP_SELF'] . '?deleteUser=' . intval($u->id()) .'">X</a>'
-					. '</td>';
-			}
-			$riepilogo .= "\n<td>" . htmlspecialchars($u->id()) . '</td>';
-			$riepilogo .= "\n<td>" . htmlspecialchars($u->name()) . '</td>';
-			$riepilogo .= "\n<td>" . htmlspecialchars($u->surname()) . '</td>';
-			$riepilogo .= "\n<td>" . htmlspecialchars($u->classe()->name()) . '</td>';
-			
-			$prenotazione = $cogestione->getReservationsForUser($u);
-			
-			foreach($blocks as $i => $b) {
-				$riepilogo .= "\n<td>" . htmlspecialchars($prenotazione[$i]->title()) . '</td>';
-			}
-		}
-		$riepilogo .= '</tr></table></div>';
-		echo $riepilogo;
-	} else {
-		printSuccess('Nessuno studente trovato!');
-	}
+	$users = $cogestione->findUser($name, $surname, $class);
+	$view = new UserListView($users);
+	$view->setAuthenticated($authenticated);
+	$view->render();
 }
+
 
 showFooter();
 ?>

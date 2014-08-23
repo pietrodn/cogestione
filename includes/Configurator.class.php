@@ -1,4 +1,7 @@
 <?php
+
+require_once('includes/RegexBlacklist.class.php');
+
 class Configurator {
 
 	private $manualMode = TRUE;
@@ -42,7 +45,9 @@ class Configurator {
 			$this->endTime = $kvConf['endTime'];
 		}
 		if(isset($kvConf['blacklist'])) {
-			$this->blacklist = explode("\n", $kvConf['blacklist']);
+			$this->blacklist = new RegexBlacklist(
+				explode("\n", $kvConf['blacklist'])
+			);
 		}
 	
 	}
@@ -138,7 +143,7 @@ class Configurator {
 	public function setBlacklist($black) {
 		if($black != $this->blacklist) {
 			$this->blacklist = $black;
-			$this->saveToDb('blacklist', implode("\n", $this->blacklist));
+			$this->saveToDb('blacklist', implode("\n", $this->blacklist->getList()));
 		}
 	}
 
