@@ -11,6 +11,7 @@ function showHeader($selectedId='', $title, $cssFiles=Array(), $jsFiles=Array())
 		<title><?php echo htmlspecialchars($title) ?></title>
 		<link rel="icon" href="images/favicon.ico" />
 		<link href="css/bootstrap.min.css" rel="stylesheet" />
+		<link href="css/common.css" rel="stylesheet" />
 		<script src="js/jquery-2.1.1.min.js"></script>
 		<script src="js/bootstrap.min.js"></script>
 
@@ -92,6 +93,19 @@ function showFooter()
 {
 
 ?>
+
+		</div>
+	</div>
+	<div class="container">
+
+	</div>
+	<div class="footer">
+		<div class="container">
+			<p class="text-muted">
+				Made by <a href="//github.com/pietrodn">Pietro De Nicolao</a>.
+				Licensed under the <a href="//www.gnu.org/copyleft/gpl.html">GNU GPLv3 license</a>.
+				<a href="//github.com/pietrodn/cogestione">Source code</a>.
+			</p>
 		</div>
 	</div>
 </body>
