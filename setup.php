@@ -32,7 +32,7 @@ if(is_readable(CONFIG_FILE)) {
 				$db->close();
 				
 				echo "<p>Provo a creare il file di configurazione...";
-				$template = file_get_contents('config.template.php');
+				$template = file_get_contents('config.default.php');
 				$template = str_replace('DB_HOST', addslashes($_POST['host']), $template);
 				$template = str_replace('DB_USER', addslashes($_POST['username']), $template);
 				$template = str_replace('DB_PASSWORD', addslashes($_POST['password']), $template);
