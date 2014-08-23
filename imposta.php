@@ -156,6 +156,11 @@ if(isset($_POST['submitActivities'])) {
 	printSuccess('Classi aggiornate con successo.');
 } else if(isset($_POST['submitBlacklist'])) {
 	activeTab('blacklist');
+	
+	if(isset($_POST['blacklistRegex'])) {
+		$configurator->setBlacklistRegex((bool)$_POST['blacklistRegex']);
+	}
+	
 	$raw_blacklist = $_POST['blacklist'];
 	$black_arr = explode("\n", $raw_blacklist);
 	$blacklist = new RegexBlacklist($black_arr);
@@ -296,6 +301,19 @@ Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo 
 				<h3 class="panel-title">Blacklist</h3>
 			</div>
 			<ul class="list-group">
+				<li class="list-group-item">
+					Scegli il tipo di blacklist:<br />
+					<div class="radio">
+						<label>
+						<input type="radio" name="blacklistRegex" value="0" <?php if(!$configurator->getBlacklistRegex()) echo "checked"; ?> />Testo semplice<br />
+						</label>
+					</div>
+					<div class="radio">
+						<label>
+						<input type="radio" name="blacklistRegex" value="1" <?php if($configurator->getBlacklistRegex()) echo "checked"; ?> />Espressioni regolari
+						</label>
+					</div>
+				</li>
 				<li class="list-group-item">
 					<div class="form-group">
 						<label for="blacklist-form">Inserisci le espressioni vietate, una per riga.

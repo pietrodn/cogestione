@@ -1,6 +1,7 @@
 <?php
 
 require_once('includes/RegexBlacklist.class.php');
+require_once('includes/SimpleBlacklist.class.php');
 
 class Configurator {
 
@@ -10,6 +11,7 @@ class Configurator {
 	private $startTime;
 	private $endTime;
 	private $blacklist;
+	private $blacklistRegex = FALSE;
 	
 	private $db;
 	
@@ -44,10 +46,16 @@ class Configurator {
 		if(isset($kvConf['endTime'])) {
 			$this->endTime = $kvConf['endTime'];
 		}
+		if(isset($kvConf['blacklistRegex'])) {
+			$this->blacklistRegex = (bool)$kvConf['blacklistRegex'];
+		}
 		if(isset($kvConf['blacklist'])) {
-			$this->blacklist = new RegexBlacklist(
-				explode("\n", $kvConf['blacklist'])
-			);
+			$list = explode("\n", $kvConf['blacklist']);
+			if($this->blacklistRegex) {
+				$this->blacklist = new RegexBlacklist($list);
+			} else {
+				$this->blacklist = new SimpleBlacklist($list);
+			}
 		}
 	
 	}
@@ -112,6 +120,10 @@ class Configurator {
 		return $this->blacklist;
 	}
 	
+	public function getBlacklistRegex() {
+		return $this->blacklistRegex;
+	}
+	
 	public function setManualMode($on) {
 		if($on != $this->manualMode) {
 			$this->manualMode = (bool)$on;
@@ -144,6 +156,13 @@ class Configurator {
 		if($black != $this->blacklist) {
 			$this->blacklist = $black;
 			$this->saveToDb('blacklist', implode("\n", $this->blacklist->getList()));
+		}
+	}
+	
+	public function setBlacklistRegex($flag) {
+		if($flag != $this->blacklistRegex) {
+			$this->blacklistRegex = (bool)$flag;
+			$this->saveToDb('blacklistRegex', intval($this->blacklistRegex));
 		}
 	}
 

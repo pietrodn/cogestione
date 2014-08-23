@@ -89,7 +89,6 @@ function showFooter()
 ?>
 
 	</div>
-
 	<div class="footer">
 		<div class="container">
 			<p class="text-muted">

@@ -25,13 +25,13 @@ class UserListView extends ListView {
 				<div class="panel-heading">
 					<h3 class="panel-title">Prenotazioni trovate</h3>
 				</div>
-				<table class="table">';
-			$riepilogo .= '<tr class="active">' . ($this->authenticated ? '<th></th>' : '') . '<th>UID</th><th>Nome</th><th>Cognome</th><th>Classe</th>';
+				<table class="table tablesorter"><thead>';
+			$riepilogo .= '<tr class="active">' . ($this->authenticated ? '<th data-sorter="false"></th>' : '') . '<th>UID</th><th>Nome</th><th>Cognome</th><th>Classe</th>';
 			foreach($blocks as $b) {
 				$blockTitle = htmlspecialchars($b->title());
 				$riepilogo .= "\n<th>$blockTitle</th>";
 			}
-			$riepilogo .= "\n</tr>";
+			$riepilogo .= "\n</tr></thead><tbody>";
 			foreach($this->list as $u) {
 				$riepilogo .= "\n<tr>";
 				if($this->authenticated) {
@@ -50,7 +50,7 @@ class UserListView extends ListView {
 					$riepilogo .= "\n<td><a href=\"?activity=" . $prenotazione[$i]->id() . "\">" . htmlspecialchars($prenotazione[$i]->title()) . '</a></td>';
 				}
 			}
-			$riepilogo .= '</tr></table></div>';
+			$riepilogo .= '</tr></tbody></table></div>';
 			echo $riepilogo;
 		} else {
 			printSuccess('Nessuno studente trovato!');
