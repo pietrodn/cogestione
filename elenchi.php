@@ -122,8 +122,12 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 	echo "\n
 		Attività: <b>" . htmlspecialchars($act->title())
 		. "</b>.\n";
+	if ($act->location()) {
+		echo "\n<br />Luogo:
+		<b>" . $act->location() . "</b>";
+	}
 	if ($act->description()) {
-		echo "<br />Descrizione:
+		echo "\n<br />Descrizione:
 		<blockquote id=\"desc-box\">" . $act->description() . "
 		</blockquote>";
 	}

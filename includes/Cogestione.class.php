@@ -80,6 +80,7 @@ class Cogestione {
 				(int)$row['activity_size'],
 				(int)$row['activity_vm'],
 				$row['activity_description'],
+				$row['activity_location'],
 				(int)$row['prenotati']
 			);
 		}
@@ -141,6 +142,7 @@ class Cogestione {
 				(int)$row['activity_size'],
 				(int)$row['activity_vm'],
 				$row['activity_description'],
+				$row['activity_location'],
 				(int)$row['prenotati']
 			);
 		}
@@ -324,6 +326,7 @@ class Cogestione {
 			. 'activity_size = ' . $act->size() . ', '
 			. "activity_title = '" . $this->db->escape($act->title()) . "', "
 			. 'activity_vm = ' . intval($act->vm()) . ', '
+			. "activity_location = '" . $this->db->escape($act->location()) . "', "
 			. "activity_description = '" . $this->db->escape($act->description()) . "' "
 			. ' WHERE activity_id = ' . intval($act->id()) . ';';
 		$res = $this->db->query($query);

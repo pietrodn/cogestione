@@ -227,7 +227,15 @@ function printActivityTable($cogestione) {
 			printf('<label for="activity_%d" class="popover_activity" data-toggle="popover" title="%s">' . "\n",
 				intval($act->id()), 
 				htmlspecialchars($act->title()));
-			printf('<span class="description-wrapper">%s</span>' . "\n", $act->description());
+			
+			/* Description box */
+			echo '<span class="description-wrapper">';
+			if($act->location()) {
+				printf('<i>%s</i><br />', $act->location());
+			}
+			echo $act->description();
+			echo '</span>' . "\n";
+			
 			printf('<input type="radio" name="block_%d" value="%d" id="activity_%d" %s class="%s %s" required />' . "\n",
 				$blk->id(),
 				$act->id(),

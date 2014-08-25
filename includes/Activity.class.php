@@ -7,9 +7,10 @@ class Activity {
 	private $size;
 	private $vm;
 	private $description;
+	private $location;
 	private $prenotati;
 	
-	public function __construct($id, $block, $title, $size, $vm, $description, $prenotati)
+	public function __construct($id, $block, $title, $size, $vm, $description, $location, $prenotati)
 	{
 		$this->id = (int)$id;
 		$this->block = $block;
@@ -17,6 +18,7 @@ class Activity {
 		$this->size = (int)$size;
 		$this->vm = (bool)$vm;
 		$this->description = $description;
+		$this->location = $location;
 		$this->prenotati = $prenotati;
 	}
 	
@@ -38,6 +40,10 @@ class Activity {
 	
 	public function vm() {
 		return (bool)$this->vm;
+	}
+	
+	public function location() {
+		return $this->location;
 	}
 	
 	public function description() {
