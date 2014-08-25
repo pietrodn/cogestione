@@ -32,6 +32,7 @@ if(isset($_POST['submitActivities'])) {
 					intval($act['max']),
 					intval(!empty($act['vm'])),
 					htmlspecialchars_decode($act['description'], ENT_QUOTES),
+					htmlspecialchars_decode($act['location'], ENT_QUOTES),
 					null
 				);
 				
@@ -193,7 +194,6 @@ Per segnare un'attività come <b>riservata alle quarte o alle quinte</b>, spunta
 Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo aver cancellato attività o blocchi.
 </p>
 -->
-<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
 
 <!-- Nav tabs -->
 <div class="panel panel-default">
@@ -212,6 +212,7 @@ Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo 
 <div class="tab-content">
 	<div class="tab-pane active" id="abilitazione">
 		<!-- Abilitation form -->
+		<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title">Abilitazione delle prenotazioni</h3>
@@ -265,9 +266,11 @@ Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo 
 				</li>
 			</ul>
 		</div>
+		</form>
 	</div>
 	<div class="tab-pane" id="classi">
 		<!-- Classes form -->
+		<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title">Classi</h3>
@@ -293,9 +296,11 @@ Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo 
 				</li>
 			</ul>
 		</div>
+		</form>
 	</div>
 	<div class="tab-pane" id="blacklist">
 		<!-- Blacklist form -->
+		<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title">Blacklist</h3>
@@ -328,9 +333,11 @@ Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo 
 				</li>
 			</ul>
 		</div>
+		</form>
 	</div>
 	<div class="tab-pane" id="cancella">
 		<!-- Deletion form -->
+		<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title">Cancellazione prenotazioni</h3>
@@ -361,18 +368,20 @@ Per motivi di coerenza dei dati, è consigliabile azzerare le prenotazioni dopo 
 				</li>
 			</ul>
 		</div>
+		</form>
 	</div>
-<div class="tab-pane" id="attivita">
+	<div class="tab-pane" id="attivita">
 
-<!-- Activity form -->
-<div class="panel panel-default">
-	<div class="panel-heading">
-		<h3 class="panel-title">Modifica tabella attività</h3>
-	</div>
-	<div class="panel-body">
-		<label>Aggiungi <input type="number" min="0" name="newBlocks" value="0" /> nuovi blocchi</label>
-		<table id="ActivityTable" class="table table-bordered">
-			<tr>
+	<!-- Activity form -->
+		<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title">Modifica tabella attività</h3>
+				</div>
+				<div class="panel-body">
+					<label>Aggiungi <input type="number" min="0" name="newBlocks" value="0" /> nuovi blocchi</label>
+					<table id="ActivityTable" class="table table-bordered">
+						<tr>
 <?php
 /* Intestazione con blocchi */
 /* Ottiene i nomi delle colonne (blocchi) */
@@ -399,6 +408,7 @@ foreach($blocks as $i => $b) {
 	/* Stampa tutte le attività che si svolgono contemporaneamente */
 	foreach($activities as $act) {
 		$title = htmlspecialchars($act->title(), ENT_QUOTES, "UTF-8", false);
+		$location = htmlspecialchars($act->location(), ENT_QUOTES, "UTF-8", false);
 		$id = $act->id();
 		$placeholder = htmlspecialchars('Descrizione per "' . $title . '"');
 		echo "\n<div class=\"set-activity\" id=\"activity-$id\">\n"
@@ -412,16 +422,20 @@ foreach($blocks as $i => $b) {
 			. "<input class=\"form-control activity-set-title\" type=\"text\" id=\"activity-title-$id\" name=\"activity[$id][title]\" value=\"$title\" /><br />\n"
 			. "</div>"
 			. '<div class="input-group activity-size">'
+			. '<span class="input-group-addon">Posti:</span>'
+			. "<input class=\"form-control\" type=\"number\" min=\"0\" id=\"activity-max-$id\" name=\"activity[$id][max]\" value=\""
+			. intval($act->size()) . "\" />\n"
 			. '<span class="checkbox input-group-addon">'
 			. "<label for=\"activity-vm-$id\">"
 			. "<input id=\"activity-vm-$id\" name=\"activity[$id][vm]\" type=\"checkbox\" "
 			. ($act->vm() ? 'checked="checked"' : '')
 			. "/>VM18</label>"
 			. "</span>"
-			. "<input class=\"form-control\" type=\"number\" min=\"0\" id=\"activity-max-$id\" name=\"activity[$id][max]\" value=\""
-			. intval($act->size()) . "\" />\n"
-			. '<span class="input-group-addon">posti</span>'
 			. "</div>"
+			. '<div class="input-group">'
+			. '<span class="input-group-addon">Luogo:</span>'
+			. "<input class=\"form-control activity-set-location\" type=\"text\" id=\"activity-location-$id\" name=\"activity[$id][location]\" value=\"$location\" /><br />\n"
+			. '</div>'
 			. "<textarea class=\"form-control\" rows=\"4\" name=\"activity[$id][description]\" placeholder=\"$placeholder\">" . htmlspecialchars($act->description()) . "</textarea>"
 			. "\n</div>\n";
 	}
@@ -434,14 +448,14 @@ foreach($blocks as $i => $b) {
 	echo '</td>';
 }
 ?>
-</tr>
-</table>
-<button class="btn btn-primary" type="submit" name="submitActivities">Modifica attività</button>
-			</div><!-- panel-body -->
-		</div><!-- panel -->
+						</tr>
+					</table>
+					<button class="btn btn-primary" type="submit" name="submitActivities">Modifica attività</button>
+				</div><!-- panel-body -->
+			</div><!-- panel -->
+		</form>
 	</div><!-- tab-pane -->
 </div><!-- tab-content -->
-</form>
 <?php
 	showFooter();
 	

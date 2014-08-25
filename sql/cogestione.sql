@@ -1,149 +1,223 @@
--- MySQL dump 10.13  Distrib 5.6.15, for osx10.7 (x86_64)
+-- phpMyAdmin SQL Dump
+-- version 4.2.6
+-- http://www.phpmyadmin.net
 --
--- Host: localhost    Database: cogestione
--- ------------------------------------------------------
--- Server version	5.6.15
+-- Host: localhost
+-- Generation Time: Ago 25, 2014 alle 17:24
+-- Versione del server: 5.6.19
+-- PHP Version: 5.4.24
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
+
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `activity`
+-- Database: `cogestione`
 --
 
-DROP TABLE IF EXISTS `activity`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `activity` (
-  `activity_id` int(11) NOT NULL AUTO_INCREMENT,
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `activity`
+--
+
+CREATE TABLE IF NOT EXISTS `activity` (
+`activity_id` int(11) NOT NULL,
   `activity_time` int(11) NOT NULL,
   `activity_size` int(11) NOT NULL,
   `activity_title` text NOT NULL,
   `activity_vm` tinyint(1) NOT NULL DEFAULT '0',
   `activity_description` text,
-  UNIQUE KEY `id` (`activity_id`),
-  KEY `activity_time` (`activity_time`),
-  CONSTRAINT `activity_block` FOREIGN KEY (`activity_time`) REFERENCES `block` (`block_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=120 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  `activity_location` text
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
 
 --
--- Table structure for table `block`
+-- Struttura della tabella `block`
 --
 
-DROP TABLE IF EXISTS `block`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `block` (
-  `block_id` int(11) NOT NULL AUTO_INCREMENT,
-  `block_title` tinytext NOT NULL,
-  PRIMARY KEY (`block_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE IF NOT EXISTS `block` (
+`block_id` int(11) NOT NULL,
+  `block_title` tinytext NOT NULL
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
 
 --
--- Table structure for table `class`
+-- Struttura della tabella `class`
 --
 
-DROP TABLE IF EXISTS `class`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `class` (
-  `class_id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS `class` (
+`class_id` int(11) NOT NULL,
   `class_year` int(11) NOT NULL,
-  `class_section` varchar(20) NOT NULL,
-  PRIMARY KEY (`class_id`),
-  UNIQUE KEY `class_title` (`class_year`,`class_section`) COMMENT 'The name of the class must be unique.'
-) ENGINE=InnoDB AUTO_INCREMENT=1097 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  `class_section` varchar(20) NOT NULL
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
 
 --
--- Table structure for table `config`
+-- Struttura della tabella `config`
 --
 
-DROP TABLE IF EXISTS `config`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `config` (
+CREATE TABLE IF NOT EXISTS `config` (
   `config_key` varchar(255) NOT NULL,
-  `config_value` text NOT NULL,
-  PRIMARY KEY (`config_key`)
+  `config_value` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+
+-- --------------------------------------------------------
 
 --
--- Table structure for table `prenotazioni`
+-- Struttura della tabella `prenotazioni`
 --
 
-DROP TABLE IF EXISTS `prenotazioni`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `prenotazioni` (
-  `pren_id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS `prenotazioni` (
+`pren_id` int(11) NOT NULL,
   `pren_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `pren_user` int(11) NOT NULL,
-  PRIMARY KEY (`pren_id`),
-  KEY `pren_user` (`pren_user`),
-  CONSTRAINT `pren_user` FOREIGN KEY (`pren_user`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  `pren_user` int(11) NOT NULL
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
 
 --
--- Table structure for table `prenotazioni_attivita`
+-- Struttura della tabella `prenotazioni_attivita`
 --
 
-DROP TABLE IF EXISTS `prenotazioni_attivita`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `prenotazioni_attivita` (
-  `prenact_id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS `prenotazioni_attivita` (
+`prenact_id` int(11) NOT NULL,
   `prenact_prenotation` int(11) NOT NULL,
-  `prenact_activity` int(11) NOT NULL,
-  PRIMARY KEY (`prenact_id`),
-  KEY `prenact_prenotation` (`prenact_prenotation`),
-  KEY `prenact_activity` (`prenact_activity`),
-  CONSTRAINT `prenact_activity` FOREIGN KEY (`prenact_activity`) REFERENCES `activity` (`activity_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `prenact_pren` FOREIGN KEY (`prenact_prenotation`) REFERENCES `prenotazioni` (`pren_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  `prenact_activity` int(11) NOT NULL
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
 
 --
--- Table structure for table `user`
+-- Struttura della tabella `user`
 --
 
-DROP TABLE IF EXISTS `user`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `user` (
-  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS `user` (
+`user_id` int(11) NOT NULL,
   `user_name` varchar(255) NOT NULL,
   `user_surname` varchar(255) NOT NULL,
   `user_class` int(11) NOT NULL,
-  `user_pren_latest` int(11) DEFAULT NULL,
-  PRIMARY KEY (`user_id`),
-  UNIQUE KEY `user_name` (`user_name`,`user_surname`,`user_class`),
-  KEY `user_class` (`user_class`),
-  KEY `user_pren_latest` (`user_pren_latest`),
-  CONSTRAINT `user_class` FOREIGN KEY (`user_class`) REFERENCES `class` (`class_id`),
-  CONSTRAINT `user_pren_latest` FOREIGN KEY (`user_pren_latest`) REFERENCES `prenotazioni` (`pren_id`) ON DELETE SET NULL ON UPDATE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+  `user_pren_latest` int(11) DEFAULT NULL
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `activity`
+--
+ALTER TABLE `activity`
+ ADD UNIQUE KEY `id` (`activity_id`), ADD KEY `activity_time` (`activity_time`);
+
+--
+-- Indexes for table `block`
+--
+ALTER TABLE `block`
+ ADD PRIMARY KEY (`block_id`);
+
+--
+-- Indexes for table `class`
+--
+ALTER TABLE `class`
+ ADD PRIMARY KEY (`class_id`), ADD UNIQUE KEY `class_title` (`class_year`,`class_section`) COMMENT 'The name of the class must be unique.';
+
+--
+-- Indexes for table `config`
+--
+ALTER TABLE `config`
+ ADD PRIMARY KEY (`config_key`);
+
+--
+-- Indexes for table `prenotazioni`
+--
+ALTER TABLE `prenotazioni`
+ ADD PRIMARY KEY (`pren_id`), ADD KEY `pren_user` (`pren_user`);
+
+--
+-- Indexes for table `prenotazioni_attivita`
+--
+ALTER TABLE `prenotazioni_attivita`
+ ADD PRIMARY KEY (`prenact_id`), ADD KEY `prenact_prenotation` (`prenact_prenotation`), ADD KEY `prenact_activity` (`prenact_activity`);
+
+--
+-- Indexes for table `user`
+--
+ALTER TABLE `user`
+ ADD PRIMARY KEY (`user_id`), ADD UNIQUE KEY `user_name` (`user_name`,`user_surname`,`user_class`), ADD KEY `user_class` (`user_class`), ADD KEY `user_pren_latest` (`user_pren_latest`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `activity`
+--
+ALTER TABLE `activity`
+MODIFY `activity_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=138;
+--
+-- AUTO_INCREMENT for table `block`
+--
+ALTER TABLE `block`
+MODIFY `block_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=3;
+--
+-- AUTO_INCREMENT for table `class`
+--
+ALTER TABLE `class`
+MODIFY `class_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=1921;
+--
+-- AUTO_INCREMENT for table `prenotazioni`
+--
+ALTER TABLE `prenotazioni`
+MODIFY `pren_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=16;
+--
+-- AUTO_INCREMENT for table `prenotazioni_attivita`
+--
+ALTER TABLE `prenotazioni_attivita`
+MODIFY `prenact_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=31;
+--
+-- AUTO_INCREMENT for table `user`
+--
+ALTER TABLE `user`
+MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=16;
+--
+-- Limiti per le tabelle scaricate
+--
+
+--
+-- Limiti per la tabella `activity`
+--
+ALTER TABLE `activity`
+ADD CONSTRAINT `activity_block` FOREIGN KEY (`activity_time`) REFERENCES `block` (`block_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Limiti per la tabella `prenotazioni`
+--
+ALTER TABLE `prenotazioni`
+ADD CONSTRAINT `pren_user` FOREIGN KEY (`pren_user`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Limiti per la tabella `prenotazioni_attivita`
+--
+ALTER TABLE `prenotazioni_attivita`
+ADD CONSTRAINT `prenact_activity` FOREIGN KEY (`prenact_activity`) REFERENCES `activity` (`activity_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+ADD CONSTRAINT `prenact_pren` FOREIGN KEY (`prenact_prenotation`) REFERENCES `prenotazioni` (`pren_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Limiti per la tabella `user`
+--
+ALTER TABLE `user`
+ADD CONSTRAINT `user_class` FOREIGN KEY (`user_class`) REFERENCES `class` (`class_id`),
+ADD CONSTRAINT `user_pren_latest` FOREIGN KEY (`user_pren_latest`) REFERENCES `prenotazioni` (`pren_id`) ON DELETE SET NULL ON UPDATE SET NULL;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
--- Dump completed on 2014-07-26 12:04:46
