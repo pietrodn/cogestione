@@ -119,26 +119,23 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 		.'</h3>
 		</div>
 		<div class="panel-body">';
-	echo "\n
-		Attività: <b>" . htmlspecialchars($act->title())
-		. "</b>.\n";
+	echo "\n<p>Attività: <b>" . htmlspecialchars($act->title()) . "</b>.</p>\n";
+	echo "\n<p>Quando: <b>" . htmlspecialchars($act->block()->title()) . "</b></p>";
 	if ($act->location()) {
-		echo "\n<br />Luogo:
-		<b>" . $act->location() . "</b>";
+		echo "\n<p>Dove:
+		<b>" . $act->location() . "</b></p>";
 	}
 	if ($act->description()) {
-		echo "\n<br />Descrizione:
-		<blockquote id=\"desc-box\">" . $act->description() . "
-		</blockquote>";
+		echo "\n<blockquote id=\"desc-box\">" . $act->description() . "</blockquote>";
 	}
-	echo "\nQuando: <b>" . htmlspecialchars($act->block()->title())
-		. "</b>\n<br />Partecipanti: <b>" . intval($act->prenotati()) . ($act->size() ? '/' . intval($act->size()) : '') . '</b>';
+	
+	echo "\n<p>Partecipanti: <b>" . intval($act->prenotati()) . ($act->size() ? '/' . intval($act->size()) : '') . '</b></p>';
 	
 	if($act->prenotati()>0)
 	{	
 		$user_list = $cogestione->getUsersForActivity($act);
 								
-		echo "<br />Elenco dei partecipanti:\n
+		echo "<p>Elenco dei partecipanti:</p>\n
 			<ol id=\"partecipanti\" class=\"well\">";
 		foreach($user_list as $u) {
 			echo "\n<li><a href=\"?uid=" . $u->id() . "\">"

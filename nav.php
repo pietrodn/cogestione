@@ -16,89 +16,93 @@ function showHeader($selectedId='', $title, $cssFiles=Array(), $jsFiles=Array())
 		<script src="js/bootstrap.min.js"></script>
 
 
-<?php
-	foreach($cssFiles as $f) {
-		echo '<link rel="stylesheet" href="' . htmlspecialchars($f) . '" />' . "\n";
-	}
+		<?php
+		foreach($cssFiles as $f) {
+			echo '<link rel="stylesheet" href="' . htmlspecialchars($f) . '" />' . "\n";
+		}
 	
-	foreach($jsFiles as $f) {
-		echo '<script src="' . htmlspecialchars($f) . '"></script>' . "\n";
-	}
-?>
-</head>
-<body>
-	<!-- Fixed navbar -->
-    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href=".">Cogestione 2014</a>
-        </div>
-        <div class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-<?php
-	$tablinks = array(
-		array('id' => 'ca-nstab-prenota', 'title' => 'Prenota', 'url' => '.'),
-		array('id' => 'ca-nstab-elenchi', 'title' => 'Elenchi', 'url' => 'elenchi.php'),
-		array('id' => 'ca-nstab-grafico', 'title' => 'Grafico', 'url' => 'grafico.php'),
-		array('id' => 'ca-nstab-imposta', 'title' => 'Imposta', 'url' => 'imposta.php')
-		);
+		foreach($jsFiles as $f) {
+			echo '<script src="' . htmlspecialchars($f) . '"></script>' . "\n";
+		}
+		?>
+	</head>
+	<body>
+		<!-- Fixed navbar -->
+		<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+		  <div class="container">
+			<div class="navbar-header">
+			  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			  </button>
+			  <a class="navbar-brand" href=".">Cogestione 2014</a>
+			</div>
+			<div class="navbar-collapse collapse">
+				<ul class="nav navbar-nav">
+				<?php
+					$tablinks = array(
+						array('id' => 'ca-nstab-prenota', 'title' => 'Prenota', 'url' => '.', 'login' => FALSE),
+						array('id' => 'ca-nstab-elenchi', 'title' => 'Elenchi', 'url' => 'elenchi.php', 'login' => FALSE),
+						array('id' => 'ca-nstab-grafico', 'title' => 'Grafico', 'url' => 'grafico.php', 'login' => FALSE),
+						array('id' => 'ca-nstab-imposta', 'title' => 'Imposta', 'url' => 'imposta.php', 'login' => TRUE)
+						);
 		
-		foreach($tablinks as $i) {
-			echo "<li " . ($selectedId == $i['id'] ? 'class="active"' : '') . '><a href="' . $i['url'] . '">' . $i['title'] . '</a></li>';
-        }
-?>
-        </ul>
-        <ul class="nav navbar-nav navbar-right">
-    <?php
-    if(isset($_SESSION['auth'])) {
-    ?>
-        
-        <li class="navbar-text">Signed in as <?php echo htmlspecialchars($_SESSION['username']); ?></li>
-        <li><a href="login.php?logout=1">Logout</a></li>
-        
-    <?php
-    } else {
-    ?>
-    <li <?php echo ($selectedId == 'ca-nstab-login' ? 'class="active"' : '') ?>><a href="login.php">Login</a></li>
-    <?php
-    }
-    ?>
-    </ul>
-        
+					foreach($tablinks as $i) {
+						if(!$i['login'] || isset($_SESSION['auth'])) {
+							echo "<li " . ($selectedId == $i['id'] ? 'class="active"' : '') . '><a href="' . $i['url'] . '">' . $i['title'] . "</a></li>\n";
+						}
+					}
+				?>
+				</ul>
+				<ul class="nav navbar-nav navbar-right">
+					<?php
+					if(isset($_SESSION['auth'])) {
+					?>
+					<li class="navbar-text">Signed in as <?php echo htmlspecialchars($_SESSION['username']); ?></li>
+					<li>
+						<a href="login.php?logout=1">Logout</a>
+					</li>
+					<?php
+					} else {
+					?>
+					<li <?php echo ($selectedId == 'ca-nstab-login' ? 'class="active"' : '') ?>>
+						<a href="login.php">Login</a>
+					</li>
+					<?php
+					}
+					?>
+				</ul>
+		
 
-        </div><!--/.nav-collapse -->
-      </div>
-    </div>
-	<div class="container">
-		<div class="page-header">
-			<h1><?php echo htmlspecialchars($title) ?></h1>
+			</div><!--/.nav-collapse -->
+		  </div>
 		</div>
-		<!-- start content -->
-<?php
-}
-
-function showFooter()
-{
-
-?>
-
-	</div>
-	<div class="footer">
 		<div class="container">
-			<p class="text-muted">
-				Made by <a href="//github.com/pietrodn">Pietro De Nicolao</a>.
-				Licensed under the <a href="//www.gnu.org/copyleft/gpl.html">GNU GPLv3 license</a>.
-				<a href="//github.com/pietrodn/cogestione">Source code</a>.
-			</p>
+			<div class="page-header">
+				<h1><?php echo htmlspecialchars($title) ?></h1>
+			</div>
+			<!-- start content -->
+	<?php
+	}
+
+	function showFooter()
+	{
+
+	?>
+
 		</div>
-	</div>
-</body>
+		<div class="footer">
+			<div class="container">
+				<p class="text-muted">
+					Made by <a href="//github.com/pietrodn">Pietro De Nicolao</a>.
+					Licensed under the <a href="//www.gnu.org/copyleft/gpl.html">GNU GPLv3 license</a>.
+					<a href="//github.com/pietrodn/cogestione">Source code</a>.
+				</p>
+			</div>
+		</div>
+	</body>
 </html>
 <?php
 }
