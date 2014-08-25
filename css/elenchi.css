@@ -5,15 +5,6 @@
 		display:none;
 	}
 	
-	body {
-		font-family: Verdana, sans-serif;
-		padding-left: 5px;
-	}
-	
-	.noprint {
-		display: none;
-	}
-	
 	a[href]:after {
 		content: none;
 	}

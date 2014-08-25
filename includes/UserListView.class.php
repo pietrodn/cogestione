@@ -21,7 +21,7 @@ class UserListView extends ListView {
 		if(count($this->list)) {
 			$blocks = $this->cogestione->blocchi();
 			$riepilogo = '';
-			$riepilogo .= '<div class="panel panel-success noprint">
+			$riepilogo .= '<div class="panel panel-success hidden-print">
 				<div class="panel-heading">
 					<h3 class="panel-title">Prenotazioni trovate</h3>
 				</div>

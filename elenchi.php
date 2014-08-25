@@ -21,7 +21,7 @@ $blocks = $cogestione->blocchi();
 
 $postiTot = $cogestione->getTotalSeats();
 $nPrenot = $cogestione->getSubscriptionsNumber();
-echo '<p class="noprint">Numero di prenotazioni: '
+echo '<p class="hidden-print">Numero di prenotazioni: '
 	. $nPrenot . '/' . $postiTot
 	. ' (' . round($nPrenot/$postiTot*100)
 	. '% degli studenti)</p>';
@@ -46,12 +46,12 @@ if(isset($_GET['deleteUser'])) {
 }
 
 // Cerca studente
-echo '<div class="panel panel-default noprint">
+echo '<div class="panel panel-default hidden-print">
   <div class="panel-heading">
   <h3 class="panel-title">Cerca uno studente per visualizzare la sua prenotazione</h3>
   </div>
   <div class="panel-body">';
-echo '<form class="form-inline noprint" role="form" action="'. $_SERVER['PHP_SELF'] . '" method="get" style="margin-bottom: 10px;">
+echo '<form class="form-inline hidden-print" role="form" action="'. $_SERVER['PHP_SELF'] . '" method="get" style="margin-bottom: 10px;">
 	<fieldset>
 	<div class="form-group">
 	<label for="name" class="sr-only">Nome: </label>
@@ -85,9 +85,11 @@ echo "</fieldset></form></div></div>\n";
 
 // Selettore attività
 
-echo '<div class="panel panel-default noprint">
-  <div class="panel-heading"><h3 class="panel-title">Seleziona un\'attività per elencare i partecipanti</h3></div>
-  <table class="table table-bordered noprint">';
+echo '<div class="panel panel-default hidden-print">
+  <div class="panel-heading">
+  <h3 class="panel-title">Seleziona un\'attività per elencare i partecipanti</h3>
+  </div>
+  <table class="table table-bordered">';
 echo '<tr>';
 foreach($blocks as $b) {
 	$bt = htmlspecialchars($b->title());
@@ -122,8 +124,7 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 	echo "\n<p>Attività: <b>" . htmlspecialchars($act->title()) . "</b>.</p>\n";
 	echo "\n<p>Quando: <b>" . htmlspecialchars($act->block()->title()) . "</b></p>";
 	if ($act->location()) {
-		echo "\n<p>Dove:
-		<b>" . $act->location() . "</b></p>";
+		echo "\n<p>Dove:<b>" . $act->location() . "</b></p>";
 	}
 	if ($act->description()) {
 		echo "\n<blockquote id=\"desc-box\">" . $act->description() . "</blockquote>";
@@ -146,7 +147,7 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 		echo "\n</ol>";
 		
 	}
-	echo "\n</div></div>";
+	echo "\n</div>\n</div>";
 	
 } else if(isset($_GET['uid'])) {
 	
@@ -168,7 +169,6 @@ if(isset($_GET['activity'])) // Se si seleziona un'attività
 	$view->setAuthenticated($authenticated);
 	$view->render();
 }
-
 
 showFooter();
 ?>
