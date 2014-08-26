@@ -94,7 +94,7 @@ function showConfigForm() {
 				</div>
 				<div class="form-group">
 					<label for="password">DB password: </label>
-					<input class="form-control" type="password" name="password" id="password" size="20" placeholder="password" value="" />
+					<input class="form-control" type="password" name="password" id="password" size="20" placeholder="MySQL password" value="" />
 				</div>
 				<div class="form-group">
 					<label for="dbname">DB name: </label>

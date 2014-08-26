@@ -19,6 +19,8 @@ Installazione automatica
 5. Finita la configurazione, ripristinare permessi restrittivi sulla cartella "cogestione" e su config.php.
 6. Se volete ripetere la configurazione automatica, eliminate o spostate prima il file config.php.
 
+![Installazione automatica](http://i.imgur.com/1i4bRkq.png)
+
 Installazione manuale
 ---------------------
 
@@ -30,7 +32,7 @@ Se per qualche motivo non potete o volete usare lo script automatico di configur
 4. Modificare config.php con le impostazioni di MySQL e le credenziali per modificare le attività.
 5. Ora potete andare sul sito nel vostro browser e impostare tutto attraverso la pagina "Imposta".
 
-![Schermata di impostazione della cogestione](http://i.imgur.com/5p7TCgc.png)
+![Schermata di impostazione della cogestione](http://i.imgur.com/MJR28cS.png)
 
 Blocchi
 -------
@@ -101,7 +103,7 @@ Le prenotazioni si possono attivare o disattivare in modalità automatica o manu
 * **Modalità automatica**: si specificano data e ora di inizio e di fine. Il sistema accetterà prenotazioni a partire dall'ora di partenza e cesserà di farlo all'ora di chiusura specificata. Una volta impostato, il sistema non necessita di ulteriore supervisione. Gli orari di inizio e di fine sono visibili nella pagina **Prenota**.
 * **Modalità manuale**: il sistema si attiva e si disattiva manualmente dalla schermata Imposta.
 
-![Schermata di prenotazione per gli utenti](http://i.imgur.com/dZD4StH.png)
+![Schermata di prenotazione per gli utenti](http://i.imgur.com/MJwV5fn.png)
 
 Blacklist
 ---------
@@ -126,6 +128,8 @@ Si può anche cercare un utente per nome, cognome e/o classe. È possibile speci
 La tabella così ottenuta è riordinabile dinamicamente, cliccando sui titoli delle colonne.
 
 Da quest'ultima vista, se si è fatto il login in zona amministrativa, si possono anche cancellare le prenotazioni cliccando sulla "X" rossa accanto alla riga dell'utente prenotato. Non sarà richiesta ulteriore conferma.
+
+![Elenco prenotazioni](http://i.imgur.com/7rjKLDt.png)
 
 Grafico
 -------
