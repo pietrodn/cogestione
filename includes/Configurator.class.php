@@ -51,11 +51,13 @@ class Configurator {
 		}
 		if(isset($kvConf['blacklist'])) {
 			$list = explode("\n", $kvConf['blacklist']);
-			if($this->blacklistRegex) {
-				$this->blacklist = new RegexBlacklist($list);
-			} else {
-				$this->blacklist = new SimpleBlacklist($list);
-			}
+		} else {
+			$list = Array();
+		}
+		if($this->blacklistRegex) {
+			$this->blacklist = new RegexBlacklist($list);
+		} else {
+			$this->blacklist = new SimpleBlacklist($list);
 		}
 	
 	}

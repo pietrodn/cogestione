@@ -1,7 +1,9 @@
 <?php
 	error_reporting(E_ALL);
 	define('CONFIG_FILE', 'config.php');
-	include_once(CONFIG_FILE);
+	if(file_exists(CONFIG_FILE)) {
+		include_once(CONFIG_FILE);
+	}
 	
 	require_once("includes/Configurator.class.php");
 	require_once("includes/Cogestione.class.php");
