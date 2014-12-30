@@ -1,3 +1,5 @@
+"use strict";
+
 $(function(){
 	$(".tablesorter").tablesorter({
 		theme: 'bootstrap',

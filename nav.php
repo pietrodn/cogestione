@@ -12,7 +12,7 @@ function showHeader($selectedId='', $title, $cssFiles=Array(), $jsFiles=Array())
 		<link rel="icon" href="images/favicon.ico" />
 		<link href="css/bootstrap.min.css" rel="stylesheet" />
 		<link href="css/common.css" rel="stylesheet" />
-		<script src="js/jquery-2.1.1.min.js"></script>
+		<script src="js/jquery-2.1.3.min.js"></script>
 		<script src="js/bootstrap.min.js"></script>
 
 

@@ -1,3 +1,5 @@
+"use strict";
+
 /* Ottiene la classe dal selettore e attiva o disattiva gli elementi */
 function getClassAndToggle() {
 	 var classN = parseInt($(this).children(':selected').text());

@@ -1,3 +1,4 @@
+"use strict";
 $(function(){
 	// Initial state
 	setAutomaticMode($('#automatic-switch').prop("checked"));
@@ -15,7 +16,7 @@ $(function(){
 	});
 	
 	/* Remembers the active tab after submitting */
-	activeTab = $('#active-tab').text();
+	var activeTab = $('#active-tab').text();
 	$('#imposta-tab a[href="#' + activeTab + '"]').tab('show');
 	
 });
