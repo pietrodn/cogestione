@@ -71,12 +71,16 @@ class Configurator {
 	}
 	
 	public function isAuthenticated($user, $pass) {
-		foreach($this->coge_users as $couple) {
-			if($user === $couple['user'] && $pass === $couple['pass'])
-				return TRUE;
-		}
-		return FALSE;
-	}
+                foreach($this->coge_users as $couple) {
+                  for ($a = 0; $a<count($couple); $a++) {
+                        if($user === $couple[$a]['user'] && $pass === $couple[$a]['pass']) {
+                          return TRUE;
+                        }
+                  }
+                }
+                return FALSE;
+        }
+
 	
 	public function isEnabled() {
 		/* This function tells if the application is enabled for inserts. */
