@@ -9,6 +9,10 @@ $db_user = 'DB_USER'; # MySQL user with access to $db_name
 $db_password = 'DB_PASSWORD'; # Password of MySQL user
 
 # Credentials for editing cogestione data. Uncomment and copy.
-$cgUsers[] = Array('user' => 'ADMIN_USER', 'pass' => 'ADMIN_PASSWORD');
+$cgUsers[] = Array(
+              Array('user' => 'ADMIN_USER0', 'pass' => 'ADMIN_PASSWORD0'),
+              # Add other admin users, or delete the following array
+              Array('user' => 'ADMIN_USER1', 'pass' => 'ADMIN_PASSWORD1'),
+             );
 
 ?>
