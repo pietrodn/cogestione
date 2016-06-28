@@ -1,43 +1,48 @@
 <?php
 	require_once("common.php");
-	
+
 	showHeader('ca-nstab-grafico', 'Grafico prenotazioni cogestione');
-	
+
     // Config
     $configurator = Configurator::configurator();
     $dtz = new DateTimeZone('Europe/Rome');
     date_default_timezone_set('Europe/Rome');
     $beginDateTime = new DateTime($configurator->getStartTime(), $dtz);
 	$endDateTime = new DateTime($configurator->getEndTime(), $dtz);
-	
-    $beginTime = $beginDateTime->format('YmdHis');	// Inizio delle prenotazioni	
+
+    $beginTime = $beginDateTime->format('YmdHis');	// Inizio delle prenotazioni
     $endTime = $endDateTime->format('YmdHis');          // Fine delle prenotazioni
     $xSize = 710;			// Dimensioni del grafico
     $ySize = 420;
     $xTicks = floor($xSize/100);	// N. di tacche sull'asse X
-    
+
     // MAIN
     $chxlArr = $chxpArr = Array();
-    
+
     $bDT = new DateTime($beginTime, $dtz);
     $beginTS = $dTS = date_timestamp_get($bDT);
-    
+
     $eDT = new DateTime($endTime, $dtz);
     $curDT = new DateTime(null, $dtz);
-    
+
     $endDT = min($curDT, $eDT);
     $endTS = $endDT->getTimestamp(); // Non va comunque oltre l'ora di fine
-    
+
     $db = Database::database();
-    
+
     // Intervalli di 1h
-    $res = $db->query("SELECT count(pren_id) as c,
-    	UNIX_TIMESTAMP(CONCAT(DATE(pren_timestamp), ' ', HOUR(pren_timestamp), ':00:00')) + 3600 - $beginTS AS t
-    	FROM prenotazioni WHERE pren_timestamp >= $beginTime
-    	GROUP BY CONCAT(DATE(pren_timestamp), HOUR(pren_timestamp)) ORDER BY pren_timestamp;");
-    
+    $res = $db->query("SELECT c,
+    	UNIX_TIMESTAMP(CONCAT(d, ' ', h, ':00:00')) + 3600 - $beginTS AS t
+    	FROM (
+            SELECT COUNT(pren_id) as c, DATE(pren_timestamp) AS d, HOUR(pren_timestamp) AS h
+            FROM prenotazioni WHERE pren_timestamp >= $beginTime
+            GROUP BY d, h
+            ORDER BY d, h
+        ) AS a");
+
+
     $pCount = $nData = 0;
-    
+
     // Data
     $chdX = '';
     $chdY = '';
@@ -47,19 +52,19 @@
     	$chdY .= $pCount . ',';
     	$nData++;
     }
-    
+
     $pMax = ceil($pCount/100)*100;	// Massima Y arrotondata al centinaio successivo
-    
+
     // X axis labels
     for($i=0; $i<=$xTicks; $i++) {
     	$chxlArr[] = date('d/m H:i', $dTS);
     	$chxpArr[] = ($dTS-$beginTS);
     	$dTS += round(($endTS-$beginTS)/$xTicks);
     }
-    
+
     // Create some random text-encoded data for a line chart.
     $preurl = 'https://chart.googleapis.com/chart?chid=' . md5(uniqid(rand(), true));
-    
+
     $chxl = join($chxlArr, '|');
     $chxp = join($chxpArr, ',');
     $chdX = substr($chdX, 0, -1);

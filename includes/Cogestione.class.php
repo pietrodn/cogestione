@@ -13,12 +13,12 @@ class Cogestione {
 	private $blocks = null; // Block cache
 	private $classi = null; // Class cache
 	private $activityInfo = Array();
-	
+
 	function __construct() {
 		$this->db = Database::database();
 		$this->configurator = Configurator::configurator();
 	}
-	
+
 	public function blocchi() {
 		if($this->blocks === null) {
 			/* Returns an array like this: {block_id => Block()} */
@@ -33,7 +33,7 @@ class Cogestione {
 		}
 		return $this->blocks;
 	}
-	
+
 	public function classi() {
 		/* Returns an array like this: {class_id => Classe()} */
 		if($this->classi === null) {
@@ -50,14 +50,14 @@ class Cogestione {
 		}
 		return $this->classi;
 	}
-	
+
 	public function getClassInfo($id) {
 		/* Ottiene anno e sezione della classe con id $id. */
-		
+
 		$this->classi(); // Sets the internal array if necessary
 		return $this->classi[$id];
 	}
-	
+
 	public function getActivityInfo($id) {
 		/* Ottiene title, time e n. prenotati di una data attività.
 			Restituisce una riga siffatta:
@@ -86,14 +86,14 @@ class Cogestione {
 		}
 		return $this->activityInfo[$id];
 	}
-	
+
 	public function isSubscribed($user) {
 		// Has the user already subscribed?
 		$res = $this->db->query('SELECT user_id
 								FROM user
-								WHERE user_name="' . $this->db->escape($user->name()) . '"
-								AND user_surname="' . $this->db->escape($user->surname()) . '"
-								AND user_class="' . $this->db->escape($user->classe()->id()) . '";');
+								WHERE user_name=\'' . $this->db->escape($user->name()) . '\'
+								AND user_surname=\'' . $this->db->escape($user->surname()) . '\'
+								AND user_class=\'' . $this->db->escape($user->classe()->id()) . '\';');
 		$n = count($res);
 		return ( $n ? TRUE : FALSE );
 	}
@@ -125,14 +125,14 @@ class Cogestione {
 
 	public function getActivitiesForBlock($blk) {
 		/* 	Returns an array of activities in the specified block. */
-		
+
 		$res = $this->db->query('SELECT activity.*, COUNT(prenact_id) AS prenotati
 			FROM activity
 			LEFT JOIN prenotazioni_attivita ON activity_id=prenact_activity
 			WHERE activity_time=' . (int)$blk->id() . '
 			GROUP BY activity_id
 			ORDER BY activity_id;');
-		
+
 		$acts = Array();
 		foreach($res as $row) {
 			$acts[(int)$row['activity_id']] = new Activity(
@@ -151,29 +151,29 @@ class Cogestione {
 
 	public function inserisciPrenotazione($user, $prenotazione) {
 		/* $prenotazione array associativo "id blocco" => "id attività" */
-	
+
 		// Escaping
 		$name = $this->db->escape($user->name());
 		$surname = $this->db->escape($user->surname());
 		$class_id = (int)$user->classe()->id();
 		// Inserimento dati
-	
+
 		$res = $this->db->query("INSERT INTO user (user_name, user_surname, user_class)
 			VALUES ('$name', '$surname', $class_id);");
-		
+
 		$user_id = $this->db->insert_id();
 		$res = $this->db->query("INSERT INTO prenotazioni (pren_user)
 			VALUES ('$user_id');");
 		$pren_id = $this->db->insert_id();
-	
+
 		foreach($prenotazione as $blocco_id => $attivita_id) {
 			$blocco_id = intval($blocco_id);
 			$attivita_id = intval($attivita_id);
-		
+
 			$res = $this->db->query("INSERT INTO prenotazioni_attivita (prenact_prenotation, prenact_activity)
 				VALUES ('$pren_id', '$attivita_id');");
 		}
-		
+
 		$res = $this->db->query("UPDATE user SET
 			user_pren_latest = " . $pren_id . "
 			WHERE user_id = " . $user_id . ";");
@@ -188,7 +188,7 @@ class Cogestione {
 			ON prenact_prenotation=pren_id
 			WHERE pren_user = " . (int)$user->id() . "
 			ORDER BY activity_time;");
-	
+
 		$activities = [];
 		foreach($prenotazione as $p) {
 			$activities[$p['activity_time']] = $this->getActivityInfo($p['activity_id']);
@@ -203,8 +203,8 @@ class Cogestione {
 				LEFT JOIN user ON user_id=pren_user
 				WHERE prenact_activity = " . (int)$activity->id() . "
 				ORDER BY pren_timestamp;");
-		
-		$uArr = Array();						
+
+		$uArr = Array();
 		foreach($res as $row) {
 			$classe = $this->getClassInfo($row['user_class']);
 			$uArr[$row['user_id']] = new User(
@@ -212,7 +212,7 @@ class Cogestione {
 				$row['user_name'],
 				$row['user_surname'],
 				$classe
-			);	
+			);
 		}
 		return $uArr;
 	}
@@ -221,11 +221,11 @@ class Cogestione {
 		$conditions = Array();
 		if(!empty($user_name)) {
 			$name = $this->db->escape($user_name);
-			$conditions[] = "user_name=\"$name\"";
+			$conditions[] = "user_name=\'$name\'";
 		}
 		if(!empty($user_surname)) {
 			$surname = $this->db->escape($user_surname);
-			$conditions[] = "user_surname=\"$surname\"";
+			$conditions[] = "user_surname=\'$surname\'";
 		}
 		if(!empty($user_class)) {
 			$class = intval($user_class);
@@ -236,8 +236,8 @@ class Cogestione {
 			FROM user
 			WHERE $conditionString
 			ORDER BY CONCAT(user_surname, user_name);");
-	
-		$uArr = Array();						
+
+		$uArr = Array();
 		foreach($res as $row) {
 			$classe = $this->getClassInfo($row['user_class']);
 			$uArr[$row['user_id']] = new User(
@@ -245,21 +245,21 @@ class Cogestione {
 				$row['user_name'],
 				$row['user_surname'],
 				$classe
-			);	
+			);
 		}
 		return $uArr;
 	}
-	
+
 	public function getUser($user_id) {
 		$res = $this->db->query("SELECT DISTINCT user_id, user_name, user_surname, user_class
 			FROM user
 			WHERE user_id = " . intval($user_id) . "
 			LIMIT 1;");
-		
+
 		if(count($res) == 0) {
 			return FALSE;
 		}
-		
+
 		$row = $res[0];
 		$classe = $this->getClassInfo($row['user_class']);
 		$user = new User(
@@ -268,7 +268,7 @@ class Cogestione {
 			$row['user_surname'],
 			$classe
 		);
-			
+
 		return $user;
 	}
 
@@ -287,7 +287,7 @@ class Cogestione {
 	public function addNewBlocks($n) {
 		// Adds $n new blocks
 		$defaultRecord = "('Nuovo blocco')";
-	
+
 		if($n > 0) {
 			$query = "INSERT INTO block (block_title) VALUES ";
 			for($i=0; $i<$n; $i++) {
@@ -349,29 +349,29 @@ class Cogestione {
 		$res = $this->db->query("DELETE FROM user;");
 		return $res;
 	}
-	
+
 	public function deleteUser($uid) {
 		$res = $this->db->query("DELETE FROM user
 								WHERE user_id = " . intval($uid) . ";");
 		return $res;
 	}
-	
+
 	public function setClasses($classes_arr) {
 		/* 	This function updates the class table with the classes in $classes_arr.
 			$classes_arr is an array of Classe-s */
-		
+
 		// Removes deleted classes
 		$toDelete = Array();
 		foreach($this->classi() as $cl) {
 			$found = FALSE;
-			
+
 			foreach($classes_arr as $new_cl) {
 				if($new_cl->name() == $cl->name()) {
 					$found = TRUE;
 					break;
 				}
 			}
-			
+
 			if(!$found) {
 				$toDelete[] = intval($cl->id());
 			}
@@ -380,7 +380,7 @@ class Cogestione {
 			$query = "DELETE FROM class WHERE class_id IN (" . implode(',', $toDelete) . ');';
 			$this->db->query($query);
 		}
-		
+
 		// Insert new classes
 		$query = "INSERT IGNORE INTO class
 			(class_year, class_section)
@@ -394,27 +394,27 @@ class Cogestione {
 		$query .= implode(', ', $tuples);
 		$query .= ';';
 		$res = $this->db->query($query);
-		
+
 		$this->classi = null; // resets cache
-		
+
 	}
-	
+
 	public function deleteClass($cl_id) {
 		/* This function deletes a single class with id $cl_id. */
-		
+
 		$this->classi = null; // resets cache
-		
+
 		$res = $this->db->query("DELETE FROM class WHERE class_id = " . intval($cl_id) . ";");
 		return $res;
 	}
-	
+
 	public function classExists($class_id) {
 		foreach($this->classi() as $cl) {
 			if($cl->id() == $class_id) {
 				return TRUE;
 			}
 		}
-		
+
 		return FALSE;
 	}
 }
